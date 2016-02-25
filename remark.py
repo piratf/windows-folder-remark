@@ -14,6 +14,8 @@ def sysEncode(content):
     return content.encode(defEncoding).decode(defEncoding)
 
 def runCommand(command):
+    # 我使用 cxfreeze 打包成 exe 程序，如果用 popen 运行时会出现没有 subprocess 模块的 bug，所以用 system 运行系统命令
+    # 如果有更好的办法请联系我，感谢
     os.system(command)
 
 def re_enterMessage(message):

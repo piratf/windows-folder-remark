@@ -34,8 +34,8 @@ def addCommentToFolder(fpath, comment):
         f.write(sysEncode(comment + os.linesep))
 
     # 添加保护
-    runCommand('attrib ' + settingFilePath + ' +s +h')
-    runCommand('attrib ' + fpath + ' +s ')
+    runCommand('attrib \"' + settingFilePath + '\" +s +h')
+    runCommand('attrib \"' + fpath + '\" +s ')
 
     print (sysEncode(u"备注添加成功~"))
     print (sysEncode(u"备注可能过一会才会显示，不要着急"))
@@ -58,7 +58,7 @@ def addComment(fpath = None, comment = None):
     # 判断设置文件是否已经存在
     if (os.path.exists(settingFilePath)):
         # 去除保护属性
-        runCommand('attrib ' + settingFilePath + ' -s -h')
+        runCommand('attrib \"' + settingFilePath + '\" -s -h')
 
     # 输入文件夹的备注
     if (comment == None):

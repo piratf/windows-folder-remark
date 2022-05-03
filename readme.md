@@ -3,7 +3,7 @@
 
 ## 如何使用
 
-本工具提供 exe 版本和 python 源码版本，exe 版本可以直接双击运行，源码版本支持的版本为 Python 3.x
+本工具提供 exe 版本和 python 源码版本，exe 版本为 dist/remark/remark.exe，可以直接双击运行，源码版本支持的版本为 Python 3.x
 
 以下通过展示 exe 版本的使用方法，python 源码版本用法相同。
 

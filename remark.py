@@ -3,6 +3,8 @@
 
 __author__ = 'Piratf'
 
+# Modified By CraikLee 2024-01-26
+
 import sys
 import os
 
@@ -24,40 +26,45 @@ def re_enter_message(message):
     print(sys_encode(u" * 继续处理或按 ctrl + c 退出程序") + os.linesep)
 
 
-def get_setting_file_path(fpath):
-    return fpath + os.sep + 'desktop.ini'
+def get_setting_file_path(dir_path):
+    return dir_path + os.sep + 'desktop.ini'
 
 
-def update_folder_comment(fpath, comment):
+def update_folder_comment(dir_path, comment):
     content = sys_encode(u'[.ShellClassInfo]' + os.linesep + 'InfoTip=')
     # 开始设置备注信息
-    setting_file_path = get_setting_file_path(fpath)
+    setting_file_path = get_setting_file_path(dir_path)
     with open(setting_file_path, 'w') as f:
         f.write(content)
         f.write(sys_encode(comment + os.linesep))
 
     # 添加保护
     run_command('attrib \"' + setting_file_path + '\" +s +h')
-    run_command('attrib \"' + fpath + '\" +s ')
+    run_command('attrib \"' + dir_path + '\" +s ')
 
     print(sys_encode(u"备注添加成功~"))
     print(sys_encode(u"备注可能过一会才会显示，不要着急"))
 
 
-def add_comment(fpath=None, comment=None):
+def add_comment(dir_path=None, comment=None):
     input_path_msg = sys_encode(u"请输入文件夹路径(或拖动文件夹到这里): ")
     input_comment_msg = sys_encode(u"请输入文件夹备注:")
 
     # 输入文件夹路径
-    if fpath is None:
-        fpath = input(input_path_msg)
-
+    if dir_path is None:
+        dir_path_temp = input(input_path_msg)
+        #print(dir_path_temp)
+        #dir_path = "r"+dir_path
+        dir_path = dir_path_temp.replace('\"', '')
+	
     # 判断路径是否存在文件夹
-    while not os.path.isdir(fpath):
+    while not os.path.isdir(dir_path):
+        #print(dir_path)        
         re_enter_message(u"你输入的不是一个文件夹路径")
-        fpath = input(input_path_msg)
+        dir_path_temp = input(input_path_msg)
+        dir_path = dir_path_temp.replace('\"', '')
 
-    setting_file_path = get_setting_file_path(fpath)
+    setting_file_path = get_setting_file_path(dir_path)
 
     # 判断设置文件是否已经存在
     if os.path.exists(setting_file_path):
@@ -72,7 +79,7 @@ def add_comment(fpath=None, comment=None):
         re_enter_message(u"备注不要为空哦")
         comment = input(input_comment_msg)
 
-    update_folder_comment(fpath, comment)
+    update_folder_comment(dir_path, comment)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,113 @@
+# -*- coding: utf-8 -*-
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        architecture: [x64, x86]
+        python-version: ['3.9']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Build package
+        run: pip install .
+
+      - name: Build ${{ matrix.architecture }} executable
+        run: |
+          $arch = "${{ matrix.architecture }}"
+          if ($arch -eq "x86") {
+            $env:PYTHON_ARCH = "32"
+            pyinstaller --onefile --console --name "windows-folder-remark-x86" remark.py
+          } else {
+            pyinstaller --onefile --console --name "windows-folder-remark-x64" remark.py
+          }
+
+      - name: Generate checksum
+        run: |
+          if ("${{ matrix.architecture }}" -eq "x86") {
+            $file = "dist/windows-folder-remark-x86.exe"
+          } else {
+            $file = "dist/windows-folder-remark-x64.exe"
+          }
+          certutil -hashfile $file SHA256 > "$file.sha256"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-folder-remark-${{ matrix.architecture }}
+          path: |
+            dist/*.exe
+            dist/*.sha256
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if ($env:GITHUB_REF -match "refs/tags/v(.*)") {
+            $version = $matches[1]
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+            echo "version=$version"
+          }
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          $notes = @"
+          ## 下载说明
+          - `windows-folder-remark-x64.exe`: 64位 Windows 系统（推荐）
+          - `windows-folder-remark-x86.exe`: 32位 Windows 系统
+          - `.sha256` 文件用于验证下载文件的完整性
+
+          ## 验证方法
+          ```powershell
+          certutil -hashfile 文件名.exe SHA256
+          ```
+          然后对比生成的哈希值与 .sha256 文件中的值是否一致。
+          "@
+          $notes | Out-File -Encoding UTF8 -FilePath release_notes.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.txt
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

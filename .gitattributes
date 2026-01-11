@@ -1,1 +1,10 @@
+# 统一使用 LF 换行符
+* text=auto eol=lf
+
+# Windows 特定文件保持 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# LFS for large files
 dist/* filter=lfs diff=lfs merge=lfs -text

@@ -9,6 +9,7 @@ import sys
 import os
 import subprocess
 import platform
+import argparse
 
 # 获取系统编码，确保备注不会出现乱码
 defEncoding = sys.getfilesystemencoding()
@@ -100,6 +101,29 @@ def delete_folder_comment(dir_path):
         return False
 
 
+def view_folder_comment(dir_path):
+    setting_file_path = get_setting_file_path(dir_path)
+    
+    if not os.path.exists(setting_file_path):
+        print(sys_encode(u"该文件夹没有备注"))
+        return
+    
+    try:
+        with open(setting_file_path, 'r', encoding=defEncoding) as f:
+            content = f.read()
+            if 'InfoTip=' in content:
+                start = content.index('InfoTip=') + 8
+                end = content.find(os.linesep, start)
+                if end == -1:
+                    end = len(content)
+                comment = content[start:end].strip()
+                print(sys_encode(u"当前备注: ") + comment)
+            else:
+                print(sys_encode(u"该文件夹没有备注"))
+    except IOError as e:
+        print(sys_encode(u"读取文件失败: ") + str(e))
+
+
 def add_comment(dir_path=None, comment=None):
     input_path_msg = sys_encode(u"请输入文件夹路径(或拖动文件夹到这里): ")
     input_comment_msg = sys_encode(u"请输入文件夹备注:")
@@ -142,25 +166,43 @@ def add_comment(dir_path=None, comment=None):
 def show_help():
     print(sys_encode(u"Windows 文件夹备注工具"))
     print(sys_encode(u"使用方法:"))
-    print(sys_encode(u"  1. 交互模式: python remark.py"))
-    print(sys_encode(u"  2. 命令行模式: python remark.py [文件夹路径] [备注内容]"))
-    print(sys_encode(u"  3. 删除备注: python remark.py --delete [文件夹路径]"))
+    print(sys_encode(u"  交互模式: python remark.py"))
+    print(sys_encode(u"  命令行模式: python remark.py [选项] [参数]"))
+    print(sys_encode(u"选项:"))
+    print(sys_encode(u"  --delete <路径>    删除文件夹备注"))
+    print(sys_encode(u"  --view <路径>      查看文件夹备注"))
+    print(sys_encode(u"  --help, -h         显示帮助信息"))
     print(sys_encode(u"示例:"))
-    print(sys_encode(u"  python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""))
-    print(sys_encode(u"  python remark.py --delete \"C:\\\\MyFolder\""))
+    print(sys_encode(u" [添加备注] python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""))
+    print(sys_encode(u" [删除备注] python remark.py --delete \"C:\\\\MyFolder\""))
+    print(sys_encode(u" [查看当前备注] python remark.py --view \"C:\\\\MyFolder\""))
 
 
 if __name__ == '__main__':
     if not check_platform():
         sys.exit(1)
     
-    if len(sys.argv) == 2 and sys.argv[1] in ['--help', '-h', '/?']:
+    parser = argparse.ArgumentParser(
+        description=sys_encode(u"Windows 文件夹备注工具"),
+        add_help=False
+    )
+    parser.add_argument('folder', nargs='?', help=sys_encode(u"文件夹路径"))
+    parser.add_argument('comment', nargs='?', help=sys_encode(u"备注内容"))
+    parser.add_argument('--delete', metavar='PATH', help=sys_encode(u"删除文件夹备注"))
+    parser.add_argument('--view', metavar='PATH', help=sys_encode(u"查看文件夹备注"))
+    parser.add_argument('--help', '-h', action='store_true', help=sys_encode(u"显示帮助信息"))
+    
+    args = parser.parse_args()
+    
+    if args.help:
         show_help()
-    elif len(sys.argv) == 3 and sys.argv[1] == '--delete':
-        delete_folder_comment(sys.argv[2])
-    elif len(sys.argv) == 3:
-        add_comment(sys.argv[1], sys.argv[2])
-    elif len(sys.argv) == 1:
+    elif args.delete:
+        delete_folder_comment(args.delete)
+    elif args.view:
+        view_folder_comment(args.view)
+    elif args.folder and args.comment:
+        add_comment(args.folder, args.comment)
+    elif not args.folder and not args.comment:
         print(sys_encode(u"Windows 文件夹备注工具"))
         print(sys_encode(u"提示: 按 Ctrl + C 退出程序") + os.linesep)
         while True:

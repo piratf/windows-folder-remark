@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 编码处理工具
@@ -14,5 +13,5 @@ def sys_encode(content):
     try:
         return content.encode(defEncoding).decode(defEncoding)
     except (UnicodeEncodeError, UnicodeDecodeError) as e:
-        print(sys_encode(u"编码转换错误: ") + str(e))
+        print(sys_encode("编码转换错误: ") + str(e))
         return content

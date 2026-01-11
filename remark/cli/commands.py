@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 
 """
 命令行接口
 """
 
+import argparse
 import os
 import sys
-import argparse
+
 from remark.core.folder_handler import FolderCommentHandler
 from remark.utils.encoding import sys_encode
 from remark.utils.platform import check_platform
@@ -30,10 +30,10 @@ class CLI:
     def _validate_folder(self, path):
         """验证路径是否为文件夹"""
         if not os.path.exists(path):
-            print(sys_encode(u"路径不存在: ") + path)
+            print(sys_encode("路径不存在: ") + path)
             return False
         if not self.handler.supports(path):
-            print(sys_encode(u"路径不是文件夹: ") + path)
+            print(sys_encode("路径不是文件夹: ") + path)
             return False
         return True
 
@@ -54,57 +54,57 @@ class CLI:
         if self._validate_folder(path):
             comment = self.handler.get_comment(path)
             if comment:
-                print(sys_encode(u"当前备注: ") + comment)
+                print(sys_encode("当前备注: ") + comment)
             else:
-                print(sys_encode(u"该文件夹没有备注"))
+                print(sys_encode("该文件夹没有备注"))
 
     def interactive_mode(self):
         """交互模式"""
         version = get_version()
-        print(sys_encode(u"Windows 文件夹备注工具 v") + version)
-        print(sys_encode(u"提示: 按 Ctrl + C 退出程序") + os.linesep)
+        print(sys_encode("Windows 文件夹备注工具 v") + version)
+        print(sys_encode("提示: 按 Ctrl + C 退出程序") + os.linesep)
 
-        input_path_msg = sys_encode(u"请输入文件夹路径(或拖动到这里): ")
-        input_comment_msg = sys_encode(u"请输入备注:")
+        input_path_msg = sys_encode("请输入文件夹路径(或拖动到这里): ")
+        input_comment_msg = sys_encode("请输入备注:")
 
         while True:
             try:
                 path = input(input_path_msg).replace('\"', '').strip()
 
                 if not os.path.exists(path):
-                    print(sys_encode(u"路径不存在，请重新输入"))
+                    print(sys_encode("路径不存在，请重新输入"))
                     continue
 
                 if not os.path.isdir(path):
-                    print(sys_encode(u"请输入文件夹路径，不是文件路径"))
+                    print(sys_encode("请输入文件夹路径，不是文件路径"))
                     continue
 
                 comment = input(input_comment_msg)
                 while not comment:
-                    print(sys_encode(u"备注不要为空哦"))
+                    print(sys_encode("备注不要为空哦"))
                     comment = input(input_comment_msg)
 
                 self.add_comment(path, comment)
 
             except KeyboardInterrupt:
-                print(sys_encode(u" ❤ 感谢使用"))
+                print(sys_encode(" ❤ 感谢使用"))
                 break
-            print(os.linesep + sys_encode(u"继续处理或按 Ctrl + C 退出程序") + os.linesep)
+            print(os.linesep + sys_encode("继续处理或按 Ctrl + C 退出程序") + os.linesep)
 
     def show_help(self):
         """显示帮助信息"""
-        print(sys_encode(u"Windows 文件夹备注工具"))
-        print(sys_encode(u"使用方法:"))
-        print(sys_encode(u"  交互模式: python remark.py"))
-        print(sys_encode(u"  命令行模式: python remark.py [选项] [参数]"))
-        print(sys_encode(u"选项:"))
-        print(sys_encode(u"  --delete <路径>    删除备注"))
-        print(sys_encode(u"  --view <路径>      查看备注"))
-        print(sys_encode(u"  --help, -h         显示帮助信息"))
-        print(sys_encode(u"示例:"))
-        print(sys_encode(u" [添加备注] python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""))
-        print(sys_encode(u" [删除备注] python remark.py --delete \"C:\\\\MyFolder\""))
-        print(sys_encode(u" [查看当前备注] python remark.py --view \"C:\\\\MyFolder\""))
+        print(sys_encode("Windows 文件夹备注工具"))
+        print(sys_encode("使用方法:"))
+        print(sys_encode("  交互模式: python remark.py"))
+        print(sys_encode("  命令行模式: python remark.py [选项] [参数]"))
+        print(sys_encode("选项:"))
+        print(sys_encode("  --delete <路径>    删除备注"))
+        print(sys_encode("  --view <路径>      查看备注"))
+        print(sys_encode("  --help, -h         显示帮助信息"))
+        print(sys_encode("示例:"))
+        print(sys_encode(" [添加备注] python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""))
+        print(sys_encode(" [删除备注] python remark.py --delete \"C:\\\\MyFolder\""))
+        print(sys_encode(" [查看当前备注] python remark.py --view \"C:\\\\MyFolder\""))
 
     def run(self, argv=None):
         """运行 CLI"""
@@ -112,14 +112,14 @@ class CLI:
             sys.exit(1)
 
         parser = argparse.ArgumentParser(
-            description=sys_encode(u"Windows 文件夹备注工具"),
+            description=sys_encode("Windows 文件夹备注工具"),
             add_help=False
         )
-        parser.add_argument('path', nargs='?', help=sys_encode(u"文件夹路径"))
-        parser.add_argument('comment', nargs='?', help=sys_encode(u"备注内容"))
-        parser.add_argument('--delete', metavar='PATH', help=sys_encode(u"删除备注"))
-        parser.add_argument('--view', metavar='PATH', help=sys_encode(u"查看备注"))
-        parser.add_argument('--help', '-h', action='store_true', help=sys_encode(u"显示帮助信息"))
+        parser.add_argument('path', nargs='?', help=sys_encode("文件夹路径"))
+        parser.add_argument('comment', nargs='?', help=sys_encode("备注内容"))
+        parser.add_argument('--delete', metavar='PATH', help=sys_encode("删除备注"))
+        parser.add_argument('--view', metavar='PATH', help=sys_encode("查看备注"))
+        parser.add_argument('--help', '-h', action='store_true', help=sys_encode("显示帮助信息"))
 
         args = parser.parse_args(argv)
 
@@ -143,10 +143,10 @@ def main():
         cli = CLI()
         cli.run()
     except KeyboardInterrupt:
-        print(sys_encode(u"\n操作已取消"))
+        print(sys_encode("\n操作已取消"))
         sys.exit(0)
     except Exception as e:
-        print(sys_encode(u"发生错误: ") + str(e))
+        print(sys_encode("发生错误: ") + str(e))
         sys.exit(1)
 
 

@@ -75,6 +75,9 @@ ignore = [
     "E501",   # line too long (由 formatter 处理)
     "B008",   # do not perform function calls in argument defaults
     "SIM108", # use ternary operator (可读性考虑)
+    "RUF001", # 中文全角字符误报
+    "RUF002", # 中文全角字符误报
+    "RUF003", # 中文全角字符误报
 ]
 
 fixable = ["ALL"]

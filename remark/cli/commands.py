@@ -12,6 +12,15 @@ from remark.utils.encoding import sys_encode
 from remark.utils.platform import check_platform
 
 
+def get_version():
+    """动态获取版本号"""
+    try:
+        from importlib.metadata import version
+        return version("windows-folder-remark")
+    except Exception:
+        return "unknown"
+
+
 class CLI:
     """命令行接口"""
 
@@ -51,7 +60,8 @@ class CLI:
 
     def interactive_mode(self):
         """交互模式"""
-        print(sys_encode(u"Windows 文件夹备注工具"))
+        version = get_version()
+        print(sys_encode(u"Windows 文件夹备注工具 v") + version)
         print(sys_encode(u"提示: 按 Ctrl + C 退出程序") + os.linesep)
 
         input_path_msg = sys_encode(u"请输入文件夹路径(或拖动到这里): ")

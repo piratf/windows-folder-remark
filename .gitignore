@@ -1,3 +1,33 @@
+# IDE
 .idea
+
+# Build
+build/
+dist/
 *.spec
-build
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# Distribution
+*.whl
+*.tar.gz

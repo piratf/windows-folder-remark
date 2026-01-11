@@ -27,7 +27,7 @@ def re_enter_message(message):
 
 
 def get_setting_file_path(dir_path):
-    return dir_path + os.sep + 'desktop.ini'
+    return os.path.join(dir_path, 'desktop.ini')
 
 
 def update_folder_comment(dir_path, comment):

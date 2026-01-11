@@ -3,15 +3,13 @@
 """
 文件夹备注处理器 - 使用 desktop.ini
 
-使用 Windows Property System API (IPropertyStore) 来设置文件夹备注。
-相比 desktop.ini，Property Store 是更现代和推荐的方式，支持即时刷新显示。
+使用 Microsoft 官方支持的 desktop.ini 方式设置文件夹备注。
 
-注意：由于 Windows 文件夹不支持通过 Property Store 写入 PKEY_Comment，
-此实现回退到使用 desktop.ini 方式，这是 Microsoft 官方支持的方法。
+参考文档:
+https://learn.microsoft.com/en-us/windows/win32/shell/how-to-customize-folders-with-desktop-ini
 """
 
 import os
-import sys
 
 from remark.core.base import CommentHandler
 from remark.utils.encoding import sys_encode
@@ -32,10 +30,10 @@ class FolderCommentHandler(CommentHandler):
             print(sys_encode(u"备注长度超过限制，最大长度为 ") + str(MAX_COMMENT_LENGTH) + sys_encode(u" 个字符"))
             comment = comment[:MAX_COMMENT_LENGTH]
 
-        # Windows 文件夹不支持 Property Store 写入备注，使用 desktop.ini
         return self._set_comment_desktop_ini(folder_path, comment)
 
-    def _set_comment_desktop_ini(self, folder_path, comment):
+    @staticmethod
+    def _set_comment_desktop_ini(folder_path, comment):
         """使用 desktop.ini 设置备注"""
         desktop_ini_path = DesktopIniHandler.get_path(folder_path)
 
@@ -61,9 +59,6 @@ class FolderCommentHandler(CommentHandler):
                 print(sys_encode(u"设置文件夹属性失败"))
                 return False
 
-            # 通知 Windows Shell 刷新显示
-            DesktopIniHandler.notify_shell_update(folder_path)
-
             print(sys_encode(u"备注添加成功"))
             return True
         except Exception as e:
@@ -72,7 +67,6 @@ class FolderCommentHandler(CommentHandler):
 
     def get_comment(self, folder_path):
         """获取文件夹备注"""
-        # 使用 desktop.ini 读取
         return DesktopIniHandler.read_info_tip(folder_path)
 
     def delete_comment(self, folder_path):
@@ -83,20 +77,24 @@ class FolderCommentHandler(CommentHandler):
             print(sys_encode(u"该文件夹没有备注"))
             return True
 
-        # 清除文件属性以便删除
+        # 清除文件属性以便修改
         if not DesktopIniHandler.clear_file_attributes(desktop_ini_path):
-            print(sys_encode(u"去除文件属性失败"))
+            print(sys_encode(u"清除文件属性失败"))
             return False
 
-        # 删除 desktop.ini
-        if DesktopIniHandler.delete(folder_path):
-            # 通知 Windows Shell 刷新显示
-            DesktopIniHandler.notify_shell_update(folder_path)
-            print(sys_encode(u"备注删除成功"))
-            return True
-        else:
-            print(sys_encode(u"删除文件失败"))
+        # 移除 InfoTip 行（保留其他设置如 IconResource）
+        if not DesktopIniHandler.remove_info_tip(folder_path):
+            print(sys_encode(u"移除备注失败"))
             return False
+
+        # 如果 desktop.ini 仍存在，恢复文件属性
+        if DesktopIniHandler.exists(folder_path):
+            if not DesktopIniHandler.set_file_hidden_system_attributes(desktop_ini_path):
+                print(sys_encode(u"恢复文件属性失败"))
+                return False
+
+        print(sys_encode(u"备注删除成功"))
+        return True
 
     def supports(self, path):
         """检查是否支持该路径"""

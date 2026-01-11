@@ -79,6 +79,27 @@ def update_folder_comment(dir_path, comment):
     return True
 
 
+def delete_folder_comment(dir_path):
+    setting_file_path = get_setting_file_path(dir_path)
+    
+    if not os.path.exists(setting_file_path):
+        print(sys_encode(u"该文件夹没有备注"))
+        return True
+    
+    # 去除保护属性
+    if not run_command('attrib \"' + setting_file_path + '\" -s -h'):
+        print(sys_encode(u"去除文件属性失败"))
+        return False
+    
+    try:
+        os.remove(setting_file_path)
+        print(sys_encode(u"备注删除成功"))
+        return True
+    except OSError as e:
+        print(sys_encode(u"删除文件失败: ") + str(e))
+        return False
+
+
 def add_comment(dir_path=None, comment=None):
     input_path_msg = sys_encode(u"请输入文件夹路径(或拖动文件夹到这里): ")
     input_comment_msg = sys_encode(u"请输入文件夹备注:")
@@ -118,11 +139,26 @@ def add_comment(dir_path=None, comment=None):
         print(sys_encode(u"备注添加失败"))
 
 
+def show_help():
+    print(sys_encode(u"Windows 文件夹备注工具"))
+    print(sys_encode(u"使用方法:"))
+    print(sys_encode(u"  1. 交互模式: python remark.py"))
+    print(sys_encode(u"  2. 命令行模式: python remark.py [文件夹路径] [备注内容]"))
+    print(sys_encode(u"  3. 删除备注: python remark.py --delete [文件夹路径]"))
+    print(sys_encode(u"示例:"))
+    print(sys_encode(u"  python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""))
+    print(sys_encode(u"  python remark.py --delete \"C:\\\\MyFolder\""))
+
+
 if __name__ == '__main__':
     if not check_platform():
         sys.exit(1)
     
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 2 and sys.argv[1] in ['--help', '-h', '/?']:
+        show_help()
+    elif len(sys.argv) == 3 and sys.argv[1] == '--delete':
+        delete_folder_comment(sys.argv[2])
+    elif len(sys.argv) == 3:
         add_comment(sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 1:
         print(sys_encode(u"Windows 文件夹备注工具"))
@@ -135,8 +171,4 @@ if __name__ == '__main__':
                 break
             re_enter_message("成功完成一次备注")
     else:
-        print(sys_encode(u"使用方法:"))
-        print(sys_encode(u"  1. 交互模式: python remark.py"))
-        print(sys_encode(u"  2. 命令行模式: python remark.py [文件夹路径] [备注内容]"))
-        print(sys_encode(u"示例:"))
-        print(sys_encode(u"  python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""))
+        show_help()

@@ -16,7 +16,11 @@ This is necessary to store the localized strings that can be displayed to users.
 import os
 import sys
 import codecs
-import ctypes
+
+
+class EncodingConversionCanceled(Exception):
+    """编码转换被用户取消"""
+    pass
 
 
 # Windows desktop.ini 标准编码格式
@@ -129,12 +133,17 @@ class DesktopIniHandler(object):
         使用 UTF-16 编码写入（自动添加 BOM），符合 Microsoft 官方文档要求。
         这确保中文等非 ASCII 字符在资源管理器中正确显示。
 
+        如果 desktop.ini 已存在且包含其他设置（如 IconResource），会保留这些设置。
+
         Args:
             folder_path: 文件夹路径
             info_tip: 要写入的 InfoTip 值
 
         Returns:
             bool: 写入是否成功
+
+        Raises:
+            EncodingConversionCanceled: 用户拒绝编码转换
         """
         if not info_tip:
             return False
@@ -142,20 +151,222 @@ class DesktopIniHandler(object):
         desktop_ini_path = DesktopIniHandler.get_path(folder_path)
 
         try:
-            # 构建 desktop.ini 内容
-            # 格式: [.ShellClassInfo]\r\nInfoTip=值\r\n
-            content = (
-                DesktopIniHandler.SECTION_SHELL_CLASS_INFO + LINE_ENDING +
-                DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip + LINE_ENDING
-            )
+            # 如果文件已存在，读取并更新
+            if os.path.exists(desktop_ini_path):
+                # 确保是 UTF-16 编码（用户拒绝会抛出异常）
+                DesktopIniHandler.ensure_utf16_encoding(desktop_ini_path)
 
-            # 使用 UTF-16 编码写入，codecs 会自动添加 UTF-16 LE BOM (0xFF 0xFE)
+                with codecs.open(desktop_ini_path, 'r', encoding=DESKTOP_INI_ENCODING) as f:
+                    content = f.read()
+
+                # 检查是否已有 InfoTip
+                lines = content.splitlines()
+                new_lines = []
+                info_tip_updated = False
+
+                for line in lines:
+                    stripped = line.strip()
+                    # 更新现有 InfoTip 行
+                    if stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + '=') or \
+                       stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + ' '):
+                        new_lines.append(DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip)
+                        info_tip_updated = True
+                    else:
+                        new_lines.append(line)
+
+                # 如果没有 InfoTip，添加它
+                if not info_tip_updated:
+                    # 找到 [.ShellClassInfo] 后插入
+                    inserted = False
+                    for i, line in enumerate(new_lines):
+                        if line.strip().startswith('[.ShellClassInfo]'):
+                            new_lines.insert(i + 1, DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip)
+                            inserted = True
+                            break
+                    if not inserted:
+                        # 没找到 section，添加整个 section
+                        new_lines = [
+                            DesktopIniHandler.SECTION_SHELL_CLASS_INFO,
+                            DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip
+                        ]
+
+                new_content = LINE_ENDING.join(new_lines)
+            else:
+                # 新建文件
+                new_content = (
+                    DesktopIniHandler.SECTION_SHELL_CLASS_INFO + LINE_ENDING +
+                    DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip + LINE_ENDING
+                )
+
+            # 使用 UTF-16 编码写入
             with codecs.open(desktop_ini_path, 'w', encoding=DESKTOP_INI_ENCODING) as f:
-                f.write(content)
+                f.write(new_content)
 
             return True
 
+        except EncodingConversionCanceled:
+            return False
+        except Exception:
+            return False
+
+    @staticmethod
+    def detect_encoding(file_path):
+        """
+        检测文件编码
+
+        Args:
+            file_path: 文件路径
+
+        Returns:
+            tuple: (encoding_name, is_utf16)
+                - encoding_name: 检测到的编码名称
+                - is_utf16: 是否为 UTF-16 编码
+        """
+        # 检查 BOM
+        try:
+            with open(file_path, 'rb') as f:
+                bom = f.read(4)
+
+            if bom[:2] == b'\xff\xfe':  # UTF-16 LE BOM
+                return 'utf-16-le', True
+            elif bom[:2] == b'\xfe\xff':  # UTF-16 BE BOM
+                return 'utf-16-be', True
+            elif bom[:3] == b'\xef\xbb\xbf':  # UTF-8 BOM
+                return 'utf-8-sig', False
+        except Exception:
+            pass
+
+        # 尝试检测其他编码
+        for encoding in ['utf-8', 'gbk', 'mbcs']:
+            try:
+                with codecs.open(file_path, 'r', encoding=encoding) as f:
+                    f.read()
+                return encoding, False
+            except (UnicodeDecodeError, UnicodeError):
+                continue
+
+        return None, False
+
+    @staticmethod
+    def ensure_utf16_encoding(file_path):
+        """
+        确保文件是 UTF-16 编码，如果不是则提示用户确认转换
+
+        如果用户拒绝转换，抛出 EncodingConversionCanceled 异常。
+
+        Args:
+            file_path: 文件路径
+
+        Raises:
+            EncodingConversionCanceled: 用户拒绝转换
+        """
+        encoding, is_utf16 = DesktopIniHandler.detect_encoding(file_path)
+
+        if is_utf16:
+            return  # 已经是 UTF-16
+
+        # 文件不是 UTF-16，需要用户确认
+        print(f"警告：desktop.ini 文件编码为 {encoding or '未知'}，不是标准的 UTF-16。")
+        print("修改此文件前需要先转换为 UTF-16 编码。")
+        print("原内容会被保留，仅改变编码格式。")
+
+        try:
+            # 显示文件预览
+            with codecs.open(file_path, 'r', encoding=encoding or 'utf-8') as f:
+                content = f.read()
+
+            print("\n当前文件内容:")
+            print("-" * 40)
+            print(content)
+            print("-" * 40)
+
+            # 用户确认
+            while True:
+                response = input("\n是否转换为 UTF-16 编码后继续？[Y/n]: ").strip().lower()
+                if response in ('', 'y', 'yes'):
+                    break
+                elif response in ('n', 'no'):
+                    print("操作已取消。")
+                    raise EncodingConversionCanceled("用户拒绝编码转换")
+                else:
+                    print("请输入 Y 或 n")
+
+            # 执行转换
+            with codecs.open(file_path, 'w', encoding=DESKTOP_INI_ENCODING) as f:
+                f.write(content)
+
+            print("✓ 已转换为 UTF-16 编码。")
+
+        except EncodingConversionCanceled:
+            raise
         except Exception as e:
+            print(f"转换失败: {e}")
+            print("操作已取消。")
+            raise EncodingConversionCanceled(f"编码转换失败: {e}")
+
+    @staticmethod
+    def remove_info_tip(folder_path):
+        """
+        移除 desktop.ini 中的 InfoTip
+
+        只删除 InfoTip 行，保留其他设置（如 IconResource, Logo 等）。
+
+        Args:
+            folder_path: 文件夹路径
+
+        Returns:
+            bool: 操作是否成功
+
+        Raises:
+            EncodingConversionCanceled: 用户拒绝编码转换
+        """
+        desktop_ini_path = DesktopIniHandler.get_path(folder_path)
+
+        if not os.path.exists(desktop_ini_path):
+            return True
+
+        try:
+            # 确保文件是 UTF-16 编码
+            DesktopIniHandler.ensure_utf16_encoding(desktop_ini_path)
+
+            # 读取内容（UTF-16）
+            with codecs.open(desktop_ini_path, 'r', encoding=DESKTOP_INI_ENCODING) as f:
+                content = f.read()
+
+            # 移除 InfoTip 行
+            lines = content.splitlines()
+            new_lines = []
+            for line in lines:
+                # 跳过 InfoTip 行（支持 = 前后有/无空格）
+                stripped = line.strip()
+                if stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + '=') or \
+                   stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + ' '):
+                    continue
+                new_lines.append(line)
+
+            # 检查是否还有有效内容
+            has_content = False
+            for line in new_lines:
+                stripped = line.strip()
+                if stripped and not stripped.startswith('[.ShellClassInfo]'):
+                    has_content = True
+                    break
+
+            # 如果没有其他内容，删除文件
+            if not has_content:
+                os.remove(desktop_ini_path)
+                return True
+
+            # 用 UTF-16 写回
+            new_content = LINE_ENDING.join(new_lines)
+            with codecs.open(desktop_ini_path, 'w', encoding=DESKTOP_INI_ENCODING) as f:
+                f.write(new_content)
+
+            return True
+
+        except EncodingConversionCanceled:
+            return False
+        except Exception:
             return False
 
     @staticmethod
@@ -269,53 +480,5 @@ class DesktopIniHandler(object):
                 shell=True
             )
             return result == 0
-        except Exception:
-            return False
-
-    @staticmethod
-    def notify_shell_update(folder_path=None):
-        """
-        通知 Windows Shell 刷新显示
-
-        当修改 desktop.ini 后，Windows 资源管理器不会自动刷新显示。
-        需要调用 SHChangeNotify API 来通知 Shell 更新。
-
-        参考:
-        https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shchangenotify
-
-        Args:
-            folder_path: 文件夹路径，如果为 None 则全局刷新
-
-        Returns:
-            bool: 通知是否成功
-        """
-        if sys.platform != 'win32':
-            return False
-
-        try:
-            # SHChangeNotify 事件常量
-            SHCNE_ATTRIBUTES = 0x00000800     # 项目或文件夹属性已更改
-            SHCNE_ASSOCCHANGED = 0x08000000   # 文件关联已更改（全局刷新）
-            SHCNF_PATH = 0x0001               # 参数是路径
-            SHCNF_IDLIST = 0x0000             # 参数是 PIDL
-
-            if folder_path:
-                # 刷新特定目录的属性
-                folder_path = os.path.abspath(folder_path)
-                ctypes.windll.shell32.SHChangeNotify(
-                    SHCNE_ATTRIBUTES,
-                    SHCNF_PATH,
-                    folder_path,
-                    None
-                )
-            else:
-                # 全局刷新（刷新所有图标和元数据）
-                ctypes.windll.shell32.SHChangeNotify(
-                    SHCNE_ASSOCCHANGED,
-                    SHCNF_IDLIST,
-                    None,
-                    None
-                )
-            return True
         except Exception:
             return False

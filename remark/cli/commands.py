@@ -129,8 +129,15 @@ class CLI:
 
 def main():
     """主入口"""
-    cli = CLI()
-    cli.run()
+    try:
+        cli = CLI()
+        cli.run()
+    except KeyboardInterrupt:
+        print(sys_encode(u"\n操作已取消"))
+        sys.exit(0)
+    except Exception as e:
+        print(sys_encode(u"发生错误: ") + str(e))
+        sys.exit(1)
 
 
 if __name__ == '__main__':

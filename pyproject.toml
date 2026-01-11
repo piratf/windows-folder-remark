@@ -1,0 +1,164 @@
+# pyproject.toml - 现代 Python 项目配置
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+
+[project]
+name = "windows-folder-remark"
+version = "2.0.0"
+description = "Windows 文件夹备注工具"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Piratf"}
+]
+keywords = ["windows", "folder", "remark", "desktop.ini"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# 运行时依赖
+dependencies = []
+
+# 开发依赖
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.14.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-mock>=3.10.0",
+    "pre-commit>=3.0.0",
+]
+
+# 命令行入口
+[project.scripts]
+remark = "remark.cli.commands:main"
+
+# 构建系统配置
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+# =============================================================================
+# 工具配置
+# =============================================================================
+
+# Ruff - 代码检查和格式化
+# https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific rules
+]
+
+ignore = [
+    "E501",   # line too long (由 formatter 处理)
+    "B008",   # do not perform function calls in argument defaults
+    "SIM108", # use ternary operator (可读性考虑)
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]  # 允许测试中使用 assert
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+known-first-party = ["remark"]
+
+
+# Mypy - 静态类型检查
+# https://mypy.readthedocs.io/
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+show_error_codes = true
+show_column_numbers = true
+color_output = true
+error_summary = true
+
+[[tool.mypy.overrides]]
+module = []
+ignore_missing_imports = true
+
+
+# Pytest - 测试框架
+# https://docs.pytest.org/
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+minversion = "7.0"
+
+addopts = [
+    "-v",                    # 详细输出
+    "-l",                    # 显示本地变量（失败时）
+    "-s",                    # 显示 print 输出
+    "--cov=remark",          # 覆盖率报告
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "-n", "auto",            # 并行运行
+]
+
+markers = [
+    "unit: 单元测试",
+    "integration: 集成测试",
+    "windows: 仅在 Windows 上运行的测试",
+    "slow: 慢速测试",
+]
+
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+# Coverage - 覆盖率配置
+# https://coverage.readthedocs.io/
+[tool.coverage.run]
+source = ["remark"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]

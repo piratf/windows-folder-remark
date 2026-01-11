@@ -32,41 +32,30 @@ import subprocess
 # 项目根目录
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# 版本文件路径
-VERSION_FILES = [
-    os.path.join(ROOT_DIR, 'remark', '__init__.py'),
-    os.path.join(ROOT_DIR, 'setup.py'),
-]
-
 
 def get_current_version():
-    """获取当前版本号"""
-    version_file = os.path.join(ROOT_DIR, 'remark', '__init__.py')
-    with open(version_file, 'r', encoding='utf-8') as f:
+    """获取当前版本号（从 pyproject.toml）"""
+    toml_file = os.path.join(ROOT_DIR, 'pyproject.toml')
+    with open(toml_file, 'r', encoding='utf-8') as f:
         content = f.read()
-        match = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", content)
+        match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
         if match:
             return match.group(1)
-    raise ValueError("无法找到当前版本号")
+    raise ValueError("无法在 pyproject.toml 中找到版本号")
 
 
-def update_version_files(new_version):
-    """更新所有版本文件"""
-    version_pattern = re.compile(r"(__version__\s*=\s*['\"])([^'\"]+)(['\"])")
-    setup_pattern = re.compile(r"(version\s*=\s*['\"])([^'\"]+)(['\"])")
-
-    for file_path in VERSION_FILES:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        if '__version__' in content:
-            new_content = version_pattern.sub(rf"\g<1>{new_version}\g<3>", content)
-        else:
-            new_content = setup_pattern.sub(rf"\g<1>{new_version}\g<3>", content)
-
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(new_content)
-
+def update_version(new_version):
+    """更新 pyproject.toml 中的版本号"""
+    toml_file = os.path.join(ROOT_DIR, 'pyproject.toml')
+    with open(toml_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+    content = re.sub(
+        r'(version\s*=\s*["\'])([^"\']+)(["\'])',
+        rf'\g<1>{new_version}\g<3>',
+        content
+    )
+    with open(toml_file, 'w', encoding='utf-8') as f:
+        f.write(content)
     return new_version
 
 
@@ -105,7 +94,7 @@ def commit_version_changes():
     """提交版本变更"""
     current_version = get_current_version()
     subprocess.run([
-        'git', 'add', 'remark/__init__.py', 'setup.py'
+        'git', 'add', 'pyproject.toml'
     ], check=True)
     subprocess.run([
         'git', 'commit', '-m', f'bump: version to {current_version}'
@@ -166,7 +155,7 @@ def main():
         return
 
     # 更新版本文件
-    update_version_files(new_version)
+    update_version(new_version)
     print(f"已更新版本号到: {new_version}")
 
     # 提交变更

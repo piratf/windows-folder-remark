@@ -1,0 +1,49 @@
+# Pre-commit configuration
+# https://pre-commit.com/
+
+default_language_version:
+  python: python3.9
+
+repos:
+  # Ruff - 代码检查和格式化
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # Pre-commit hooks for general checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace     # 删除行尾空格
+      - id: end-of-file-fixer       # 文件末尾添加换行
+      - id: check-yaml              # 检查 YAML 语法
+      - id: check-toml              # 检查 TOML 语法
+      - id: check-added-large-files # 防止大文件提交
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict    # 检查合并冲突标记
+      - id: check-case-conflict     # 检查大小写冲突
+      - id: check-docstring-first   # 检查 docstring 是否在代码前
+
+  # Mypy - 静态类型检查
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.14.1
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-setuptools
+        args: [--config-file=mypy.ini]
+
+# 全局排除
+exclude: |
+  ^(?:
+      \.venv/|
+      \.git/|
+      \.mypy_cache/|
+      __pycache__/|
+      build/|
+      dist/|
+      *.egg-info/
+    )

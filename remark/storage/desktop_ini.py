@@ -13,9 +13,8 @@ https://learn.microsoft.com/en-us/windows/win32/shell/how-to-customize-folders-w
 This is necessary to store the localized strings that can be displayed to users."
 """
 
-import os
-import sys
 import codecs
+import os
 
 
 class EncodingConversionCanceled(Exception):

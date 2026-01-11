@@ -8,12 +8,21 @@ __author__ = 'Piratf'
 import sys
 import os
 import subprocess
+import platform
 
 # 获取系统编码，确保备注不会出现乱码
 defEncoding = sys.getfilesystemencoding()
 
 # Windows InfoTip 最大长度限制
 MAX_COMMENT_LENGTH = 260
+
+
+def check_platform():
+    if platform.system() != 'Windows':
+        print(sys_encode(u"错误: 此工具为 Windows 系统中的文件夹添加备注，暂不支持其他系统。"))
+        print(sys_encode(u"当前系统: ") + platform.system())
+        return False
+    return True
 
 
 # 将代码中的字符转换为系统编码
@@ -113,6 +122,9 @@ def add_comment(dir_path=None, comment=None):
 
 
 if __name__ == '__main__':
+    if not check_platform():
+        sys.exit(1)
+    
     if len(sys.argv) == 3:
         add_comment(sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 1:

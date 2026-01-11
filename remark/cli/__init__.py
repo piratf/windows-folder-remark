@@ -4,4 +4,4 @@
 
 from remark.cli.commands import CLI
 
-__all__ = ['CLI']
+__all__ = ["CLI"]

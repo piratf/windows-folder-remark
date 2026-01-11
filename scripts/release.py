@@ -1,4 +1,3 @@
-
 """
 版本发布脚本
 
@@ -34,8 +33,8 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_current_version():
     """获取当前版本号（从 pyproject.toml）"""
-    toml_file = os.path.join(ROOT_DIR, 'pyproject.toml')
-    with open(toml_file, encoding='utf-8') as f:
+    toml_file = os.path.join(ROOT_DIR, "pyproject.toml")
+    with open(toml_file, encoding="utf-8") as f:
         content = f.read()
         match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
         if match:
@@ -45,28 +44,24 @@ def get_current_version():
 
 def update_version(new_version):
     """更新 pyproject.toml 中的版本号"""
-    toml_file = os.path.join(ROOT_DIR, 'pyproject.toml')
-    with open(toml_file, encoding='utf-8') as f:
+    toml_file = os.path.join(ROOT_DIR, "pyproject.toml")
+    with open(toml_file, encoding="utf-8") as f:
         content = f.read()
-    content = re.sub(
-        r'(version\s*=\s*["\'])([^"\']+)(["\'])',
-        rf'\g<1>{new_version}\g<3>',
-        content
-    )
-    with open(toml_file, 'w', encoding='utf-8') as f:
+    content = re.sub(r'(version\s*=\s*["\'])([^"\']+)(["\'])', rf"\g<1>{new_version}\g<3>", content)
+    with open(toml_file, "w", encoding="utf-8") as f:
         f.write(content)
     return new_version
 
 
-def bump_version(current, part='patch'):
+def bump_version(current, part="patch"):
     """递增版本号"""
-    major, minor, patch = map(int, current.split('.'))
+    major, minor, patch = map(int, current.split("."))
 
-    if part == 'major':
+    if part == "major":
         major += 1
         minor = 0
         patch = 0
-    elif part == 'minor':
+    elif part == "minor":
         minor += 1
         patch = 0
     else:  # patch
@@ -78,50 +73,36 @@ def bump_version(current, part='patch'):
 def create_tag(version):
     """创建 git tag"""
     tag_name = f"v{version}"
-    subprocess.run(['git', 'tag', '-a', tag_name, '-m', f'Release {tag_name}'], check=True)
+    subprocess.run(["git", "tag", "-a", tag_name, "-m", f"Release {tag_name}"], check=True)
     print(f"已创建 tag: {tag_name}")
     return tag_name
 
 
 def push_tag(tag_name):
     """推送 tag 到远程仓库"""
-    subprocess.run(['git', 'push', 'origin', tag_name], check=True)
+    subprocess.run(["git", "push", "origin", tag_name], check=True)
     print(f"已推送 tag: {tag_name}")
 
 
 def commit_version_changes():
     """提交版本变更"""
     current_version = get_current_version()
-    subprocess.run([
-        'git', 'add', 'pyproject.toml'
-    ], check=True)
-    subprocess.run([
-        'git', 'commit', '-m', f'bump: version to {current_version}'
-    ], check=True)
+    subprocess.run(["git", "add", "pyproject.toml"], check=True)
+    subprocess.run(["git", "commit", "-m", f"bump: version to {current_version}"], check=True)
     print(f"已提交版本变更: {current_version}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description='版本发布管理工具')
+    parser = argparse.ArgumentParser(description="版本发布管理工具")
     parser.add_argument(
-        'version',
-        nargs='?',
-        help='新版本号 (如: 2.1.0) 或递增类型: patch/minor/major'
+        "version", nargs="?", help="新版本号 (如: 2.1.0) 或递增类型: patch/minor/major"
     )
     parser.add_argument(
-        '--push', '-p',
-        action='store_true',
-        help='创建并推送 tag 到远程仓库（触发 GitHub Actions）'
+        "--push", "-p", action="store_true", help="创建并推送 tag 到远程仓库（触发 GitHub Actions）"
     )
+    parser.add_argument("--commit", "-c", action="store_true", help="提交版本变更到 git")
     parser.add_argument(
-        '--commit', '-c',
-        action='store_true',
-        help='提交版本变更到 git'
-    )
-    parser.add_argument(
-        '--dry-run', '-n',
-        action='store_true',
-        help='只显示将要执行的操作，不实际执行'
+        "--dry-run", "-n", action="store_true", help="只显示将要执行的操作，不实际执行"
     )
 
     args = parser.parse_args()
@@ -133,11 +114,11 @@ def main():
         return
 
     # 确定新版本号
-    if args.version in ('patch', 'minor', 'major'):
+    if args.version in ("patch", "minor", "major"):
         new_version = bump_version(current, args.version)
     else:
         # 验证版本号格式
-        if not re.match(r'^\d+\.\d+\.\d+$', args.version):
+        if not re.match(r"^\d+\.\d+\.\d+$", args.version):
             print("错误: 版本号格式应为 x.y.z")
             sys.exit(1)
         new_version = args.version
@@ -171,5 +152,5 @@ def main():
         print("\n提示: 使用 --push 参数创建并推送 tag 以触发 release")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -3,11 +3,9 @@
 """
 
 from remark.utils.constants import MAX_COMMENT_LENGTH
-from remark.utils.encoding import sys_encode
 from remark.utils.platform import check_platform
 
 __all__ = [
-    'MAX_COMMENT_LENGTH',
-    'check_platform',
-    'sys_encode',
+    "MAX_COMMENT_LENGTH",
+    "check_platform",
 ]

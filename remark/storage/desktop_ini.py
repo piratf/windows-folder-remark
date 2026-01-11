@@ -14,7 +14,9 @@ This is necessary to store the localized strings that can be displayed to users.
 """
 
 import os
+import sys
 import codecs
+import ctypes
 
 
 # Windows desktop.ini 标准编码格式
@@ -181,14 +183,14 @@ class DesktopIniHandler(object):
     @staticmethod
     def set_folder_system_attributes(folder_path):
         """
-        设置文件夹为系统文件夹
+        设置文件夹为只读属性
 
-        根据 Microsoft 文档，文件夹必须设置为系统文件夹
+        根据 Microsoft 文档和社区讨论，文件夹必须设置为只读属性
         Windows 才会读取 desktop.ini 中的自定义设置。
 
-        参考: "Use PathMakeSystemFolder to make the folder a system folder.
-        This sets the read-only bit on the folder to indicate that the special
-        behavior reserved for Desktop.ini should be enabled."
+        参考: "Apply the read-only attribute for each folder.
+        This will make Explorer process the desktop.ini file for that folder."
+        https://superuser.com/questions/1117824/how-to-get-windows-to-read-copied-desktop-ini-file
 
         Args:
             folder_path: 文件夹路径
@@ -197,12 +199,27 @@ class DesktopIniHandler(object):
             bool: 设置是否成功
         """
         try:
-            # 设置文件夹为只读/系统属性
-            # read-only bit 通知 Windows 启用 desktop.ini 特殊行为
             import subprocess
+            import ctypes
+
+            # 使用 Windows API 检查文件夹是否已有只读属性
+            FILE_ATTRIBUTE_READONLY = 0x01
+            GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
+
+            attrs = GetFileAttributesW(folder_path)
+            if attrs == 0xFFFFFFFF:  # INVALID_FILE_ATTRIBUTES
+                return False
+
+            # 如果已有只读属性，无需再次设置
+            if attrs & FILE_ATTRIBUTE_READONLY:
+                return True
+
+            # 设置文件夹为只读属性
             result = subprocess.call(
                 'attrib +r "' + folder_path + '"',
-                shell=True
+                shell=True,
+                stdout=subprocess.DEVNULL,  # 抑制输出
+                stderr=subprocess.DEVNULL
             )
             return result == 0
         except Exception:
@@ -252,5 +269,53 @@ class DesktopIniHandler(object):
                 shell=True
             )
             return result == 0
+        except Exception:
+            return False
+
+    @staticmethod
+    def notify_shell_update(folder_path=None):
+        """
+        通知 Windows Shell 刷新显示
+
+        当修改 desktop.ini 后，Windows 资源管理器不会自动刷新显示。
+        需要调用 SHChangeNotify API 来通知 Shell 更新。
+
+        参考:
+        https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shchangenotify
+
+        Args:
+            folder_path: 文件夹路径，如果为 None 则全局刷新
+
+        Returns:
+            bool: 通知是否成功
+        """
+        if sys.platform != 'win32':
+            return False
+
+        try:
+            # SHChangeNotify 事件常量
+            SHCNE_ATTRIBUTES = 0x00000800     # 项目或文件夹属性已更改
+            SHCNE_ASSOCCHANGED = 0x08000000   # 文件关联已更改（全局刷新）
+            SHCNF_PATH = 0x0001               # 参数是路径
+            SHCNF_IDLIST = 0x0000             # 参数是 PIDL
+
+            if folder_path:
+                # 刷新特定目录的属性
+                folder_path = os.path.abspath(folder_path)
+                ctypes.windll.shell32.SHChangeNotify(
+                    SHCNE_ATTRIBUTES,
+                    SHCNF_PATH,
+                    folder_path,
+                    None
+                )
+            else:
+                # 全局刷新（刷新所有图标和元数据）
+                ctypes.windll.shell32.SHChangeNotify(
+                    SHCNE_ASSOCCHANGED,
+                    SHCNF_IDLIST,
+                    None,
+                    None
+                )
+            return True
         except Exception:
             return False

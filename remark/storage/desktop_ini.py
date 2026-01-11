@@ -74,7 +74,8 @@ class DesktopIniHandler:
         """
         读取 desktop.ini 中的 InfoTip 值
 
-        使用 UTF-16 编码读取，支持中文等非 ASCII 字符
+        使用 UTF-16 编码读取（与写入逻辑一致），支持中文等非 ASCII 字符。
+        如果 UTF-16 读取失败，会尝试其他编码以处理外部程序创建的文件。
 
         Args:
             folder_path: 文件夹路径
@@ -87,39 +88,40 @@ class DesktopIniHandler:
         if not os.path.exists(desktop_ini_path):
             return None
 
-        try:
-            # 尝试多种编码读取，优先使用 UTF-16
-            encodings = ["utf-16-le", "utf-16", "utf-8-sig", "utf-8", "gbk", "mbcs"]
+        # 优先使用标准编码 UTF-16（与写入逻辑一致）
+        # 降级编码用于处理外部程序创建的文件
+        encodings = [DESKTOP_INI_ENCODING, "utf-16-le", "utf-8-sig", "utf-8", "gbk", "mbcs"]
 
-            for encoding in encodings:
-                try:
-                    with codecs.open(desktop_ini_path, "r", encoding=encoding) as f:
-                        content = f.read()
+        for encoding in encodings:
+            try:
+                with codecs.open(desktop_ini_path, "r", encoding=encoding) as f:
+                    content = f.read()
 
-                    # 解析 InfoTip
-                    if DesktopIniHandler.PROPERTY_INFOTIP in content:
-                        # 找到 InfoTip= 的位置
-                        start = content.index(DesktopIniHandler.PROPERTY_INFOTIP + "=")
-                        start += len(DesktopIniHandler.PROPERTY_INFOTIP + "=")
+                # 解析 InfoTip
+                if DesktopIniHandler.PROPERTY_INFOTIP in content:
+                    # 找到 InfoTip= 的位置
+                    start = content.index(DesktopIniHandler.PROPERTY_INFOTIP + "=")
+                    start += len(DesktopIniHandler.PROPERTY_INFOTIP + "=")
 
-                        # 找到行尾
-                        end = len(content)
-                        for line_ending in ["\r\n", "\n", "\r"]:
-                            pos = content.find(line_ending, start)
-                            if pos != -1 and pos < end:
-                                end = pos
-                                break
+                    # 找到行尾
+                    end = len(content)
+                    for line_ending in ["\r\n", "\n", "\r"]:
+                        pos = content.find(line_ending, start)
+                        if pos != -1 and pos < end:
+                            end = pos
+                            break
 
-                        value = content[start:end].strip()
-                        if value:
-                            return value
-                    # 如果找到了 InfoTip 但没有值，或者没找到 InfoTip，继续尝试下一个编码
-                    break
-                except (UnicodeDecodeError, UnicodeError):
-                    continue
-
-        except Exception:
-            pass
+                    value = content[start:end].strip()
+                    if value:
+                        return value
+                # 成功读取但没找到 InfoTip，不需要再尝试其他编码
+                break
+            except (UnicodeDecodeError, UnicodeError):
+                # 当前编码失败，尝试下一个
+                continue
+            except Exception:
+                # 其他错误（文件不存在、权限问题等），直接返回
+                break
 
         return None
 

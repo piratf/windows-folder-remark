@@ -86,14 +86,11 @@ def add_comment(dir_path=None, comment=None):
     # 输入文件夹路径
     if dir_path is None:
         dir_path_temp = input(input_path_msg)
-        #print(dir_path_temp)
-        #dir_path = "r"+dir_path
         dir_path = dir_path_temp.replace('\"', '').strip()
-	
+
     # 判断路径是否存在文件夹
     while not os.path.isdir(dir_path):
-        #print(dir_path)        
-        re_enter_message(u"你输入的不是一个文件夹路径")
+        re_enter_message(u"你输入的路径是 [{}], 我没有找到这个文件夹".format(dir_path))
         dir_path_temp = input(input_path_msg)
         dir_path = dir_path_temp.replace('\"', '').strip()
 
@@ -128,6 +125,8 @@ if __name__ == '__main__':
     if len(sys.argv) == 3:
         add_comment(sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 1:
+        print(sys_encode(u"Windows 文件夹备注工具"))
+        print(sys_encode(u"提示: 按 Ctrl + C 退出程序") + os.linesep)
         while True:
             try:
                 add_comment()
@@ -136,5 +135,8 @@ if __name__ == '__main__':
                 break
             re_enter_message("成功完成一次备注")
     else:
-        print('Usage .1: %s [folder path] [content]' % sys.argv[0])
-        print('Usage .2: %s' % sys.argv[0])
+        print(sys_encode(u"使用方法:"))
+        print(sys_encode(u"  1. 交互模式: python remark.py"))
+        print(sys_encode(u"  2. 命令行模式: python remark.py [文件夹路径] [备注内容]"))
+        print(sys_encode(u"示例:"))
+        print(sys_encode(u"  python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""))

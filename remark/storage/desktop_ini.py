@@ -1,4 +1,3 @@
-
 """
 Desktop.ini 交互层
 
@@ -16,16 +15,17 @@ import codecs
 import os
 
 
-class EncodingConversionCanceled(Exception):
+class EncodingConversionCanceled(Exception):  # noqa: N818
     """编码转换被用户取消"""
+
     pass
 
 
 # Windows desktop.ini 标准编码格式
 # 使用 'utf-16' 编码，codecs 会自动添加 UTF-16 LE BOM (0xFF 0xFE)
-DESKTOP_INI_ENCODING = 'utf-16'
+DESKTOP_INI_ENCODING = "utf-16"
 # Windows 行尾符
-LINE_ENDING = '\r\n'
+LINE_ENDING = "\r\n"
 
 
 class DesktopIniHandler:
@@ -37,11 +37,11 @@ class DesktopIniHandler:
     """
 
     # desktop.ini 文件名
-    FILENAME = 'desktop.ini'
+    FILENAME = "desktop.ini"
     # ShellClassInfo 段落
-    SECTION_SHELL_CLASS_INFO = '[.ShellClassInfo]'
+    SECTION_SHELL_CLASS_INFO = "[.ShellClassInfo]"
     # InfoTip 属性
-    PROPERTY_INFOTIP = 'InfoTip'
+    PROPERTY_INFOTIP = "InfoTip"
 
     @staticmethod
     def get_path(folder_path):
@@ -89,22 +89,22 @@ class DesktopIniHandler:
 
         try:
             # 尝试多种编码读取，优先使用 UTF-16
-            encodings = ['utf-16-le', 'utf-16', 'utf-8-sig', 'utf-8', 'gbk', 'mbcs']
+            encodings = ["utf-16-le", "utf-16", "utf-8-sig", "utf-8", "gbk", "mbcs"]
 
             for encoding in encodings:
                 try:
-                    with codecs.open(desktop_ini_path, 'r', encoding=encoding) as f:
+                    with codecs.open(desktop_ini_path, "r", encoding=encoding) as f:
                         content = f.read()
 
                     # 解析 InfoTip
                     if DesktopIniHandler.PROPERTY_INFOTIP in content:
                         # 找到 InfoTip= 的位置
-                        start = content.index(DesktopIniHandler.PROPERTY_INFOTIP + '=')
-                        start += len(DesktopIniHandler.PROPERTY_INFOTIP + '=')
+                        start = content.index(DesktopIniHandler.PROPERTY_INFOTIP + "=")
+                        start += len(DesktopIniHandler.PROPERTY_INFOTIP + "=")
 
                         # 找到行尾
                         end = len(content)
-                        for line_ending in ['\r\n', '\n', '\r']:
+                        for line_ending in ["\r\n", "\n", "\r"]:
                             pos = content.find(line_ending, start)
                             if pos != -1 and pos < end:
                                 end = pos
@@ -154,7 +154,7 @@ class DesktopIniHandler:
                 # 确保是 UTF-16 编码（用户拒绝会抛出异常）
                 DesktopIniHandler.ensure_utf16_encoding(desktop_ini_path)
 
-                with codecs.open(desktop_ini_path, 'r', encoding=DESKTOP_INI_ENCODING) as f:
+                with codecs.open(desktop_ini_path, "r", encoding=DESKTOP_INI_ENCODING) as f:
                     content = f.read()
 
                 # 检查是否已有 InfoTip
@@ -165,9 +165,10 @@ class DesktopIniHandler:
                 for line in lines:
                     stripped = line.strip()
                     # 更新现有 InfoTip 行
-                    if stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + '=') or \
-                       stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + ' '):
-                        new_lines.append(DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip)
+                    if stripped.startswith(
+                        DesktopIniHandler.PROPERTY_INFOTIP + "="
+                    ) or stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + " "):
+                        new_lines.append(DesktopIniHandler.PROPERTY_INFOTIP + "=" + info_tip)
                         info_tip_updated = True
                     else:
                         new_lines.append(line)
@@ -177,27 +178,33 @@ class DesktopIniHandler:
                     # 找到 [.ShellClassInfo] 后插入
                     inserted = False
                     for i, line in enumerate(new_lines):
-                        if line.strip().startswith('[.ShellClassInfo]'):
-                            new_lines.insert(i + 1, DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip)
+                        if line.strip().startswith("[.ShellClassInfo]"):
+                            new_lines.insert(
+                                i + 1, DesktopIniHandler.PROPERTY_INFOTIP + "=" + info_tip
+                            )
                             inserted = True
                             break
                     if not inserted:
                         # 没找到 section，添加整个 section
                         new_lines = [
                             DesktopIniHandler.SECTION_SHELL_CLASS_INFO,
-                            DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip
+                            DesktopIniHandler.PROPERTY_INFOTIP + "=" + info_tip,
                         ]
 
                 new_content = LINE_ENDING.join(new_lines)
             else:
                 # 新建文件
                 new_content = (
-                    DesktopIniHandler.SECTION_SHELL_CLASS_INFO + LINE_ENDING +
-                    DesktopIniHandler.PROPERTY_INFOTIP + '=' + info_tip + LINE_ENDING
+                    DesktopIniHandler.SECTION_SHELL_CLASS_INFO
+                    + LINE_ENDING
+                    + DesktopIniHandler.PROPERTY_INFOTIP
+                    + "="
+                    + info_tip
+                    + LINE_ENDING
                 )
 
             # 使用 UTF-16 编码写入
-            with codecs.open(desktop_ini_path, 'w', encoding=DESKTOP_INI_ENCODING) as f:
+            with codecs.open(desktop_ini_path, "w", encoding=DESKTOP_INI_ENCODING) as f:
                 f.write(new_content)
 
             return True
@@ -222,22 +229,22 @@ class DesktopIniHandler:
         """
         # 检查 BOM
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 bom = f.read(4)
 
-            if bom[:2] == b'\xff\xfe':  # UTF-16 LE BOM
-                return 'utf-16-le', True
-            elif bom[:2] == b'\xfe\xff':  # UTF-16 BE BOM
-                return 'utf-16-be', True
-            elif bom[:3] == b'\xef\xbb\xbf':  # UTF-8 BOM
-                return 'utf-8-sig', False
+            if bom[:2] == b"\xff\xfe":  # UTF-16 LE BOM
+                return "utf-16-le", True
+            elif bom[:2] == b"\xfe\xff":  # UTF-16 BE BOM
+                return "utf-16-be", True
+            elif bom[:3] == b"\xef\xbb\xbf":  # UTF-8 BOM
+                return "utf-8-sig", False
         except Exception:
             pass
 
         # 尝试检测其他编码
-        for encoding in ['utf-8', 'gbk', 'mbcs']:
+        for encoding in ["utf-8", "gbk", "mbcs"]:
             try:
-                with codecs.open(file_path, 'r', encoding=encoding) as f:
+                with codecs.open(file_path, "r", encoding=encoding) as f:
                     f.read()
                 return encoding, False
             except (UnicodeDecodeError, UnicodeError):
@@ -270,7 +277,7 @@ class DesktopIniHandler:
 
         try:
             # 显示文件预览
-            with codecs.open(file_path, 'r', encoding=encoding or 'utf-8') as f:
+            with codecs.open(file_path, "r", encoding=encoding or "utf-8") as f:
                 content = f.read()
 
             print("\n当前文件内容:")
@@ -281,16 +288,16 @@ class DesktopIniHandler:
             # 用户确认
             while True:
                 response = input("\n是否转换为 UTF-16 编码后继续？[Y/n]: ").strip().lower()
-                if response in ('', 'y', 'yes'):
+                if response in ("", "y", "yes"):
                     break
-                elif response in ('n', 'no'):
+                elif response in ("n", "no"):
                     print("操作已取消。")
                     raise EncodingConversionCanceled("用户拒绝编码转换")
                 else:
                     print("请输入 Y 或 n")
 
             # 执行转换
-            with codecs.open(file_path, 'w', encoding=DESKTOP_INI_ENCODING) as f:
+            with codecs.open(file_path, "w", encoding=DESKTOP_INI_ENCODING) as f:
                 f.write(content)
 
             print("✓ 已转换为 UTF-16 编码。")
@@ -300,7 +307,7 @@ class DesktopIniHandler:
         except Exception as e:
             print(f"转换失败: {e}")
             print("操作已取消。")
-            raise EncodingConversionCanceled(f"编码转换失败: {e}")
+            raise EncodingConversionCanceled(f"编码转换失败: {e}") from e
 
     @staticmethod
     def remove_info_tip(folder_path):
@@ -328,7 +335,7 @@ class DesktopIniHandler:
             DesktopIniHandler.ensure_utf16_encoding(desktop_ini_path)
 
             # 读取内容（UTF-16）
-            with codecs.open(desktop_ini_path, 'r', encoding=DESKTOP_INI_ENCODING) as f:
+            with codecs.open(desktop_ini_path, "r", encoding=DESKTOP_INI_ENCODING) as f:
                 content = f.read()
 
             # 移除 InfoTip 行
@@ -337,8 +344,9 @@ class DesktopIniHandler:
             for line in lines:
                 # 跳过 InfoTip 行（支持 = 前后有/无空格）
                 stripped = line.strip()
-                if stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + '=') or \
-                   stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + ' '):
+                if stripped.startswith(
+                    DesktopIniHandler.PROPERTY_INFOTIP + "="
+                ) or stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + " "):
                     continue
                 new_lines.append(line)
 
@@ -346,7 +354,7 @@ class DesktopIniHandler:
             has_content = False
             for line in new_lines:
                 stripped = line.strip()
-                if stripped and not stripped.startswith('[.ShellClassInfo]'):
+                if stripped and not stripped.startswith("[.ShellClassInfo]"):
                     has_content = True
                     break
 
@@ -357,7 +365,7 @@ class DesktopIniHandler:
 
             # 用 UTF-16 写回
             new_content = LINE_ENDING.join(new_lines)
-            with codecs.open(desktop_ini_path, 'w', encoding=DESKTOP_INI_ENCODING) as f:
+            with codecs.open(desktop_ini_path, "w", encoding=DESKTOP_INI_ENCODING) as f:
                 f.write(new_content)
 
             return True
@@ -412,8 +420,8 @@ class DesktopIniHandler:
             import subprocess
 
             # 使用 Windows API 检查文件夹是否已有只读属性
-            FILE_ATTRIBUTE_READONLY = 0x01
-            GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
+            FILE_ATTRIBUTE_READONLY = 0x01  # noqa: N806 - Windows API 常量
+            GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW  # noqa: N806 - Windows API
 
             attrs = GetFileAttributesW(folder_path)
             if attrs == 0xFFFFFFFF:  # INVALID_FILE_ATTRIBUTES
@@ -428,7 +436,7 @@ class DesktopIniHandler:
                 'attrib +r "' + folder_path + '"',
                 shell=True,
                 stdout=subprocess.DEVNULL,  # 抑制输出
-                stderr=subprocess.DEVNULL
+                stderr=subprocess.DEVNULL,
             )
             return result == 0
         except Exception:
@@ -450,10 +458,8 @@ class DesktopIniHandler:
         """
         try:
             import subprocess
-            result = subprocess.call(
-                'attrib +h +s "' + file_path + '"',
-                shell=True
-            )
+
+            result = subprocess.call('attrib +h +s "' + file_path + '"', shell=True)
             return result == 0
         except Exception:
             return False
@@ -473,10 +479,8 @@ class DesktopIniHandler:
         """
         try:
             import subprocess
-            result = subprocess.call(
-                'attrib -s -h "' + file_path + '"',
-                shell=True
-            )
+
+            result = subprocess.call('attrib -s -h "' + file_path + '"', shell=True)
             return result == 0
         except Exception:
             return False

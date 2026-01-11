@@ -7,6 +7,7 @@ __author__ = 'Piratf'
 
 import sys
 import os
+import subprocess
 
 # 获取系统编码，确保备注不会出现乱码
 defEncoding = sys.getfilesystemencoding()
@@ -22,7 +23,14 @@ def sys_encode(content):
 
 
 def run_command(command):
-    os.system(command)
+    try:
+        result = subprocess.call(command, shell=True)
+        if result != 0:
+            print(sys_encode(u"命令执行失败，错误码: ") + str(result))
+        return result == 0
+    except Exception as e:
+        print(sys_encode(u"命令执行异常: ") + str(e))
+        return False
 
 
 def re_enter_message(message):

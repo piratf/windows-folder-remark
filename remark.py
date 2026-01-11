@@ -34,7 +34,7 @@ def update_folder_comment(dir_path, comment):
     content = sys_encode(u'[.ShellClassInfo]' + os.linesep + 'InfoTip=')
     # 开始设置备注信息
     setting_file_path = get_setting_file_path(dir_path)
-    with open(setting_file_path, 'w') as f:
+    with open(setting_file_path, 'w', encoding=defEncoding) as f:
         f.write(content)
         f.write(sys_encode(comment + os.linesep))
 

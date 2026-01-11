@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 文件夹备注处理器 - 使用 desktop.ini
@@ -12,9 +11,9 @@ https://learn.microsoft.com/en-us/windows/win32/shell/how-to-customize-folders-w
 import os
 
 from remark.core.base import CommentHandler
-from remark.utils.encoding import sys_encode
-from remark.utils.constants import MAX_COMMENT_LENGTH
 from remark.storage.desktop_ini import DesktopIniHandler
+from remark.utils.constants import MAX_COMMENT_LENGTH
+from remark.utils.encoding import sys_encode
 
 
 class FolderCommentHandler(CommentHandler):
@@ -23,11 +22,11 @@ class FolderCommentHandler(CommentHandler):
     def set_comment(self, folder_path, comment):
         """设置文件夹备注"""
         if not os.path.isdir(folder_path):
-            print(sys_encode(u"路径不是文件夹: ") + folder_path)
+            print(sys_encode("路径不是文件夹: ") + folder_path)
             return False
 
         if len(comment) > MAX_COMMENT_LENGTH:
-            print(sys_encode(u"备注长度超过限制，最大长度为 ") + str(MAX_COMMENT_LENGTH) + sys_encode(u" 个字符"))
+            print(sys_encode("备注长度超过限制，最大长度为 ") + str(MAX_COMMENT_LENGTH) + sys_encode(" 个字符"))
             comment = comment[:MAX_COMMENT_LENGTH]
 
         return self._set_comment_desktop_ini(folder_path, comment)
@@ -41,28 +40,28 @@ class FolderCommentHandler(CommentHandler):
             # 清除文件属性以便修改
             if DesktopIniHandler.exists(folder_path):
                 if not DesktopIniHandler.clear_file_attributes(desktop_ini_path):
-                    print(sys_encode(u"清除文件属性失败"))
+                    print(sys_encode("清除文件属性失败"))
                     return False
 
             # 使用 UTF-16 编码写入 desktop.ini
             if not DesktopIniHandler.write_info_tip(folder_path, comment):
-                print(sys_encode(u"写入 desktop.ini 失败"))
+                print(sys_encode("写入 desktop.ini 失败"))
                 return False
 
             # 设置 desktop.ini 文件为隐藏和系统属性
             if not DesktopIniHandler.set_file_hidden_system_attributes(desktop_ini_path):
-                print(sys_encode(u"设置文件属性失败"))
+                print(sys_encode("设置文件属性失败"))
                 return False
 
             # 设置文件夹为只读属性（使 desktop.ini 生效）
             if not DesktopIniHandler.set_folder_system_attributes(folder_path):
-                print(sys_encode(u"设置文件夹属性失败"))
+                print(sys_encode("设置文件夹属性失败"))
                 return False
 
-            print(sys_encode(u"备注添加成功"))
+            print(sys_encode("备注添加成功"))
             return True
         except Exception as e:
-            print(sys_encode(u"设置备注失败: ") + str(e))
+            print(sys_encode("设置备注失败: ") + str(e))
             return False
 
     def get_comment(self, folder_path):
@@ -74,26 +73,26 @@ class FolderCommentHandler(CommentHandler):
         desktop_ini_path = DesktopIniHandler.get_path(folder_path)
 
         if not DesktopIniHandler.exists(folder_path):
-            print(sys_encode(u"该文件夹没有备注"))
+            print(sys_encode("该文件夹没有备注"))
             return True
 
         # 清除文件属性以便修改
         if not DesktopIniHandler.clear_file_attributes(desktop_ini_path):
-            print(sys_encode(u"清除文件属性失败"))
+            print(sys_encode("清除文件属性失败"))
             return False
 
         # 移除 InfoTip 行（保留其他设置如 IconResource）
         if not DesktopIniHandler.remove_info_tip(folder_path):
-            print(sys_encode(u"移除备注失败"))
+            print(sys_encode("移除备注失败"))
             return False
 
         # 如果 desktop.ini 仍存在，恢复文件属性
         if DesktopIniHandler.exists(folder_path):
             if not DesktopIniHandler.set_file_hidden_system_attributes(desktop_ini_path):
-                print(sys_encode(u"恢复文件属性失败"))
+                print(sys_encode("恢复文件属性失败"))
                 return False
 
-        print(sys_encode(u"备注删除成功"))
+        print(sys_encode("备注删除成功"))
         return True
 
     def supports(self, path):

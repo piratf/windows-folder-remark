@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 Desktop.ini 交互层
@@ -29,7 +28,7 @@ DESKTOP_INI_ENCODING = 'utf-16'
 LINE_ENDING = '\r\n'
 
 
-class DesktopIniHandler(object):
+class DesktopIniHandler:
     """
     Desktop.ini 处理器
 
@@ -409,8 +408,8 @@ class DesktopIniHandler(object):
             bool: 设置是否成功
         """
         try:
-            import subprocess
             import ctypes
+            import subprocess
 
             # 使用 Windows API 检查文件夹是否已有只读属性
             FILE_ATTRIBUTE_READONLY = 0x01

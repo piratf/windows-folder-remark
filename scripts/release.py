@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """
 版本发布脚本
@@ -23,11 +22,11 @@
     python scripts/release.py patch --push
 """
 
+import argparse
 import os
 import re
-import sys
-import argparse
 import subprocess
+import sys
 
 # 项目根目录
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,7 +35,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def get_current_version():
     """获取当前版本号（从 pyproject.toml）"""
     toml_file = os.path.join(ROOT_DIR, 'pyproject.toml')
-    with open(toml_file, 'r', encoding='utf-8') as f:
+    with open(toml_file, encoding='utf-8') as f:
         content = f.read()
         match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
         if match:
@@ -47,7 +46,7 @@ def get_current_version():
 def update_version(new_version):
     """更新 pyproject.toml 中的版本号"""
     toml_file = os.path.join(ROOT_DIR, 'pyproject.toml')
-    with open(toml_file, 'r', encoding='utf-8') as f:
+    with open(toml_file, encoding='utf-8') as f:
         content = f.read()
     content = re.sub(
         r'(version\s*=\s*["\'])([^"\']+)(["\'])',
@@ -149,7 +148,7 @@ def main():
         print("\n[DRY RUN] 将执行以下操作:")
         print(f"  1. 更新版本号: {current} -> {new_version}")
         if args.commit:
-            print(f"  2. 提交版本变更")
+            print("  2. 提交版本变更")
         if args.push:
             print(f"  3. 创建并推送 tag v{new_version}")
         return
@@ -167,9 +166,9 @@ def main():
         tag_name = create_tag(new_version)
         push_tag(tag_name)
         print(f"\n✓ Release v{new_version} 已准备就绪!")
-        print(f"  GitHub Actions 将自动构建并发布")
+        print("  GitHub Actions 将自动构建并发布")
     else:
-        print(f"\n提示: 使用 --push 参数创建并推送 tag 以触发 release")
+        print("\n提示: 使用 --push 参数创建并推送 tag 以触发 release")
 
 
 if __name__ == '__main__':

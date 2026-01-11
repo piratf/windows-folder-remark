@@ -12,6 +12,9 @@ import subprocess
 # 获取系统编码，确保备注不会出现乱码
 defEncoding = sys.getfilesystemencoding()
 
+# Windows InfoTip 最大长度限制
+MAX_COMMENT_LENGTH = 260
+
 
 # 将代码中的字符转换为系统编码
 def sys_encode(content):
@@ -99,6 +102,11 @@ def add_comment(dir_path=None, comment=None):
     while not comment:
         re_enter_message(u"备注不要为空哦")
         comment = input(input_comment_msg)
+
+    if len(comment) > MAX_COMMENT_LENGTH:
+        print(sys_encode(u"备注长度超过限制，最大长度为 ") + str(MAX_COMMENT_LENGTH) + sys_encode(u" 个字符"))
+        print(sys_encode(u"当前备注将被截断为前 ") + str(MAX_COMMENT_LENGTH) + sys_encode(u" 个字符"))
+        comment = comment[:MAX_COMMENT_LENGTH]
 
     if not update_folder_comment(dir_path, comment):
         print(sys_encode(u"备注添加失败"))

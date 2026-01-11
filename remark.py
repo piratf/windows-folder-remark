@@ -46,16 +46,25 @@ def update_folder_comment(dir_path, comment):
     content = sys_encode(u'[.ShellClassInfo]' + os.linesep + 'InfoTip=')
     # 开始设置备注信息
     setting_file_path = get_setting_file_path(dir_path)
-    with open(setting_file_path, 'w', encoding=defEncoding) as f:
-        f.write(content)
-        f.write(sys_encode(comment + os.linesep))
+    try:
+        with open(setting_file_path, 'w', encoding=defEncoding) as f:
+            f.write(content)
+            f.write(sys_encode(comment + os.linesep))
+    except IOError as e:
+        print(sys_encode(u"文件写入失败: ") + str(e))
+        return False
 
     # 添加保护
-    run_command('attrib \"' + setting_file_path + '\" +s +h')
-    run_command('attrib \"' + dir_path + '\" +s ')
+    if not run_command('attrib \"' + setting_file_path + '\" +s +h'):
+        print(sys_encode(u"设置文件属性失败"))
+        return False
+    if not run_command('attrib \"' + dir_path + '\" +s '):
+        print(sys_encode(u"设置文件夹属性失败"))
+        return False
 
     print(sys_encode(u"备注添加成功~"))
     print(sys_encode(u"备注可能过一会才会显示，不要着急"))
+    return True
 
 
 def add_comment(dir_path=None, comment=None):
@@ -67,14 +76,14 @@ def add_comment(dir_path=None, comment=None):
         dir_path_temp = input(input_path_msg)
         #print(dir_path_temp)
         #dir_path = "r"+dir_path
-        dir_path = dir_path_temp.replace('\"', '')
+        dir_path = dir_path_temp.replace('\"', '').strip()
 	
     # 判断路径是否存在文件夹
     while not os.path.isdir(dir_path):
         #print(dir_path)        
         re_enter_message(u"你输入的不是一个文件夹路径")
         dir_path_temp = input(input_path_msg)
-        dir_path = dir_path_temp.replace('\"', '')
+        dir_path = dir_path_temp.replace('\"', '').strip()
 
     setting_file_path = get_setting_file_path(dir_path)
 
@@ -91,7 +100,8 @@ def add_comment(dir_path=None, comment=None):
         re_enter_message(u"备注不要为空哦")
         comment = input(input_comment_msg)
 
-    update_folder_comment(dir_path, comment)
+    if not update_folder_comment(dir_path, comment):
+        print(sys_encode(u"备注添加失败"))
 
 
 if __name__ == '__main__':

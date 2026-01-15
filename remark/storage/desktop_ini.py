@@ -97,6 +97,11 @@ class DesktopIniHandler:
                 with codecs.open(desktop_ini_path, "r", encoding=encoding) as f:
                     content = f.read()
 
+                # 验证是否是合法的 desktop.ini 结构（必须包含 [.ShellClassInfo]）
+                # 如果不包含，说明编码不对，继续尝试下一个
+                if DesktopIniHandler.SECTION_SHELL_CLASS_INFO not in content:
+                    continue
+
                 # 解析 InfoTip
                 if DesktopIniHandler.PROPERTY_INFOTIP in content:
                     # 找到 InfoTip= 的位置
@@ -114,8 +119,8 @@ class DesktopIniHandler:
                     value = content[start:end].strip()
                     if value:
                         return value
-                # 成功读取但没找到 InfoTip，不需要再尝试其他编码
-                break
+                # 成功读取且结构正确，但没有 InfoTip
+                return None
             except (UnicodeDecodeError, UnicodeError):
                 # 当前编码失败，尝试下一个
                 continue

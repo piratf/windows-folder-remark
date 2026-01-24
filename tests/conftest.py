@@ -1,4 +1,5 @@
 """共享测试配置"""
+
 import sys
 from pathlib import Path
 
@@ -23,4 +24,3 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "windows" in item.keywords:
                 item.add_marker(skip_windows)
-

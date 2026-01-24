@@ -1,6 +1,8 @@
 """编码处理集成测试"""
-import os
+
 import codecs
+import os
+
 import pytest
 
 from remark.storage.desktop_ini import DesktopIniHandler
@@ -130,8 +132,6 @@ class TestEncodingHandling:
         DesktopIniHandler.write_info_tip(folder, "行尾测试")
 
         ini_path = os.path.join(folder, "desktop.ini")
-        with open(ini_path, "rb") as f:
-            content = f.read()
 
         # UTF-16 LE 编码中，\r\n 被存储为 \x00\r\x00\n（每个字符前有 null byte）
         # 或者可以简单地读取文本内容验证行尾符

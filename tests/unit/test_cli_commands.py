@@ -1,8 +1,8 @@
 """CLI 命令单元测试"""
-import os
-import sys
+
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 from remark.cli.commands import CLI, get_version
 
@@ -27,9 +27,7 @@ class TestCLI:
 
     def test_validate_folder_not_dir(self, capsys):
         """测试验证非文件夹路径"""
-        with patch("os.path.exists", return_value=True), patch(
-            "os.path.isdir", return_value=False
-        ):
+        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=False):
             cli = CLI()
             result = cli._validate_folder("/file.txt")
             assert result is False
@@ -38,16 +36,18 @@ class TestCLI:
 
     def test_validate_folder_success(self):
         """测试验证有效文件夹"""
-        with patch("os.path.exists", return_value=True), patch(
-            "os.path.isdir", return_value=True
-        ):
+        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=True):
             cli = CLI()
             result = cli._validate_folder("/valid/folder")
             assert result is True
 
     def test_add_comment_success(self):
         """测试添加备注成功"""
-        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=True), patch("remark.core.folder_handler.FolderCommentHandler.set_comment", return_value=True):
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch("remark.core.folder_handler.FolderCommentHandler.set_comment", return_value=True),
+        ):
             cli = CLI()
             result = cli.add_comment("/test/folder", "测试备注")
             assert result is True
@@ -61,7 +61,13 @@ class TestCLI:
 
     def test_delete_comment_success(self):
         """测试删除备注成功"""
-        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=True), patch("remark.core.folder_handler.FolderCommentHandler.delete_comment", return_value=True):
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch(
+                "remark.core.folder_handler.FolderCommentHandler.delete_comment", return_value=True
+            ),
+        ):
             cli = CLI()
             result = cli.delete_comment("/test/folder")
             assert result is True
@@ -75,7 +81,14 @@ class TestCLI:
 
     def test_view_comment_with_content(self, capsys):
         """测试查看有备注的文件夹"""
-        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=True), patch("remark.core.folder_handler.FolderCommentHandler.get_comment", return_value="测试备注"):
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch(
+                "remark.core.folder_handler.FolderCommentHandler.get_comment",
+                return_value="测试备注",
+            ),
+        ):
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
@@ -83,7 +96,11 @@ class TestCLI:
 
     def test_view_comment_without_content(self, capsys):
         """测试查看无备注的文件夹"""
-        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=True), patch("remark.core.folder_handler.FolderCommentHandler.get_comment", return_value=None):
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch("remark.core.folder_handler.FolderCommentHandler.get_comment", return_value=None),
+        ):
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
@@ -102,11 +119,12 @@ class TestCLI:
     )
     def test_interactive_mode_scenarios(self, inputs, expected_add_calls):
         """测试交互模式各种场景"""
-        with patch("builtins.input", side_effect=inputs), patch(
-            "os.path.exists", return_value=True
-        ), patch("os.path.isdir", return_value=True), patch.object(
-            CLI, "add_comment"
-        ) as mock_add:
+        with (
+            patch("builtins.input", side_effect=inputs),
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch.object(CLI, "add_comment") as mock_add,
+        ):
             cli = CLI()
             cli.interactive_mode()
             assert mock_add.call_count == expected_add_calls
@@ -130,36 +148,40 @@ class TestCLI:
 
     def test_run_with_delete(self):
         """测试运行 --delete 参数"""
-        with patch("remark.cli.commands.check_platform", return_value=True), patch.object(
-            CLI, "delete_comment"
-        ) as mock_delete:
+        with (
+            patch("remark.cli.commands.check_platform", return_value=True),
+            patch.object(CLI, "delete_comment") as mock_delete,
+        ):
             cli = CLI()
             cli.run(["--delete", "/test/folder"])
             mock_delete.assert_called_once_with("/test/folder")
 
     def test_run_with_view(self):
         """测试运行 --view 参数"""
-        with patch("remark.cli.commands.check_platform", return_value=True), patch.object(
-            CLI, "view_comment"
-        ) as mock_view:
+        with (
+            patch("remark.cli.commands.check_platform", return_value=True),
+            patch.object(CLI, "view_comment") as mock_view,
+        ):
             cli = CLI()
             cli.run(["--view", "/test/folder"])
             mock_view.assert_called_once_with("/test/folder")
 
     def test_run_with_path_and_comment(self):
         """测试运行带路径和备注参数"""
-        with patch("remark.cli.commands.check_platform", return_value=True), patch.object(
-            CLI, "add_comment"
-        ) as mock_add:
+        with (
+            patch("remark.cli.commands.check_platform", return_value=True),
+            patch.object(CLI, "add_comment") as mock_add,
+        ):
             cli = CLI()
             cli.run(["/folder", "备注"])
             mock_add.assert_called_once_with("/folder", "备注")
 
     def test_run_interactive_mode(self):
         """测试运行进入交互模式"""
-        with patch("remark.cli.commands.check_platform", return_value=True), patch.object(
-            CLI, "interactive_mode"
-        ) as mock_interactive:
+        with (
+            patch("remark.cli.commands.check_platform", return_value=True),
+            patch.object(CLI, "interactive_mode") as mock_interactive,
+        ):
             cli = CLI()
             cli.run([])
             mock_interactive.assert_called_once()

@@ -1,6 +1,9 @@
 """平台检测单元测试"""
-import pytest
+
 from unittest.mock import patch
+
+import pytest
+
 from remark.utils.platform import check_platform
 
 

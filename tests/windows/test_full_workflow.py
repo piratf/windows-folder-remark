@@ -1,8 +1,10 @@
 """完整工作流测试（仅 Windows）"""
+
+import ctypes
 import os
 import sys
+
 import pytest
-import ctypes
 
 from remark.core.folder_handler import FolderCommentHandler
 from remark.storage.desktop_ini import DesktopIniHandler
@@ -36,9 +38,9 @@ class TestFullWorkflow:
         assert comment == "完整工作流测试"
 
         # 4. 验证文件属性（Windows API）
-        GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
-        FILE_ATTRIBUTE_HIDDEN = 0x02
-        FILE_ATTRIBUTE_SYSTEM = 0x04
+        GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW  # noqa: N806
+        FILE_ATTRIBUTE_HIDDEN = 0x02  # noqa: N806
+        FILE_ATTRIBUTE_SYSTEM = 0x04  # noqa: N806
 
         attrs = GetFileAttributesW(ini_path)
         assert attrs != 0xFFFFFFFF
@@ -91,7 +93,7 @@ class TestFullWorkflow:
 
         # 验证文件只有一个 InfoTip
         ini_path = os.path.join(folder, "desktop.ini")
-        with open(ini_path, "r", encoding="utf-16") as f:
+        with open(ini_path, encoding="utf-16") as f:
             content = f.read()
         # 计算出现次数
         count = content.count("InfoTip=")
@@ -186,7 +188,7 @@ class TestFullWorkflow:
         special_comments = [
             "换行\n测试",  # 包含换行符（会被处理）
             "制表符\t测试",
-            "引号 \"测试\"",
+            '引号 "测试"',
             "单引号 '测试'",
             "反斜杠 \\测试",
             "斜杠 /测试",
@@ -276,9 +278,9 @@ class TestDesktopIniIntegration:
         assert DesktopIniHandler.set_file_hidden_system_attributes(ini_path) is True
 
         # 验证属性
-        GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
-        FILE_ATTRIBUTE_HIDDEN = 0x02
-        FILE_ATTRIBUTE_SYSTEM = 0x04
+        GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW  # noqa: N806
+        FILE_ATTRIBUTE_HIDDEN = 0x02  # noqa: N806
+        FILE_ATTRIBUTE_SYSTEM = 0x04  # noqa: N806
 
         attrs = GetFileAttributesW(ini_path)
         assert attrs & FILE_ATTRIBUTE_HIDDEN
@@ -297,8 +299,8 @@ class TestDesktopIniIntegration:
         assert result is True
 
         # 验证只读属性
-        FILE_ATTRIBUTE_READONLY = 0x01
-        GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW
+        FILE_ATTRIBUTE_READONLY = 0x01  # noqa: N806
+        GetFileAttributesW = ctypes.windll.kernel32.GetFileAttributesW  # noqa: N806
 
         attrs = GetFileAttributesW(folder)
         assert attrs != 0xFFFFFFFF

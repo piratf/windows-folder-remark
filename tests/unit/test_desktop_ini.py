@@ -1,13 +1,15 @@
 """desktop.ini 读写单元测试"""
+
 import os
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
 
 from remark.storage.desktop_ini import (
-    DesktopIniHandler,
-    EncodingConversionCanceled,
     DESKTOP_INI_ENCODING,
     LINE_ENDING,
+    DesktopIniHandler,
+    EncodingConversionCanceled,
 )
 
 
@@ -51,9 +53,7 @@ class TestDesktopIniHandler:
     )
     def test_read_info_tip_with_content(self, content, expected):
         """测试读取各种内容格式"""
-        with patch("os.path.exists", return_value=True), patch(
-            "codecs.open"
-        ) as mock_open_func:
+        with patch("os.path.exists", return_value=True), patch("codecs.open") as mock_open_func:
             mock_file = MagicMock()
             mock_file.read.return_value = content
             mock_open_func.return_value.__enter__.return_value = mock_file
@@ -68,9 +68,7 @@ class TestDesktopIniHandler:
 
     def test_write_info_tip_new_file(self):
         """测试写入新文件"""
-        with patch("os.path.exists", return_value=False), patch(
-            "codecs.open"
-        ) as mock_open_func:
+        with patch("os.path.exists", return_value=False), patch("codecs.open") as mock_open_func:
             mock_file = MagicMock()
             mock_open_func.return_value.__enter__.return_value = mock_file
 
@@ -81,9 +79,11 @@ class TestDesktopIniHandler:
     def test_write_info_tip_update_existing(self):
         """测试更新已有文件"""
         existing_content = "[.ShellClassInfo]\r\nInfoTip=旧备注\r\n"
-        with patch("os.path.exists", return_value=True), patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.ensure_utf16_encoding"
-        ), patch("codecs.open") as mock_open_func:
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("remark.storage.desktop_ini.DesktopIniHandler.ensure_utf16_encoding"),
+            patch("codecs.open") as mock_open_func,
+        ):
             mock_file_read = MagicMock()
             mock_file_read.read.return_value = existing_content
             mock_file_write = MagicMock()

@@ -1,9 +1,10 @@
 """核心业务逻辑单元测试"""
-import os
-import pytest
-from unittest.mock import patch, MagicMock
 
-from remark.core.folder_handler import FolderCommentHandler, MAX_COMMENT_LENGTH
+from unittest.mock import patch
+
+import pytest
+
+from remark.core.folder_handler import MAX_COMMENT_LENGTH, FolderCommentHandler
 
 
 @pytest.mark.unit
@@ -37,9 +38,12 @@ class TestFolderCommentHandler:
 
     def test_set_comment_too_long(self, capsys):
         """测试备注长度超过限制"""
-        with patch("os.path.isdir", return_value=True), patch.object(
-            FolderCommentHandler, "_set_comment_desktop_ini", return_value=True
-        ) as mock_set:
+        with (
+            patch("os.path.isdir", return_value=True),
+            patch.object(
+                FolderCommentHandler, "_set_comment_desktop_ini", return_value=True
+            ) as mock_set,
+        ):
             handler = FolderCommentHandler()
             long_comment = "A" * 300  # 超过 MAX_COMMENT_LENGTH
 
@@ -53,8 +57,9 @@ class TestFolderCommentHandler:
 
     def test_set_comment_success(self):
         """测试成功设置备注"""
-        with patch("os.path.isdir", return_value=True), patch.object(
-            FolderCommentHandler, "_set_comment_desktop_ini", return_value=True
+        with (
+            patch("os.path.isdir", return_value=True),
+            patch.object(FolderCommentHandler, "_set_comment_desktop_ini", return_value=True),
         ):
             handler = FolderCommentHandler()
             result = handler.set_comment("/folder", "测试备注")
@@ -80,9 +85,7 @@ class TestFolderCommentHandler:
 
     def test_delete_comment_no_ini(self, capsys):
         """测试删除不存在的备注"""
-        with patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=False
-        ):
+        with patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=False):
             handler = FolderCommentHandler()
             result = handler.delete_comment("/folder")
             assert result is True
@@ -91,14 +94,16 @@ class TestFolderCommentHandler:
 
     def test_delete_comment_with_ini(self):
         """测试删除存在的备注"""
-        with patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True
-        ), patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.clear_file_attributes",
-            return_value=True,
-        ), patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.remove_info_tip",
-            return_value=True,
+        with (
+            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.clear_file_attributes",
+                return_value=True,
+            ),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.remove_info_tip",
+                return_value=True,
+            ),
         ):
             handler = FolderCommentHandler()
             result = handler.delete_comment("/folder")
@@ -106,11 +111,12 @@ class TestFolderCommentHandler:
 
     def test_delete_comment_clear_failure(self):
         """测试删除时清除属性失败"""
-        with patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True
-        ), patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.clear_file_attributes",
-            return_value=False,
+        with (
+            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.clear_file_attributes",
+                return_value=False,
+            ),
         ):
             handler = FolderCommentHandler()
             result = handler.delete_comment("/folder")
@@ -118,18 +124,23 @@ class TestFolderCommentHandler:
 
     def test_set_comment_desktop_ini(self):
         """测试 desktop.ini 设置备注的内部方法"""
-        with patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.write_info_tip",
-            return_value=True,
-        ), patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.clear_file_attributes",
-            return_value=True,
-        ), patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.set_file_hidden_system_attributes",
-            return_value=True,
-        ), patch(
-            "remark.storage.desktop_ini.DesktopIniHandler.set_folder_system_attributes",
-            return_value=True,
+        with (
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.write_info_tip",
+                return_value=True,
+            ),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.clear_file_attributes",
+                return_value=True,
+            ),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.set_file_hidden_system_attributes",
+                return_value=True,
+            ),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.set_folder_system_attributes",
+                return_value=True,
+            ),
         ):
             handler = FolderCommentHandler()
             result = handler._set_comment_desktop_ini("/folder", "备注")

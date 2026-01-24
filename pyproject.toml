@@ -40,6 +40,7 @@ dev = [
 # 命令行入口
 [project.scripts]
 remark = "remark.cli.commands:main"
+remark-build = "scripts.build:main"
 
 # 构建系统配置
 [build-system]

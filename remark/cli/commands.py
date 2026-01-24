@@ -51,6 +51,34 @@ class CLI:
     def view_comment(self, path):
         """查看备注"""
         if self._validate_folder(path):
+            # 检查 desktop.ini 编码
+            from remark.storage.desktop_ini import DesktopIniHandler
+
+            if DesktopIniHandler.exists(path):
+                desktop_ini_path = DesktopIniHandler.get_path(path)
+                detected_encoding, is_utf16 = DesktopIniHandler.detect_encoding(desktop_ini_path)
+                if not is_utf16:
+                    print(
+                        f"警告: desktop.ini 文件编码为 {detected_encoding or '未知'}，不是标准的 UTF-16。"
+                    )
+                    print("这可能导致中文等特殊字符显示异常。")
+
+                    # 询问是否修复
+                    while True:
+                        response = input("是否修复编码为 UTF-16？[Y/n]: ").strip().lower()
+                        if response in ("", "y", "yes"):
+                            if DesktopIniHandler.fix_encoding(desktop_ini_path, detected_encoding):
+                                print("✓ 已修复为 UTF-16 编码")
+                            else:
+                                print("✗ 修复失败")
+                            break
+                        elif response in ("n", "no"):
+                            print("跳过编码修复")
+                            break
+                        else:
+                            print("请输入 Y 或 n")
+                    print()  # 空行分隔
+
             comment = self.handler.get_comment(path)
             if comment:
                 print("当前备注:", comment)

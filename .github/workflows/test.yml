@@ -1,0 +1,92 @@
+name: Test and Build
+
+on:
+  push:
+    branches: [master, feat-*]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        run: |
+          pytest -v --cov=remark --cov-report=html --cov-report=term-missing
+
+      - name: Archive coverage reports
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+          retention-days: 7
+
+      # 仅在 Python 3.11 上构建，避免重复
+      - name: Install PyInstaller
+        if: matrix.python-version == '3.11'
+        run: |
+          pip install pyinstaller
+
+      - name: Build executable
+        if: matrix.python-version == '3.11'
+        run: |
+          pyinstaller remark.spec --clean
+
+      - name: Get version
+        id: version
+        if: matrix.python-version == '3.11'
+        run: |
+          if ("$env:GITHUB_REF" -match "^refs/tags/v(.*)") {
+            $version = $matches[1]
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+          } else {
+            $version = "dev-$($env:GITHUB_SHA.Substring(0,7))"
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+          }
+          echo "Building version: $version"
+        shell: pwsh
+
+      - name: Rename executable with version
+        if: matrix.python-version == '3.11'
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          Copy-Item "dist\windows-folder-remark.exe" "dist\windows-folder-remark-$version.exe"
+        shell: pwsh
+
+      - name: Upload artifact
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-folder-remark-${{ steps.version.outputs.version }}
+          path: dist/windows-folder-remark-${{ steps.version.outputs.version }}.exe
+          retention-days: 30
+
+      - name: Upload build info
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info-${{ steps.version.outputs.version }}
+          path: |
+            dist/windows-folder-remark.exe
+            build/*/warn*.txt
+          retention-days: 7
+          if-no-files-found: ignore

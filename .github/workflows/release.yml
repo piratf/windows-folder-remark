@@ -12,8 +12,8 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        architecture: [x64, x86]
-        python-version: ['3.9']
+        architecture: [x64]
+        python-version: ['3.11']
 
     steps:
       - name: Checkout code
@@ -27,32 +27,37 @@ jobs:
       - name: Install build dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build pyinstaller
+          pip install -e ".[dev]"
 
-      - name: Install package (editable)
+      - name: Run tests
         run: |
-          pip install -e .
+          pytest -v --cov=remark --cov-report=term-missing
 
-      - name: Verify installation
+      - name: Install PyInstaller
         run: |
-          remark --help
+          pip install pyinstaller
 
-      - name: Build ${{ matrix.architecture }} executable
+      - name: Build executable
         run: |
-          $arch = "${{ matrix.architecture }}"
-          if ($arch -eq "x86") {
-            pyinstaller --onefile --console --name "windows-folder-remark-x86" remark.py
+          pyinstaller remark.spec --clean
+
+      - name: Rename executable with version
+        run: |
+          if ($env:GITHUB_REF -match "refs/tags/v(.*)") {
+            $version = $matches[1]
           } else {
-            pyinstaller --onefile --console --name "windows-folder-remark-x64" remark.py
+            $version = "dev"
           }
+          Copy-Item "dist\windows-folder-remark.exe" "dist\windows-folder-remark-$version.exe"
 
       - name: Generate checksum
         run: |
-          if ("${{ matrix.architecture }}" -eq "x86") {
-            $file = "dist/windows-folder-remark-x86.exe"
+          if ($env:GITHUB_REF -match "refs/tags/v(.*)") {
+            $version = $matches[1]
           } else {
-            $file = "dist/windows-folder-remark-x64.exe"
+            $version = "dev"
           }
+          $file = "dist\windows-folder-remark-$version.exe"
           certutil -hashfile $file SHA256 > "$file.sha256"
 
       - name: Upload artifact
@@ -91,22 +96,42 @@ jobs:
         id: release_notes
         run: |
           $notes = @"
-          ## 下载说明
-          - `windows-folder-remark-x64.exe`: 64位 Windows 系统（推荐）
-          - `windows-folder-remark-x86.exe`: 32位 Windows 系统
+          ## windows-folder-remark v${{ steps.version.outputs.version }}
+
+          ### 下载
+          - `windows-folder-remark-${{ steps.version.outputs.version }}.exe`: 单文件可执行程序，无需安装 Python
           - `.sha256` 文件用于验证下载文件的完整性
 
-          ## 验证方法
+          ### 使用方法
           ```powershell
-          certutil -hashfile 文件名.exe SHA256
+          # 添加备注
+          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe "C:\MyFolder" "我的备注"
+
+          # 查看备注
+          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe --view "C:\MyFolder"
+
+          # 删除备注
+          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe --delete "C:\MyFolder"
+
+          # 交互模式
+          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe
+          ```
+
+          ### 验证下载
+          ```powershell
+          certutil -hashfile windows-folder-remark-${{ steps.version.outputs.version }}.exe SHA256
           ```
           然后对比生成的哈希值与 .sha256 文件中的值是否一致。
+
+          ### 系统要求
+          - Windows 7 或更高版本
           "@
           $notes | Out-File -Encoding UTF8 -FilePath release_notes.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          name: windows-folder-remark v${{ steps.version.outputs.version }}
           body_path: release_notes.txt
           draft: false
           prerelease: false

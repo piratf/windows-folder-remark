@@ -4,6 +4,8 @@
 default_language_version:
   python: python3.9
 
+default_stages: [pre-commit]
+
 repos:
   # Ruff - 代码检查和格式化
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -34,7 +36,24 @@ repos:
       - id: mypy
         additional_dependencies:
           - types-setuptools
-        args: [--config-file=mypy.ini]
+        exclude: ^remark\.py$
+
+  # Local hooks - pre-push 阶段（测试 + 构建）
+  - repo: local
+    hooks:
+      - id: run-tests
+        name: Run tests
+        entry: pytest -v -m "not slow" --cov=remark --cov-report=term-missing
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+
+      - id: build-exe
+        name: Build exe (Windows only)
+        entry: bash -c 'if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then pyinstaller remark.spec --clean; else echo "Skip build on non-Windows"; fi'
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
 
 # 全局排除
 exclude: |

@@ -1,31 +1,106 @@
-# Windows 下给文件夹添加注释
+# Windows 文件夹备注工具
 
+一个通过修改 `Desktop.ini` 文件为 Windows 文件夹添加备注/注释的命令行工具。
 
-## 如何使用
+## 特性
 
-本工具提供 exe 版本和 python 源码版本，exe 版本为 dist/remark/remark.exe，可以直接双击运行，源码版本支持的版本为 Python 3.x
+- 支持中文等多语言字符（UTF-16 编码）
+- 命令行模式和交互模式
+- 自动编码检测和修复
+- 单文件 exe 打包，无需 Python 环境
 
-以下通过展示 exe 版本的使用方法，python 源码版本用法相同。
+## 安装
 
-有两种典型的使用方式：
+### 方式一：使用 exe 文件（推荐）
+
+下载 [releases](https://github.com/piratf/windows-folder-remark/releases) 中的 `windows-folder-remark.exe`，直接使用。
+
+### 方式二：从源码安装
+
 ```bash
-# 1. 直接运行程序的方式
-# 运行后根据提示操作即可
-# 这种方式适合手动给一些文件夹进行备注
-./remark.exe
+# 克隆仓库
+git clone https://github.com/piratf/windows-folder-remark.git
+cd windows-folder-remark
 
+# 安装依赖（无外部依赖）
+pip install -e .
 
-# 2. 带参数运行程序的方式
-# 运行后会立即为输入的文件夹加上备注
-# 适合被其他程序或脚本批量调用使用
-./remark.exe [路径] [备注内容]
+# 运行
+python -m remark.cli --help
+```
+
+## 使用方法
+
+### 命令行模式
+
+```bash
+# 添加备注
+windows-folder-remark.exe "C:\MyFolder" "这是我的文件夹"
+
+# 查看备注
+windows-folder-remark.exe --view "C:\MyFolder"
+
+# 删除备注
+windows-folder-remark.exe --delete "C:\MyFolder"
+```
+
+### 交互模式
+
+```bash
+# 运行后根据提示操作
+windows-folder-remark.exe
+```
+
+## 编码检测
+
+当使用 `--view` 查看备注时，如果检测到 `desktop.ini` 文件不是标准的 UTF-16 编码，工具会提醒你：
 
 ```
----
-# 注意
-该脚本会修改文件夹下隐藏的 Desktop.ini 文件，并为文件夹修饰系统属性
+警告: desktop.ini 文件编码为 utf-8，不是标准的 UTF-16。
+这可能导致中文等特殊字符显示异常。
+是否修复编码为 UTF-16？[Y/n]:
+```
 
-# 特别说明
-感谢原版程序解决了目录加备注、分类的问题！
-原版程序有一个Bug：当目录路径里含有空格时，程序无法识别为一个目录，从而无法加备注。
-Fork的主要目的就是为了解决这个Bug，希望对有些朋友有点帮助。
+选择 `Y` 可自动修复编码。
+
+## 开发
+
+```bash
+# 安装开发依赖
+pip install -e ".[dev]"
+
+# 运行测试
+pytest
+
+# 代码检查
+ruff check .
+ruff format .
+
+# 类型检查
+mypy remark/
+
+# 本地打包 exe
+python -m scripts.build
+```
+
+## 原理说明
+
+该工具通过以下步骤实现文件夹备注：
+
+1. 在文件夹中创建/修改 `Desktop.ini` 文件
+2. 写入 `[.ShellClassInfo]` 段落和 `InfoTip` 属性
+3. 使用 UTF-16 编码保存文件
+4. 将 `Desktop.ini` 设置为隐藏和系统属性
+5. 将文件夹设置为只读属性（使 Windows 读取 `Desktop.ini`）
+
+参考：[Microsoft 官方文档](https://learn.microsoft.com/en-us/windows/win32/shell/how-to-customize-folders-with-desktop-ini)
+
+## 注意事项
+
+- 修改后可能需要几分钟才能在资源管理器中显示
+- 某些文件管理器可能不支持显示文件夹备注
+- 工具会修改文件夹的系统属性
+
+## 许可证
+
+MIT License

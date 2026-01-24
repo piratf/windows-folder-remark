@@ -84,6 +84,7 @@ class TestCLI:
         with (
             patch("os.path.exists", return_value=True),
             patch("os.path.isdir", return_value=True),
+            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=False),
             patch(
                 "remark.core.folder_handler.FolderCommentHandler.get_comment",
                 return_value="测试备注",
@@ -99,12 +100,94 @@ class TestCLI:
         with (
             patch("os.path.exists", return_value=True),
             patch("os.path.isdir", return_value=True),
+            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=False),
             patch("remark.core.folder_handler.FolderCommentHandler.get_comment", return_value=None),
         ):
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
             assert "没有备注" in captured.out
+
+    def test_view_comment_with_encoding_issue_and_fix(self, capsys):
+        """测试查看有编码问题的文件夹并选择修复"""
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.get_path",
+                return_value="/test/folder/desktop.ini",
+            ),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.detect_encoding",
+                return_value=("utf-8", False),
+            ),
+            patch("builtins.input", return_value="y"),
+            patch("remark.storage.desktop_ini.DesktopIniHandler.fix_encoding", return_value=True),
+            patch(
+                "remark.core.folder_handler.FolderCommentHandler.get_comment",
+                return_value="测试备注",
+            ),
+        ):
+            cli = CLI()
+            cli.view_comment("/test/folder")
+            captured = capsys.readouterr()
+            assert "编码为 utf-8" in captured.out
+            assert "已修复为 UTF-16 编码" in captured.out
+            assert "测试备注" in captured.out
+
+    def test_view_comment_with_encoding_issue_and_skip(self, capsys):
+        """测试查看有编码问题的文件夹但选择跳过修复"""
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.get_path",
+                return_value="/test/folder/desktop.ini",
+            ),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.detect_encoding",
+                return_value=("gbk", False),
+            ),
+            patch("builtins.input", return_value="n"),
+            patch(
+                "remark.core.folder_handler.FolderCommentHandler.get_comment",
+                return_value="测试备注",
+            ),
+        ):
+            cli = CLI()
+            cli.view_comment("/test/folder")
+            captured = capsys.readouterr()
+            assert "编码为 gbk" in captured.out
+            assert "跳过编码修复" in captured.out
+            assert "测试备注" in captured.out
+
+    def test_view_comment_with_correct_encoding(self, capsys):
+        """测试查看编码正确的文件夹"""
+        with (
+            patch("os.path.exists", return_value=True),
+            patch("os.path.isdir", return_value=True),
+            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.get_path",
+                return_value="/test/folder/desktop.ini",
+            ),
+            patch(
+                "remark.storage.desktop_ini.DesktopIniHandler.detect_encoding",
+                return_value=("utf-16-le", True),
+            ),
+            patch(
+                "remark.core.folder_handler.FolderCommentHandler.get_comment",
+                return_value="测试备注",
+            ),
+        ):
+            cli = CLI()
+            cli.view_comment("/test/folder")
+            captured = capsys.readouterr()
+            # 不应该显示编码警告
+            assert "编码" not in captured.out
+            assert "测试备注" in captured.out
 
     @pytest.mark.parametrize(
         "inputs,expected_add_calls",

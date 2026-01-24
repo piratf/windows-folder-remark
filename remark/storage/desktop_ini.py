@@ -260,6 +260,31 @@ class DesktopIniHandler:
         return None, False
 
     @staticmethod
+    def fix_encoding(file_path, current_encoding):
+        """
+        修复文件编码为 UTF-16
+
+        Args:
+            file_path: 文件路径
+            current_encoding: 当前编码名称
+
+        Returns:
+            bool: 修复是否成功
+        """
+        try:
+            # 读取当前内容
+            with codecs.open(file_path, "r", encoding=current_encoding or "utf-8") as f:
+                content = f.read()
+
+            # 写入 UTF-16 编码
+            with codecs.open(file_path, "w", encoding=DESKTOP_INI_ENCODING) as f:
+                f.write(content)
+
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
     def ensure_utf16_encoding(file_path):
         """
         确保文件是 UTF-16 编码，如果不是则提示用户确认转换

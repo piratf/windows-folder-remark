@@ -92,6 +92,54 @@ def commit_version_changes():
     print(f"已提交版本变更: {current_version}")
 
 
+def check_branch():
+    """检查当前分支是否为主分支"""
+    result = subprocess.run(
+        ["git", "branch", "--show-current"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    current_branch = result.stdout.strip()
+    return current_branch
+
+
+def check_working_directory_clean():
+    """检查工作目录是否有未提交的改动"""
+    result = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return result.stdout.strip() == ""
+
+
+def check_remote_sync():
+    """检查本地是否与远程同步"""
+    result = subprocess.run(
+        ["git", "status", "-sb"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    status_line = result.stdout.split("\n")[0]
+    # 检查是否包含 "behind" 字样
+    return "behind" not in status_line.lower()
+
+
+def validate_version_increment(current: str, new: str) -> bool:
+    """验证新版本号是否大于当前版本号"""
+    curr_major, curr_minor, curr_patch = map(int, current.split("."))
+    new_major, new_minor, new_patch = map(int, new.split("."))
+
+    return (
+        new_major > curr_major
+        or (new_major == curr_major and new_minor > curr_minor)
+        or (new_major == curr_major and new_minor == curr_minor and new_patch > curr_patch)
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description="版本发布管理工具")
     parser.add_argument(
@@ -104,8 +152,17 @@ def main():
     parser.add_argument(
         "--dry-run", "-n", action="store_true", help="只显示将要执行的操作，不实际执行"
     )
+    parser.add_argument(
+        "--skip-branch-check",
+        action="store_true",
+        help="跳过分支检查（不推荐）",
+    )
 
     args = parser.parse_args()
+
+    # --push 自动包含 --commit（确保 tag 指向包含版本变更的提交）
+    if args.push and not args.commit:
+        args.commit = True
 
     current = get_current_version()
     print(f"当前版本: {current}")
@@ -124,6 +181,38 @@ def main():
         new_version = args.version
 
     print(f"新版本: {new_version}")
+
+    # 版本号递增验证
+    if not validate_version_increment(current, new_version):
+        print(f"错误: 新版本 {new_version} 不大于当前版本 {current}")
+        print("版本号必须递增")
+        sys.exit(1)
+
+    # 分支检查
+    if not args.skip_branch_check:
+        current_branch = check_branch()
+        if current_branch not in ("main", "master"):
+            print(f"警告: 当前分支 '{current_branch}' 不是主分支")
+            print("建议在 main 或 master 分支进行发布")
+            response = input("是否继续? (yes/no): ")
+            if response.lower() not in ("yes", "y"):
+                print("已取消")
+                sys.exit(1)
+
+    # 工作目录状态检查
+    if not check_working_directory_clean():
+        print("错误: 工作目录有未提交的改动")
+        print("请先提交或暂存所有改动后再进行发布")
+        sys.exit(1)
+
+    # 远程同步检查
+    if not check_remote_sync():
+        print("警告: 本地分支落后于远程分支")
+        print("建议先执行 'git pull' 同步最新代码")
+        response = input("是否继续? (yes/no): ")
+        if response.lower() not in ("yes", "y"):
+            print("已取消")
+            sys.exit(1)
 
     if args.dry_run:
         print("\n[DRY RUN] 将执行以下操作:")

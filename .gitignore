@@ -4,7 +4,8 @@
 # Build
 build/
 dist/
-*.spec
+# PyInstaller spec files (keep remark.spec)
+# *.spec
 
 # Python
 __pycache__/

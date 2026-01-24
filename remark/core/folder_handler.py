@@ -57,7 +57,7 @@ class FolderCommentHandler(CommentHandler):
                 print("设置文件夹属性失败")
                 return False
 
-            print("备注添加成功")
+            print("备注添加成功，可能需要过几分钟才会显示")
             return True
         except Exception as e:
             print("设置备注失败:", str(e))

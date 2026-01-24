@@ -1,0 +1,93 @@
+# -*- coding: utf-8 -*-
+name: Pull Request Check
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      # 代码检查
+      - name: Check code formatting
+        run: ruff format --check .
+
+      - name: Run linter
+        run: ruff check .
+
+      # 类型检查
+      - name: Type check
+        run: mypy remark/
+        continue-on-error: true
+
+      # 测试
+      - name: Run tests
+        run: pytest -v --cov=remark --cov-report=term-missing
+
+  build-verify:
+    runs-on: windows-latest
+    needs: validate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      # 验证打包是否成功
+      - name: Build executable
+        run: pyinstaller remark.spec --clean
+
+      # 验证 exe 是否能正常运行
+      - name: Test executable
+        run: |
+          $exePath = "dist\windows-folder-remark.exe"
+          if (-not (Test-Path $exePath)) {
+            Write-Error "Executable not found!"
+            exit 1
+          }
+          # 测试帮助信息
+          & $exePath --help
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Executable failed to run!"
+            exit 1
+          }
+          Write-Output "Executable build and basic test passed!"
+        shell: pwsh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-folder-remark-pr-${{ github.event.pull_request.number }}
+          path: dist/windows-folder-remark.exe
+          retention-days: 7

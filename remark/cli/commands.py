@@ -75,7 +75,7 @@ class CLI:
                     continue
 
                 if not os.path.isdir(path):
-                    print("请输入文件夹路径，不是文件路径")
+                    print('这是一个"文件"，当前仅支持为"文件夹"添加备注')
                     continue
 
                 comment = input(input_comment_msg)

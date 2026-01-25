@@ -3,7 +3,7 @@
 """
 
 import os
-from pathlib import PureWindowsPath
+from pathlib import Path, PureWindowsPath
 
 import pytest
 
@@ -35,7 +35,7 @@ class TestFindCandidates:
 
         assert len(result) == 1
         path, remaining, type_ = result[0]
-        assert path == PureWindowsPath("D:\\My Documents").as_posix()
+        assert path == Path("D:\\My Documents")
         assert remaining == []
         assert type_ == "folder"
 
@@ -61,7 +61,7 @@ class TestFindCandidates:
 
         assert len(result) == 1
         path, remaining, type_ = result[0]
-        assert path == PureWindowsPath("D:\\Here Is My Folder").as_posix()
+        assert path == Path("D:\\Here Is My Folder")
         assert remaining == ["备注", "内容"]
         assert type_ == "folder"
 
@@ -85,7 +85,7 @@ class TestFindCandidates:
 
         assert len(result) == 1
         path, remaining, type_ = result[0]
-        assert path == PureWindowsPath("D:\\ValidFolder").as_posix()
+        assert path == Path("D:\\ValidFolder")
         assert remaining == ["备注"]
         assert type_ == "folder"
 
@@ -141,12 +141,12 @@ class TestFindCandidates:
         path2, remaining2, type2 = result[1]
 
         # 验证第一个候选是 "My Files"（包含完整路径）
-        assert path1 == PureWindowsPath("My Files").as_posix()
+        assert path1 == Path("My Files")
         assert remaining1 == ["App"]
         assert type1 == "folder"
 
         # 验证第二个候选是 "My"
-        assert path2 == PureWindowsPath("My").as_posix()
+        assert path2 == Path("My")
         assert remaining2 == ["Files", "App"]
         assert type2 == "folder"
 
@@ -189,19 +189,19 @@ class TestFindCandidates:
 
         # 候选 1: 最大匹配
         path1, remaining1, type1 = result[0]
-        assert path1 == PureWindowsPath("My Folder/App Folder/New Folder").as_posix()
+        assert path1 == Path("My Folder/App Folder/New Folder")
         assert remaining1 == ["测试内容"]
         assert type1 == "folder"
 
         # 候选 2: 中间匹配
         path2, remaining2, type2 = result[1]
-        assert path2 == PureWindowsPath("My Folder/App").as_posix()
+        assert path2 == Path("My Folder/App")
         assert remaining2 == ["Folder/New", "Folder", "测试内容"]
         assert type2 == "folder"
 
         # 候选 3: 基础匹配
         path3, remaining3, type3 = result[2]
-        assert path3 == "My"
+        assert path3 == Path("My")
         assert remaining3 == ["Folder/App", "Folder/New", "Folder", "测试内容"]
         assert type3 == "folder"
 
@@ -256,13 +256,13 @@ class TestFindCandidates:
 
         # 候选 1: 最大匹配
         path1, remaining1, type1 = result[0]
-        assert path1 == PureWindowsPath("My Folder/App/Deep/New").as_posix()
+        assert path1 == Path("My Folder/App/Deep/New")
         assert remaining1 == ["备注"]
         assert type1 == "folder"
 
         # 候选 2: 基础匹配
         path2, remaining2, type2 = result[1]
-        assert path2 == "My"
+        assert path2 == Path("My")
         assert remaining2 == ["Folder/App/Deep/New", "备注"]
         assert type2 == "folder"
 
@@ -301,13 +301,13 @@ class TestFindCandidates:
 
         # 候选 1: 最大匹配
         path1, remaining1, type1 = result[0]
-        assert path1 == PureWindowsPath("D:\\My Folder\\Sub").as_posix()
+        assert path1 == Path("D:\\My Folder\\Sub")
         assert remaining1 == ["备注"]
         assert type1 == "folder"
 
         # 候选 2: 基础匹配
         path2, remaining2, type2 = result[1]
-        assert path2 == PureWindowsPath("D:\\My").as_posix()
+        assert path2 == Path("D:\\My")
         assert remaining2 == ["Folder/Sub", "备注"]
         assert type2 == "folder"
 
@@ -321,7 +321,7 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("")
-        assert working == "."
+        assert working == PureWindowsPath()
         assert cursor.arg_index == 0
         assert cursor.char_index == 0
 
@@ -330,7 +330,7 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("C:\\")
-        assert working == PureWindowsPath("C:\\").as_posix()
+        assert working == PureWindowsPath("C:\\")
         assert cursor.arg_index == 0
         assert cursor.char_index == 2
 
@@ -339,7 +339,7 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("C:\\MyFolder\\")
-        assert working == PureWindowsPath("C:\\").as_posix()
+        assert working == PureWindowsPath("C:\\")
         assert cursor.arg_index == 0
         assert cursor.char_index == 2
 
@@ -348,7 +348,7 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("C:\\MyFolder")
-        assert working == PureWindowsPath("C:\\").as_posix()
+        assert working == PureWindowsPath("C:\\")
         assert cursor.arg_index == 0
         assert cursor.char_index == 2
 
@@ -357,7 +357,7 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("C:\\MyFolder\\Other")
-        assert working == PureWindowsPath("C:\\MyFolder").as_posix()
+        assert working == PureWindowsPath("C:\\MyFolder")
         assert cursor.arg_index == 0
         assert cursor.char_index == 11
 
@@ -366,7 +366,7 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("C:/My/Folder")
-        assert working == PureWindowsPath("C:\\My").as_posix()
+        assert working == PureWindowsPath("C:\\My")
         assert cursor.arg_index == 0
         assert cursor.char_index == 5
 
@@ -375,7 +375,7 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("MyFolder")
-        assert working == "."
+        assert working == PureWindowsPath()
         assert cursor.arg_index == 0
         assert cursor.char_index == -1
 
@@ -384,6 +384,6 @@ class TestGetCurrentWorkingPath:
         from remark.utils.path_resolver import get_current_working_path
 
         working, cursor = get_current_working_path("My\\Folder")
-        assert working == PureWindowsPath("My").as_posix()
+        assert working == PureWindowsPath("My")
         assert cursor.arg_index == 0
         assert cursor.char_index == 2

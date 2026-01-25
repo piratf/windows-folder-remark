@@ -21,6 +21,16 @@ app_version = "2.0.0"
 app_description = "Windows 文件夹备注工具"
 
 # =============================================================================
+# Python Interpreter Options
+# =============================================================================
+
+# 强制启用 UTF-8 模式，支持中文等特殊字符输出
+# See: https://pyinstaller.org/en/stable/spec-files.html#specifying-python-interpreter-options
+options = [
+    ('X utf8', None, 'OPTION'),
+]
+
+# =============================================================================
 # Analysis
 # =============================================================================
 
@@ -59,6 +69,7 @@ exe = EXE(
     a.binaries,
     a.zipfiles,
     a.datas,
+    options,  # Python 解释器选项：启用 UTF-8 模式
     [],
     name=app_name,
     debug=False,

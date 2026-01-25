@@ -128,6 +128,23 @@ def check_remote_sync():
     return "behind" not in status_line.lower()
 
 
+def get_latest_tag() -> str | None:
+    """获取最新的 git tag 版本号"""
+    try:
+        result = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        tag = result.stdout.strip()
+        # 移除 v 前缀
+        return tag.lstrip("v") if tag else None
+    except subprocess.CalledProcessError:
+        # 没有任何 tag
+        return None
+
+
 def validate_version_increment(current: str, new: str) -> bool:
     """验证新版本号是否大于当前版本号"""
     curr_major, curr_minor, curr_patch = map(int, current.split("."))
@@ -138,6 +155,15 @@ def validate_version_increment(current: str, new: str) -> bool:
         or (new_major == curr_major and new_minor > curr_minor)
         or (new_major == curr_major and new_minor == curr_minor and new_patch > curr_patch)
     )
+
+
+def is_version_releasable(version: str) -> bool:
+    """检查版本是否可发布（大于已有最新 tag）"""
+    latest_tag = get_latest_tag()
+    if latest_tag is None:
+        return True  # 没有任何 tag，可以发布
+
+    return validate_version_increment(latest_tag, version)
 
 
 def main():
@@ -167,25 +193,34 @@ def main():
     current = get_current_version()
     print(f"当前版本: {current}")
 
+    # 确定目标版本
     if not args.version:
-        return
-
-    # 确定新版本号
-    if args.version in ("patch", "minor", "major"):
+        # 未指定版本，检查当前版本是否可发布
+        if is_version_releasable(current):
+            new_version = current
+            version_changed = False
+            print(f"发布当前版本: {new_version}")
+        else:
+            print(f"当前版本 {current} 已发布或不是最新版本")
+            print("请指定新版本号: patch, minor, major 或具体版本号")
+            return
+    elif args.version in ("patch", "minor", "major"):
         new_version = bump_version(current, args.version)
+        version_changed = True
     else:
         # 验证版本号格式
         if not re.match(r"^\d+\.\d+\.\d+$", args.version):
             print("错误: 版本号格式应为 x.y.z")
             sys.exit(1)
         new_version = args.version
+        version_changed = new_version != current
 
-    print(f"新版本: {new_version}")
+    print(f"目标版本: {new_version}")
 
-    # 版本号递增验证
-    if not validate_version_increment(current, new_version):
-        print(f"错误: 新版本 {new_version} 不大于当前版本 {current}")
-        print("版本号必须递增")
+    # 检查版本是否可发布（大于已有最新 tag）
+    if not is_version_releasable(new_version):
+        latest_tag = get_latest_tag()
+        print(f"错误: 版本 {new_version} 不大于已有最新 tag v{latest_tag}")
         sys.exit(1)
 
     # 分支检查
@@ -216,19 +251,27 @@ def main():
 
     if args.dry_run:
         print("\n[DRY RUN] 将执行以下操作:")
-        print(f"  1. 更新版本号: {current} -> {new_version}")
-        if args.commit:
+        if version_changed:
+            print(f"  1. 更新版本号: {current} -> {new_version}")
+        else:
+            print(f"  1. 使用当前版本: {new_version}")
+        if args.commit and version_changed:
             print("  2. 提交版本变更")
         if args.push:
-            print(f"  3. 创建并推送 tag v{new_version}")
+            print(
+                f"  {'2' if version_changed or not args.commit else '1'}. 创建并推送 tag v{new_version}"
+            )
         return
 
-    # 更新版本文件
-    update_version(new_version)
-    print(f"已更新版本号到: {new_version}")
+    # 只有版本变更时才更新 pyproject.toml
+    if version_changed:
+        update_version(new_version)
+        print(f"已更新版本号到: {new_version}")
+    else:
+        print(f"使用当前版本: {new_version}")
 
-    # 提交变更
-    if args.commit:
+    # 提交变更（仅当版本有变更时）
+    if args.commit and version_changed:
         commit_version_changes()
 
     # 创建并推送 tag

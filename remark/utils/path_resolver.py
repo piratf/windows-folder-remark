@@ -35,14 +35,6 @@ class Cursor:
     arg_index: int
     char_index: int
 
-    def jump_to_end_of_arg(self, normalized_args: list[str]) -> None:
-        """
-        跳转到当前参数的结束位置
-
-        :param normalized_args: 归一化后的参数列表
-        """
-        self.char_index = len(normalized_args[self.arg_index])
-
     def jump_to_last_separator(self, normalized_args: list[str]) -> None:
         """
         跳转到当前参数的最后一个系统分隔符位置
@@ -295,9 +287,8 @@ def find_candidates(
         inner_items = get_inner_items_list(work_path)
 
         if not inner_items:
-            # 工作目录为空，加入候选
-            remaining = get_remaining_args(next_cursor, normalized_args)
-            candidates.append((work_path, remaining, "folder"))
+            # 工作目录为空，说明某个 A\\B 的路径不正确 (A 是空目录)
+            # 搜索失败
             continue
 
         # 在文件列表中搜索匹配
@@ -309,7 +300,8 @@ def find_candidates(
                 # 匹配成功，将匹配项作为新的工作目录加入队列
                 # 需要将 cursor 推进到分隔符之后
                 for match in matches:
-                    queue.append((work_path / match, next_cursor, next_cursor))
+                    new_work_path = work_path / match
+                    queue.append((new_work_path, next_cursor, next_cursor))
             else:
                 # 匹配失败，结束搜索，返回当前候选
                 break

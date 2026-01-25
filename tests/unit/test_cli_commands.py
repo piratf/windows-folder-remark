@@ -251,8 +251,18 @@ class TestCLI:
 
     def test_run_with_path_and_comment(self):
         """测试运行带路径和备注参数"""
+
+        def exists_side_effect(path):
+            return path == "/folder"
+
+        def isdir_side_effect(path):
+            return path == "/folder"
+
         with (
             patch("remark.cli.commands.check_platform", return_value=True),
+            patch("remark.utils.path_resolver.os.path.exists", side_effect=exists_side_effect),
+            patch("remark.utils.path_resolver.os.path.isdir", side_effect=isdir_side_effect),
+            patch("builtins.input", return_value=""),  # 模拟用户按回车确认
             patch.object(CLI, "add_comment") as mock_add,
         ):
             cli = CLI()

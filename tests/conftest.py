@@ -16,6 +16,14 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "windows: 仅在 Windows 上运行")
     config.addinivalue_line("markers", "slow: 慢速测试")
 
+    # 强制使用 UTF-8 编码输出，支持 emoji 等特殊字符
+    import io
+
+    if sys.stdout.encoding.lower() not in ("utf-8", "utf-16", "utf-16-le", "utf-16-be"):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    if sys.stderr.encoding.lower() not in ("utf-8", "utf-16", "utf-16-le", "utf-16-be"):
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
 
 def pytest_collection_modifyitems(config, items):
     """自动跳过非 Windows 平台上的 Windows 测试"""

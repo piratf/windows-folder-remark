@@ -86,7 +86,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          draft: false
+          draft: ${{ github.ref_type != 'tag' }}  # 非 tag 触发时创建 draft
           prerelease: false
           generate_release_notes: true
           files: |

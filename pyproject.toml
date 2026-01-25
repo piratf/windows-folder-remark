@@ -55,7 +55,7 @@ build-backend = "setuptools.build_meta"
 # Ruff - 代码检查和格式化
 # https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
-target-version = "2.0.1"
+target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]
@@ -100,7 +100,7 @@ known-first-party = ["remark"]
 # Mypy - 静态类型检查
 # https://mypy.readthedocs.io/
 [tool.mypy]
-python_version = "2.0.1"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -125,7 +125,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-minversion = "2.0.1"
+minversion = "7.0"
 
 addopts = [
     "-v",                    # 详细输出

@@ -21,6 +21,9 @@ repos:
     hooks:
       - id: trailing-whitespace     # 删除行尾空格
       - id: end-of-file-fixer       # 文件末尾添加换行
+      - id: mixed-line-ending       # 强制统一行尾符为 LF
+        args: ['--fix=lf']
+        exclude: ^(\.bat|\.cmd|\.ps1)$
       - id: check-yaml              # 检查 YAML 语法
       - id: check-toml              # 检查 TOML 语法
       - id: check-added-large-files # 防止大文件提交

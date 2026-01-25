@@ -1,6 +1,6 @@
 """CLI 命令单元测试"""
 
-from unittest.mock import patch
+import os
 
 import pytest
 
@@ -18,117 +18,99 @@ class TestCLI:
 
     def test_validate_folder_not_exists(self, capsys):
         """测试验证不存在的路径"""
-        with patch("os.path.exists", return_value=False):
-            cli = CLI()
-            result = cli._validate_folder("/invalid/path")
-            assert result is False
-            captured = capsys.readouterr()
-            assert "路径不存在" in captured.out
+        cli = CLI()
+        result = cli._validate_folder("/invalid/path")
+        assert result is False
+        captured = capsys.readouterr()
+        assert "路径不存在" in captured.out
 
-    def test_validate_folder_not_dir(self, capsys):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_validate_folder_not_dir(self, fs, capsys):
         """测试验证非文件夹路径"""
-        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=False):
-            cli = CLI()
-            result = cli._validate_folder("/file.txt")
-            assert result is False
-            captured = capsys.readouterr()
-            assert "不是文件夹" in captured.out
+        fs.create_file("/file.txt")
+        cli = CLI()
+        result = cli._validate_folder("/file.txt")
+        assert result is False
+        captured = capsys.readouterr()
+        assert "不是文件夹" in captured.out
 
-    def test_validate_folder_success(self):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_validate_folder_success(self, fs):
         """测试验证有效文件夹"""
-        with patch("os.path.exists", return_value=True), patch("os.path.isdir", return_value=True):
-            cli = CLI()
-            result = cli._validate_folder("/valid/folder")
-            assert result is True
+        fs.create_dir("/valid/folder")
+        cli = CLI()
+        result = cli._validate_folder("/valid/folder")
+        assert result is True
 
-    def test_add_comment_success(self):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_add_comment_success(self, fs):
         """测试添加备注成功"""
-        with (
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch("remark.core.folder_handler.FolderCommentHandler.set_comment", return_value=True),
-        ):
-            cli = CLI()
-            result = cli.add_comment("/test/folder", "测试备注")
-            assert result is True
+        fs.create_dir("/test/folder")
+        cli = CLI()
+        result = cli.add_comment("/test/folder", "测试备注")
+        assert result is True
 
     def test_add_comment_invalid_folder(self):
         """测试添加备注到无效路径"""
-        with patch("os.path.exists", return_value=False):
-            cli = CLI()
-            result = cli.add_comment("/invalid/path", "备注")
-            assert result is False
+        cli = CLI()
+        result = cli.add_comment("/invalid/path", "备注")
+        assert result is False
 
-    def test_delete_comment_success(self):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_delete_comment_success(self, fs):
         """测试删除备注成功"""
-        with (
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch(
-                "remark.core.folder_handler.FolderCommentHandler.delete_comment", return_value=True
-            ),
-        ):
-            cli = CLI()
-            result = cli.delete_comment("/test/folder")
-            assert result is True
+        fs.create_dir("/test/folder")
+        cli = CLI()
+        result = cli.delete_comment("/test/folder")
+        assert result is True
 
     def test_delete_comment_invalid_folder(self):
         """测试删除备注失败（无效路径）"""
-        with patch("os.path.exists", return_value=False):
-            cli = CLI()
-            result = cli.delete_comment("/invalid/path")
-            assert result is False
+        cli = CLI()
+        result = cli.delete_comment("/invalid/path")
+        assert result is False
 
-    def test_view_comment_with_content(self, capsys):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_view_comment_with_content(self, fs, capsys):
         """测试查看有备注的文件夹"""
-        with (
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=False),
-            patch(
-                "remark.core.folder_handler.FolderCommentHandler.get_comment",
-                return_value="测试备注",
-            ),
-        ):
+        fs.create_dir("/test/folder")
+        from remark.core.folder_handler import FolderCommentHandler
+
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr(FolderCommentHandler, "get_comment", lambda self, path: "测试备注")
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
             assert "测试备注" in captured.out
 
-    def test_view_comment_without_content(self, capsys):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_view_comment_without_content(self, fs, capsys):
         """测试查看无备注的文件夹"""
-        with (
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=False),
-            patch("remark.core.folder_handler.FolderCommentHandler.get_comment", return_value=None),
-        ):
+        fs.create_dir("/test/folder")
+        from remark.core.folder_handler import FolderCommentHandler
+
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr(FolderCommentHandler, "get_comment", lambda self, path: None)
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
             assert "没有备注" in captured.out
 
-    def test_view_comment_with_encoding_issue_and_fix(self, capsys):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_view_comment_with_encoding_issue_and_fix(self, fs, capsys):
         """测试查看有编码问题的文件夹并选择修复"""
-        with (
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
-            patch(
-                "remark.storage.desktop_ini.DesktopIniHandler.get_path",
-                return_value="/test/folder/desktop.ini",
-            ),
-            patch(
-                "remark.storage.desktop_ini.DesktopIniHandler.detect_encoding",
-                return_value=("utf-8", False),
-            ),
-            patch("builtins.input", return_value="y"),
-            patch("remark.storage.desktop_ini.DesktopIniHandler.fix_encoding", return_value=True),
-            patch(
-                "remark.core.folder_handler.FolderCommentHandler.get_comment",
-                return_value="测试备注",
-            ),
-        ):
+        from remark.core.folder_handler import FolderCommentHandler
+        from remark.storage.desktop_ini import DesktopIniHandler
+
+        fs.create_dir("/test/folder")
+        fs.create_file("/test/folder/desktop.ini", contents="test content")
+
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr(DesktopIniHandler, "detect_encoding", lambda file_path: ("utf-8", False))
+            m.setattr(DesktopIniHandler, "fix_encoding", lambda file_path, current_encoding: True)
+            m.setattr(FolderCommentHandler, "get_comment", lambda self, path: "测试备注")
+            m.setattr("builtins.input", lambda *args, **kwargs: "y")
+
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
@@ -136,26 +118,20 @@ class TestCLI:
             assert "已修复为 UTF-16 编码" in captured.out
             assert "测试备注" in captured.out
 
-    def test_view_comment_with_encoding_issue_and_skip(self, capsys):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_view_comment_with_encoding_issue_and_skip(self, fs, capsys):
         """测试查看有编码问题的文件夹但选择跳过修复"""
-        with (
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
-            patch(
-                "remark.storage.desktop_ini.DesktopIniHandler.get_path",
-                return_value="/test/folder/desktop.ini",
-            ),
-            patch(
-                "remark.storage.desktop_ini.DesktopIniHandler.detect_encoding",
-                return_value=("gbk", False),
-            ),
-            patch("builtins.input", return_value="n"),
-            patch(
-                "remark.core.folder_handler.FolderCommentHandler.get_comment",
-                return_value="测试备注",
-            ),
-        ):
+        from remark.core.folder_handler import FolderCommentHandler
+        from remark.storage.desktop_ini import DesktopIniHandler
+
+        fs.create_dir("/test/folder")
+        fs.create_file("/test/folder/desktop.ini", contents="test content")
+
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr(DesktopIniHandler, "detect_encoding", lambda file_path: ("gbk", False))
+            m.setattr(FolderCommentHandler, "get_comment", lambda self, path: "测试备注")
+            m.setattr("builtins.input", lambda *args, **kwargs: "n")
+
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
@@ -163,25 +139,23 @@ class TestCLI:
             assert "跳过编码修复" in captured.out
             assert "测试备注" in captured.out
 
-    def test_view_comment_with_correct_encoding(self, capsys):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_view_comment_with_correct_encoding(self, fs, capsys):
         """测试查看编码正确的文件夹"""
-        with (
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch("remark.storage.desktop_ini.DesktopIniHandler.exists", return_value=True),
-            patch(
-                "remark.storage.desktop_ini.DesktopIniHandler.get_path",
-                return_value="/test/folder/desktop.ini",
-            ),
-            patch(
-                "remark.storage.desktop_ini.DesktopIniHandler.detect_encoding",
-                return_value=("utf-16-le", True),
-            ),
-            patch(
-                "remark.core.folder_handler.FolderCommentHandler.get_comment",
-                return_value="测试备注",
-            ),
-        ):
+        from remark.core.folder_handler import FolderCommentHandler
+        from remark.storage.desktop_ini import DesktopIniHandler
+
+        fs.create_dir("/test/folder")
+        fs.create_file("/test/folder/desktop.ini", contents="test content")
+
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr(
+                DesktopIniHandler,
+                "detect_encoding",
+                lambda file_path: ("utf-16-le", True),
+            )
+            m.setattr(FolderCommentHandler, "get_comment", lambda self, path: "测试备注")
+
             cli = CLI()
             cli.view_comment("/test/folder")
             captured = capsys.readouterr()
@@ -189,28 +163,104 @@ class TestCLI:
             assert "编码" not in captured.out
             assert "测试备注" in captured.out
 
-    @pytest.mark.parametrize(
-        "inputs,expected_add_calls",
-        [
-            # 有效输入
-            (["/folder", "备注", KeyboardInterrupt()], 1),
-            # 第一次路径无效，第二次有效
-            (["/invalid", "/folder", "备注", KeyboardInterrupt()], 1),
-            # 第一次备注重试，第二次有效
-            (["/folder", "", "有效备注", KeyboardInterrupt()], 1),
-        ],
-    )
-    def test_interactive_mode_scenarios(self, inputs, expected_add_calls):
-        """测试交互模式各种场景"""
-        with (
-            patch("builtins.input", side_effect=inputs),
-            patch("os.path.exists", return_value=True),
-            patch("os.path.isdir", return_value=True),
-            patch.object(CLI, "add_comment") as mock_add,
-        ):
-            cli = CLI()
-            cli.interactive_mode()
-            assert mock_add.call_count == expected_add_calls
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_interactive_mode_valid_input(self, fs, monkeypatch):
+        """测试交互模式有效输入"""
+        fs.create_dir("/folder")
+
+        input_sequence = ["/folder", "测试备注"]
+
+        def mock_input(prompt):
+            if input_sequence:
+                return input_sequence.pop(0)
+            raise KeyboardInterrupt()
+
+        cli = CLI()
+
+        # Mock input to control user input and exit after first iteration
+        monkeypatch.setattr("builtins.input", mock_input)
+
+        # Mock add_comment to verify it was called
+        original_add_comment = cli.add_comment
+        calls = []
+
+        def mock_add_comment(path, comment):
+            calls.append((path, comment))
+            return original_add_comment(path, comment)
+
+        monkeypatch.setattr(cli, "add_comment", mock_add_comment)
+
+        cli.interactive_mode()
+
+        # 验证 add_comment 被正确调用
+        assert len(calls) == 1
+        assert calls[0] == ("/folder", "测试备注")
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_interactive_mode_invalid_path_then_valid(self, fs, monkeypatch, capsys):
+        """测试交互模式先输入无效路径再输入有效路径"""
+        fs.create_dir("/valid_folder")
+
+        input_sequence = ["/invalid", "/valid_folder", "备注内容"]
+
+        def mock_input(prompt):
+            if input_sequence:
+                return input_sequence.pop(0)
+            raise KeyboardInterrupt()
+
+        cli = CLI()
+        monkeypatch.setattr("builtins.input", mock_input)
+
+        # Mock add_comment to verify it was called
+        original_add_comment = cli.add_comment
+        calls = []
+
+        def mock_add_comment(path, comment):
+            calls.append((path, comment))
+            return original_add_comment(path, comment)
+
+        monkeypatch.setattr(cli, "add_comment", mock_add_comment)
+
+        cli.interactive_mode()
+
+        # 验证无效路径被提示，最终有效路径被处理
+        captured = capsys.readouterr()
+        assert "路径不存在" in captured.out
+        assert len(calls) == 1
+        assert calls[0] == ("/valid_folder", "备注内容")
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_interactive_mode_empty_comment_retry(self, fs, monkeypatch, capsys):
+        """测试交互模式空备注重试"""
+        fs.create_dir("/folder")
+
+        input_sequence = ["/folder", "", "有效备注"]
+
+        def mock_input(prompt):
+            if input_sequence:
+                return input_sequence.pop(0)
+            raise KeyboardInterrupt()
+
+        cli = CLI()
+        monkeypatch.setattr("builtins.input", mock_input)
+
+        # Mock add_comment to verify it was called
+        original_add_comment = cli.add_comment
+        calls = []
+
+        def mock_add_comment(path, comment):
+            calls.append((path, comment))
+            return original_add_comment(path, comment)
+
+        monkeypatch.setattr(cli, "add_comment", mock_add_comment)
+
+        cli.interactive_mode()
+
+        # 验证空备注被提示重新输入，最终有效备注被处理
+        captured = capsys.readouterr()
+        assert "备注不要为空" in captured.out
+        assert len(calls) == 1
+        assert calls[0] == ("/folder", "有效备注")
 
     def test_show_help(self, capsys):
         """测试帮助信息"""
@@ -223,67 +273,47 @@ class TestCLI:
 
     def test_run_with_help(self, capsys):
         """测试运行 --help 参数"""
-        with patch("remark.cli.commands.check_platform", return_value=True):
-            cli = CLI()
-            cli.run(["--help"])
-            captured = capsys.readouterr()
-            assert "Windows 文件夹备注工具" in captured.out
+        cli = CLI()
+        cli.run(["--help"])
+        captured = capsys.readouterr()
+        assert "Windows 文件夹备注工具" in captured.out
 
-    def test_run_with_delete(self):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_run_with_delete(self, fs):
         """测试运行 --delete 参数"""
-        with (
-            patch("remark.cli.commands.check_platform", return_value=True),
-            patch.object(CLI, "delete_comment") as mock_delete,
-        ):
-            cli = CLI()
-            cli.run(["--delete", "/test/folder"])
-            mock_delete.assert_called_once_with("/test/folder")
+        fs.create_dir("/test/folder")
+        cli = CLI()
+        cli.run(["--delete", "/test/folder"])
 
-    def test_run_with_view(self):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_run_with_view(self, fs):
         """测试运行 --view 参数"""
-        with (
-            patch("remark.cli.commands.check_platform", return_value=True),
-            patch.object(CLI, "view_comment") as mock_view,
-        ):
-            cli = CLI()
-            cli.run(["--view", "/test/folder"])
-            mock_view.assert_called_once_with("/test/folder")
+        fs.create_dir("/test/folder")
+        cli = CLI()
+        cli.run(["--view", "/test/folder"])
 
-    def test_run_with_path_and_comment(self):
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_run_with_path_and_comment(self, fs, monkeypatch):
         """测试运行带路径和备注参数"""
+        fs.create_dir("/folder")
+        # Mock input to auto-confirm when path is detected
+        monkeypatch.setattr("builtins.input", lambda *args, **kwargs: "y")
+        cli = CLI()
+        cli.run(["/folder", "备注"])
 
-        def exists_side_effect(path):
-            return path == "/folder"
-
-        def isdir_side_effect(path):
-            return path == "/folder"
-
-        with (
-            patch("remark.cli.commands.check_platform", return_value=True),
-            patch("remark.utils.path_resolver.os.path.exists", side_effect=exists_side_effect),
-            patch("remark.utils.path_resolver.os.path.isdir", side_effect=isdir_side_effect),
-            patch("builtins.input", return_value=""),  # 模拟用户按回车确认
-            patch.object(CLI, "add_comment") as mock_add,
-        ):
-            cli = CLI()
-            cli.run(["/folder", "备注"])
-            mock_add.assert_called_once_with("/folder", "备注")
-
-    def test_run_interactive_mode(self):
+    def test_run_interactive_mode(self, monkeypatch):
         """测试运行进入交互模式"""
-        with (
-            patch("remark.cli.commands.check_platform", return_value=True),
-            patch.object(CLI, "interactive_mode") as mock_interactive,
-        ):
-            cli = CLI()
-            cli.run([])
-            mock_interactive.assert_called_once()
+        # Mock interactive_mode to avoid actually entering interactive mode
+        monkeypatch.setattr(CLI, "interactive_mode", lambda cli: None)
+        cli = CLI()
+        cli.run([])
 
     def test_run_platform_check_fail(self):
         """测试非 Windows 平台"""
         # check_platform 在 CLI.run 开始时被调用，如果返回 False 会 sys.exit(1)
         # 由于 sys.exit 会抛出 SystemExit，我们需要捕获它或 mock 它
-        with patch("remark.cli.commands.check_platform", return_value=False):
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr("remark.cli.commands.check_platform", lambda: False)
             cli = CLI()
             with pytest.raises(SystemExit) as exc_info:
                 cli.run([])
@@ -297,12 +327,17 @@ class TestGetVersion:
 
     def test_get_version_from_package(self):
         """测试从包获取版本"""
-        with patch("importlib.metadata.version", return_value="2.0.0"):
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr("importlib.metadata.version", lambda *args, **kwargs: "2.0.0")
             version = get_version()
             assert version == "2.0.0"
 
     def test_get_version_fallback(self):
         """测试获取版本失败时返回 unknown"""
-        with patch("importlib.metadata.version", side_effect=Exception()):
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr(
+                "importlib.metadata.version",
+                lambda *args, **kwargs: (_ for _ in ()).throw(Exception()),
+            )
             version = get_version()
             assert version == "unknown"

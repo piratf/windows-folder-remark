@@ -311,6 +311,79 @@ class TestFindCandidates:
         assert remaining2 == ["Folder/Sub", "备注"]
         assert type2 == "folder"
 
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_empty_directory(self, fs):
+        """
+        用例: 空目录处理
+
+        输入: ["D:\\Empty", "Folder", "备注"]
+        模拟环境:
+            D:\\ 目录下存在空文件夹 "Empty Folder"
+            listdir("D:\\") -> ["Empty Folder"]
+            listdir("D:\\Empty Folder") -> []
+
+        预期输出:
+            [("D:\\Empty Folder\\App", ["备注"], "folder")]
+
+        说明: 匹配到 "Empty Folder" 后继续搜索，发现目录为空，加入候选
+        """
+        fs.create_dir("D:\\Empty Folder")
+
+        result = find_candidates(["D:\\Empty", "Folder\\App", "备注"])
+
+        assert len(result) == 0
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_separator_no_match(self, fs):
+        """
+        用例: 分隔符匹配失败
+
+        输入: ["D:\\My", "Invalid/Sub", "备注"]
+        模拟环境:
+            D:\\My            (文件夹)
+            D:\\My Folder\\    (文件夹)
+            listdir("D:\\") -> ["My", "My Folder"]
+            listdir("D:\\My Folder") -> ["Sub"]
+
+        预期输出:
+            [("D:\\My", ["Invalid/Sub", "备注"], "folder")]
+
+        说明: "My" 匹配后，"Invalid" 在 "My Folder" 中无匹配，搜索结束
+        """
+        fs.create_dir("D:\\My")
+        fs.create_dir("D:\\My Folder\\Sub")
+
+        result = find_candidates(["D:\\My", "Invalid/Sub", "备注"])
+
+        assert len(result) == 1
+        path, remaining, type_ = result[0]
+        assert path == Path("D:\\My")
+        assert remaining == ["Invalid/Sub", "备注"]
+        assert type_ == "folder"
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_file_skipped(self, fs):
+        """
+        用例: 跳过文件（非目录路径）
+
+        输入: ["D:\\My", "File", "Folder", "备注内容"]
+        模拟环境:
+            D:\\My File          (文件，应被跳过)
+            D:\\My File Folder\\  (文件夹)
+            listdir("D:\\") -> ["My File", "My File Folder"]
+
+        预期输出:
+            [("D:\\My File Folder", ["备注内容"], "folder")]
+
+        说明: "My File" 和 "My File Folder" 都匹配 "My File"，但 "My File" 是文件被跳过
+        """
+        fs.create_file("D:\\My File")
+        fs.create_dir("D:\\My File Folder")
+
+        result = find_candidates(["D:\\My", "File\\Folder", "备注内容"])
+
+        assert len(result) == 0
+
 
 @pytest.mark.unit
 class TestGetCurrentWorkingPath:

@@ -43,13 +43,26 @@ def get_current_version():
 
 
 def update_version(new_version):
-    """更新 pyproject.toml 中的版本号"""
+    """更新 pyproject.toml 中的版本号（仅 [project] 部分）"""
     toml_file = os.path.join(ROOT_DIR, "pyproject.toml")
     with open(toml_file, encoding="utf-8") as f:
-        content = f.read()
-    content = re.sub(r'(version\s*=\s*["\'])([^"\']+)(["\'])', rf"\g<1>{new_version}\g<3>", content)
+        lines = f.readlines()
+
+    # 只更新 [project] 部分的 version = 行
+    in_project_section = False
+    for i, line in enumerate(lines):
+        if line.strip() == "[project]":
+            in_project_section = True
+        elif line.startswith("[") and not line.startswith("[["):
+            in_project_section = False
+        elif in_project_section and line.strip().startswith("version"):
+            lines[i] = re.sub(
+                r'(version\s*=\s*["\'])([^"\']+)(["\'])', rf"\g<1>{new_version}\g<3>", line
+            )
+            break
+
     with open(toml_file, "w", encoding="utf-8") as f:
-        f.write(content)
+        f.writelines(lines)
     return new_version
 
 
@@ -70,17 +83,28 @@ def bump_version(current, part="patch"):
     return f"{major}.{minor}.{patch}"
 
 
-def create_tag(version):
+def create_tag(version, override=False):
     """创建 git tag"""
     tag_name = f"v{version}"
+    # 如果使用 override 且 tag 已存在，先删除
+    if override:
+        try:
+            subprocess.run(["git", "tag", "-d", tag_name], check=True, capture_output=True)
+            print(f"已删除本地 tag: {tag_name}")
+        except subprocess.CalledProcessError:
+            pass  # tag 不存在，忽略
     subprocess.run(["git", "tag", "-a", tag_name, "-m", f"Release {tag_name}"], check=True)
     print(f"已创建 tag: {tag_name}")
     return tag_name
 
 
-def push_tag(tag_name):
+def push_tag(tag_name, force=False):
     """推送 tag 到远程仓库"""
-    subprocess.run(["git", "push", "origin", tag_name], check=True)
+    args = ["git", "push", "origin"]
+    if force:
+        args.append("--force")
+    args.append(tag_name)
+    subprocess.run(args, check=True)
     print(f"已推送 tag: {tag_name}")
 
 
@@ -128,6 +152,23 @@ def check_remote_sync():
     return "behind" not in status_line.lower()
 
 
+def get_latest_tag() -> str | None:
+    """获取最新的 git tag 版本号"""
+    try:
+        result = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        tag = result.stdout.strip()
+        # 移除 v 前缀
+        return tag.lstrip("v") if tag else None
+    except subprocess.CalledProcessError:
+        # 没有任何 tag
+        return None
+
+
 def validate_version_increment(current: str, new: str) -> bool:
     """验证新版本号是否大于当前版本号"""
     curr_major, curr_minor, curr_patch = map(int, current.split("."))
@@ -138,6 +179,15 @@ def validate_version_increment(current: str, new: str) -> bool:
         or (new_major == curr_major and new_minor > curr_minor)
         or (new_major == curr_major and new_minor == curr_minor and new_patch > curr_patch)
     )
+
+
+def is_version_releasable(version: str) -> bool:
+    """检查版本是否可发布（大于已有最新 tag）"""
+    latest_tag = get_latest_tag()
+    if latest_tag is None:
+        return True  # 没有任何 tag，可以发布
+
+    return validate_version_increment(latest_tag, version)
 
 
 def main():
@@ -157,6 +207,11 @@ def main():
         action="store_true",
         help="跳过分支检查（不推荐）",
     )
+    parser.add_argument(
+        "--override",
+        action="store_true",
+        help="强制使用当前版本发布，跳过版本检查（用于重新发布）",
+    )
 
     args = parser.parse_args()
 
@@ -167,25 +222,38 @@ def main():
     current = get_current_version()
     print(f"当前版本: {current}")
 
+    # 确定目标版本
     if not args.version:
-        return
-
-    # 确定新版本号
-    if args.version in ("patch", "minor", "major"):
+        # 未指定版本，使用当前版本
+        new_version = current
+        version_changed = False
+        if is_version_releasable(current):
+            print(f"发布当前版本: {new_version}")
+        elif args.override:
+            print(f"强制重新发布当前版本: {new_version}")
+        else:
+            print(f"当前版本 {current} 已发布或不是最新版本")
+            print("请指定新版本号: patch, minor, major 或具体版本号")
+            print("或使用 --override 强制重新发布当前版本")
+            return
+    elif args.version in ("patch", "minor", "major"):
         new_version = bump_version(current, args.version)
+        version_changed = True
     else:
         # 验证版本号格式
         if not re.match(r"^\d+\.\d+\.\d+$", args.version):
             print("错误: 版本号格式应为 x.y.z")
             sys.exit(1)
         new_version = args.version
+        version_changed = new_version != current
 
-    print(f"新版本: {new_version}")
+    print(f"目标版本: {new_version}")
 
-    # 版本号递增验证
-    if not validate_version_increment(current, new_version):
-        print(f"错误: 新版本 {new_version} 不大于当前版本 {current}")
-        print("版本号必须递增")
+    # 检查版本是否可发布（大于已有最新 tag），除非使用 --override
+    if not args.override and not is_version_releasable(new_version):
+        latest_tag = get_latest_tag()
+        print(f"错误: 版本 {new_version} 不大于已有最新 tag v{latest_tag}")
+        print("提示: 使用 --override 强制发布当前版本（会覆盖已有 tag）")
         sys.exit(1)
 
     # 分支检查
@@ -216,25 +284,33 @@ def main():
 
     if args.dry_run:
         print("\n[DRY RUN] 将执行以下操作:")
-        print(f"  1. 更新版本号: {current} -> {new_version}")
-        if args.commit:
+        if version_changed:
+            print(f"  1. 更新版本号: {current} -> {new_version}")
+        else:
+            print(f"  1. 使用当前版本: {new_version}")
+        if args.commit and version_changed:
             print("  2. 提交版本变更")
         if args.push:
-            print(f"  3. 创建并推送 tag v{new_version}")
+            print(
+                f"  {'2' if version_changed or not args.commit else '1'}. 创建并推送 tag v{new_version}"
+            )
         return
 
-    # 更新版本文件
-    update_version(new_version)
-    print(f"已更新版本号到: {new_version}")
+    # 只有版本变更时才更新 pyproject.toml
+    if version_changed:
+        update_version(new_version)
+        print(f"已更新版本号到: {new_version}")
+    else:
+        print(f"使用当前版本: {new_version}")
 
-    # 提交变更
-    if args.commit:
+    # 提交变更（仅当版本有变更时）
+    if args.commit and version_changed:
         commit_version_changes()
 
     # 创建并推送 tag
     if args.push:
-        tag_name = create_tag(new_version)
-        push_tag(tag_name)
+        tag_name = create_tag(new_version, override=args.override)
+        push_tag(tag_name, force=args.override)
         print(f"\n✓ Release v{new_version} 已准备就绪!")
         print("  GitHub Actions 将自动构建并发布")
     else:

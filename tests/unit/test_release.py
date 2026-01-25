@@ -115,6 +115,7 @@ class TestPushCommitInteraction:
             patch("scripts.release.check_remote_sync", return_value=True),
             patch("scripts.release.get_current_version", return_value="1.0.0"),
             patch("scripts.release.check_branch", return_value="main"),
+            patch("scripts.release.get_latest_tag", return_value="1.0.0"),
         ):
             from scripts.release import main
 

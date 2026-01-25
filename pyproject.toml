@@ -6,7 +6,7 @@ name = "windows-folder-remark"
 version = "2.0.0"
 description = "Windows 文件夹备注工具"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
     {name = "Piratf"}
@@ -16,10 +16,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 # 运行时依赖
@@ -34,6 +33,7 @@ dev = [
     "pytest-cov>=4.0.0",
     "pytest-xdist>=3.0.0",
     "pytest-mock>=3.10.0",
+    "pyfakefs>=5.0.0",
     "pre-commit>=3.0.0",
 ]
 
@@ -55,7 +55,7 @@ build-backend = "setuptools.build_meta"
 # Ruff - 代码检查和格式化
 # https://docs.astral.sh/ruff/configuration/
 [tool.ruff]
-target-version = "py39"
+target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]
@@ -100,7 +100,7 @@ known-first-party = ["remark"]
 # Mypy - 静态类型检查
 # https://mypy.readthedocs.io/
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -131,10 +131,6 @@ addopts = [
     "-v",                    # 详细输出
     "-l",                    # 显示本地变量（失败时）
     "-s",                    # 显示 print 输出
-    "--cov=remark",          # 覆盖率报告
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "-n", "auto",            # 并行运行
 ]
 
 markers = [

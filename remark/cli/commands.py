@@ -168,7 +168,7 @@ class CLI:
                 print("(将查看现有备注)")
 
             if input("是否继续? [Y/n]: ").lower() in ("", "y", "yes"):
-                return path, " ".join(remaining) if remaining else None
+                return str(path), " ".join(remaining) if remaining else None
 
             return None, None
 
@@ -192,7 +192,7 @@ class CLI:
                 if path_type == "file":
                     print("\n错误: 这是一个文件，工具只能为文件夹设置备注，请重新选择")
                     continue
-                return path, " ".join(remaining) if remaining else None
+                return str(path), " ".join(remaining) if remaining else None
             print("无效选择，请重试")
 
     def run(self, argv=None):

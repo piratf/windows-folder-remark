@@ -4,14 +4,13 @@
 处理未加引号的含空格路径，智能重建完整路径。
 """
 
-import os
 import posixpath
 import re
 from collections import deque
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import PureWindowsPath
+from pathlib import Path, PureWindowsPath
 
 
 class NextResult(Enum):
@@ -163,7 +162,7 @@ def build_pattern(parts: list[str]) -> re.Pattern:
 
 def get_current_working_path(
     first_arg: str, cursor: Cursor | None = None, normalized_args: list[str] | None = None
-) -> tuple[str, Cursor]:
+) -> tuple[PureWindowsPath, Cursor]:
     """
     从第一个参数中提取工作目录和剩余内容
 
@@ -186,37 +185,30 @@ def get_current_working_path(
 
     # 空字符串处理
     if not first_arg:
-        return ".", cursor
+        return PureWindowsPath(), cursor
 
     # 使用 pathlib 获取父目录
     path_obj = PureWindowsPath(first_arg)
-    parent = path_obj.parent.as_posix()
+    parent = path_obj.parent
 
     # 跳转到最后一个分隔符位置，因为 parent 可能是 "." 等特殊情况，根据最后一个分隔符判断是安全的
     cursor.jump_to_last_separator(normalized_args)
-    return parent if parent else ".", cursor
+    return parent if parent else PureWindowsPath(), cursor
 
 
-def get_files_list(current_working_path) -> list[str]:
+def get_inner_items_list(current_working_path: Path) -> list[Path]:
     """
     获取指定路径下的所有文件和文件夹列表
 
     :param current_working_path: 当前工作目录路径
     :return: 文件和文件夹名称列表，如果路径不存在或不是目录则返回空列表
     """
-    if not os.path.exists(current_working_path):
-        return []
-    if not os.path.isdir(current_working_path):
-        return []
-    try:
-        return os.listdir(current_working_path)
-    except OSError:
-        return []
+    return list(current_working_path.iterdir())
 
 
 def find_candidates(
     args_list: list[str],
-) -> list[tuple[str, list[str], str]]:
+) -> list[tuple[Path, list[str], str]]:
     """
     递归查找所有可能的路径重建候选
 
@@ -274,15 +266,15 @@ def find_candidates(
     # 如果没有下一个参数，新 Cursor 无法前进
     #   - 弹出队列中的当前工作目录
 
-    candidates = []
+    candidates: list[tuple[Path, list[str], str]] = []
     # 队列元素: (current_working_path, cursor)
-    queue: deque[tuple[str, Cursor, Cursor]] = deque()
+    queue: deque[tuple[Path, Cursor, Cursor]] = deque()
     # working_path, start, last
-    queue.append((current_working_path, deepcopy(cursor), deepcopy(cursor)))
+    queue.append((Path(current_working_path), deepcopy(cursor), deepcopy(cursor)))
 
     while queue:
         work_path, start_cursor, cur = queue.popleft()
-        if not os.path.isdir(work_path):
+        if not work_path.is_dir():
             continue
 
         # 尝试从当前 cursor 向后推进
@@ -300,16 +292,16 @@ def find_candidates(
         pattern = build_pattern(parts)
 
         # 获取当前工作目录的文件列表
-        cur_files = get_files_list(work_path)
+        inner_items = get_inner_items_list(work_path)
 
-        if not cur_files:
+        if not inner_items:
             # 工作目录为空，加入候选
             remaining = get_remaining_args(next_cursor, normalized_args)
             candidates.append((work_path, remaining, "folder"))
             continue
 
         # 在文件列表中搜索匹配
-        matches = [f for f in cur_files if pattern.search(f)]
+        matches = [item.name for item in inner_items if pattern.search(item.name)]
 
         if result_type == NextResult.SEPARATOR:
             # 找到分隔符
@@ -317,8 +309,7 @@ def find_candidates(
                 # 匹配成功，将匹配项作为新的工作目录加入队列
                 # 需要将 cursor 推进到分隔符之后
                 for match in matches:
-                    new_path = PureWindowsPath(os.path.join(work_path, match)).as_posix()
-                    queue.append((new_path, next_cursor, next_cursor))
+                    queue.append((work_path / match, next_cursor, next_cursor))
             else:
                 # 匹配失败，结束搜索，返回当前候选
                 break
@@ -328,8 +319,8 @@ def find_candidates(
             if matches:
                 # 匹配成功，将匹配项加入候选
                 for match in matches:
-                    full_path = PureWindowsPath(os.path.join(work_path, match)).as_posix()
-                    is_folder = os.path.isdir(full_path)
+                    full_path = work_path / match
+                    is_folder = full_path.is_dir()
                     entry_type = "folder" if is_folder else "file"
                     remaining = get_remaining_args(next_cursor, normalized_args)
                     candidates.append((full_path, remaining, entry_type))
@@ -338,13 +329,15 @@ def find_candidates(
             # 将当前工作目录和 next_cursor 重新加入队列
             queue.append((work_path, start_cursor, next_cursor))
 
-    # 匹配到的路径越长越优先（消耗的参数越多，剩余参数越少）
-    candidates.sort(
-        key=lambda x: (
-            x[2] != "folder",  # folder 优先
-            -len(x[0]),  # 路径越长越优先
+    def _candidate_key(item: tuple[Path, list[str], str]) -> tuple[bool, int]:
+        """候选排序键函数：folder 优先，路径越长越优先"""
+        return (
+            item[2] != "folder",  # folder 优先
+            -len(str(item[0])),  # 路径越长越优先
         )
-    )
+
+    # 匹配到的路径越长越优先（消耗的参数越多，剩余参数越少）
+    candidates.sort(key=_candidate_key)
 
     return candidates if candidates else []
 

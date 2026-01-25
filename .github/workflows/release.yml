@@ -83,56 +83,9 @@ jobs:
         with:
           path: artifacts
 
-      - name: Extract version from tag
-        id: version
-        run: |
-          if ($env:GITHUB_REF -match "refs/tags/v(.*)") {
-            $version = $matches[1]
-            echo "version=$version" >> $env:GITHUB_OUTPUT
-            echo "version=$version"
-          }
-
-      - name: Generate Release Notes
-        id: release_notes
-        run: |
-          $notes = @"
-          ## windows-folder-remark v${{ steps.version.outputs.version }}
-
-          ### 下载
-          - `windows-folder-remark-${{ steps.version.outputs.version }}.exe`: 单文件可执行程序，无需安装 Python
-          - `.sha256` 文件用于验证下载文件的完整性
-
-          ### 使用方法
-          ```powershell
-          # 添加备注
-          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe "C:\MyFolder" "我的备注"
-
-          # 查看备注
-          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe --view "C:\MyFolder"
-
-          # 删除备注
-          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe --delete "C:\MyFolder"
-
-          # 交互模式
-          .\windows-folder-remark-${{ steps.version.outputs.version }}.exe
-          ```
-
-          ### 验证下载
-          ```powershell
-          certutil -hashfile windows-folder-remark-${{ steps.version.outputs.version }}.exe SHA256
-          ```
-          然后对比生成的哈希值与 .sha256 文件中的值是否一致。
-
-          ### 系统要求
-          - Windows 7 或更高版本
-          "@
-          $notes | Out-File -Encoding UTF8 -FilePath release_notes.txt
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: windows-folder-remark v${{ steps.version.outputs.version }}
-          body_path: release_notes.txt
           draft: false
           prerelease: false
           files: |

@@ -35,7 +35,7 @@ options = [
 # =============================================================================
 
 # Collect all submodules from remark package
-hiddenimports = collect_submodules('remark')
+hiddenimports = collect_submodules('remark') + ['tkinter']
 
 a = Analysis(
     [os.path.join("remark", "cli", "commands.py")],

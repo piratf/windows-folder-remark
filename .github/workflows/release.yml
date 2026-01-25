@@ -6,6 +6,11 @@ on:
     tags:
       - 'v*.*.*'
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for testing (e.g. v2.0.1)'
+        required: false
+        type: string
 
 jobs:
   build:
@@ -86,7 +91,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          draft: ${{ github.ref_type != 'tag' }}  # 非 tag 触发时创建 draft
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
+          draft: ${{ github.event_name == 'workflow_dispatch' }}
           prerelease: false
           generate_release_notes: true
           files: |

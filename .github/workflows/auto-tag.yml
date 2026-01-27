@@ -23,7 +23,7 @@ jobs:
       - name: Get version from pyproject.toml
         id: get_version
         run: |
-          VERSION=$(awk '/^\[project\]/,/^\\[.*\]/ { if (/^version\s*=/) print }' pyproject.toml | sed 's/version\s*=\s*["\']\([^"\']*\)["\']/\1/')
+          VERSION=$(python3 -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Get latest tag
@@ -40,12 +40,12 @@ jobs:
           python - <<EOF
           from packaging import version
           pyproject_ver = "${{ steps.get_version.outputs.version }}"
-          latest_ver = "${{ steps.get_release.outputs.latest }}"
+          latest_ver = "${{ steps.get_latest_tag.outputs.latest }}"
           should_release = version.parse(pyproject_ver) > version.parse(latest_ver)
           with open("$GITHUB_OUTPUT", "a") as f:
               f.write(f"should_release={should_release.lower()}\n")
           print(f"PyProject version: {pyproject_ver}")
-          print(f"Latest release: {latest_ver}")
+          print(f"Latest tag: {latest_ver}")
           print(f"Should release: {should_release}")
           EOF
 

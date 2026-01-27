@@ -1,0 +1,62 @@
+name: Auto Tag
+
+on:
+  push:
+    branches:
+      - main                 # 正式环境
+      - feat-release-flow    # 测试环境
+
+permissions:
+  contents: write
+
+jobs:
+  auto-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      created_tag: ${{ steps.create_tag.outputs.tag_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取所有历史，用于 git tag 操作
+
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+          VERSION=$(awk '/^\[project\]/,/^\\[.*\]/ { if (/^version\s*=/) print }' pyproject.toml | sed 's/version\s*=\s*["\']\([^"\']*\)["\']/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          # 获取所有 tag 并按版本排序，取最新的
+          LATEST=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          LATEST=${LATEST#v}
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+
+      - name: Compare versions
+        id: version_check
+        run: |
+          python - <<EOF
+          from packaging import version
+          pyproject_ver = "${{ steps.get_version.outputs.version }}"
+          latest_ver = "${{ steps.get_release.outputs.latest }}"
+          should_release = version.parse(pyproject_ver) > version.parse(latest_ver)
+          with open("$GITHUB_OUTPUT", "a") as f:
+              f.write(f"should_release={should_release.lower()}\n")
+          print(f"PyProject version: {pyproject_ver}")
+          print(f"Latest release: {latest_ver}")
+          print(f"Should release: {should_release}")
+          EOF
+
+      - name: Create and push tag
+        id: create_tag
+        if: steps.version_check.outputs.should_release == 'true'
+        run: |
+          TAG_NAME="v${{ steps.get_version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "✓ Created tag: $TAG_NAME"

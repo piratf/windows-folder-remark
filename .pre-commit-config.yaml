@@ -12,8 +12,10 @@ repos:
     rev: v0.8.4
     hooks:
       - id: ruff
+        types: [python]
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
+        types: [python]
 
   # Pre-commit hooks for general checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -37,6 +39,7 @@ repos:
     rev: v1.14.1
     hooks:
       - id: mypy
+        types: [python]
         additional_dependencies:
           - types-setuptools
         exclude: ^remark\.py$
@@ -48,6 +51,7 @@ repos:
         name: Run tests
         entry: pytest -v -m "not slow" --cov=remark --cov-report=term-missing
         language: system
+        types: [python]
         stages: [pre-commit, pre-push]
         pass_filenames: false
 
@@ -55,6 +59,7 @@ repos:
         name: Build exe (Windows only)
         entry: bash -c 'if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then pyinstaller remark.spec --clean; else echo "Skip build on non-Windows"; fi'
         language: system
+        files: '^(.*\.py|.*\.spec)$'
         stages: [pre-push]
         pass_filenames: false
 

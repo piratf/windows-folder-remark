@@ -55,7 +55,10 @@ class CLI:
         """安装右键菜单"""
         if registry.install_context_menu():
             print("右键菜单安装成功")
-            print("现在可以右键点击文件夹，选择「添加文件夹备注」")
+            print("")
+            print("使用说明:")
+            print("  Windows 10: 右键文件夹可直接看到「添加文件夹备注」")
+            print("  Windows 11: 右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注")
             return True
         else:
             print("右键菜单安装失败")

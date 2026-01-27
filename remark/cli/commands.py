@@ -7,6 +7,8 @@ import os
 import sys
 
 from remark.core.folder_handler import FolderCommentHandler
+from remark.gui import remark_dialog
+from remark.utils import registry
 from remark.utils.path_resolver import find_candidates
 from remark.utils.platform import check_platform
 
@@ -47,6 +49,40 @@ class CLI:
         """删除备注"""
         if self._validate_folder(path):
             return self.handler.delete_comment(path)
+        return False
+
+    def install_menu(self) -> bool:
+        """安装右键菜单"""
+        if registry.install_context_menu():
+            print("右键菜单安装成功")
+            print("")
+            print("使用说明:")
+            print("  Windows 10: 右键文件夹可直接看到「添加文件夹备注」")
+            print("  Windows 11: 右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注")
+            return True
+        else:
+            print("右键菜单安装失败")
+            return False
+
+    def uninstall_menu(self) -> bool:
+        """卸载右键菜单"""
+        if registry.uninstall_context_menu():
+            print("右键菜单已卸载")
+            return True
+        else:
+            print("右键菜单卸载失败")
+            return False
+
+    def gui_mode(self, folder_path: str) -> bool:
+        """GUI 模式（右键菜单调用）"""
+        if not self._validate_folder(folder_path):
+            return False
+
+        # 显示对话框
+        comment = remark_dialog.show_remark_dialog(folder_path)
+        if comment:
+            result = self.add_comment(folder_path, comment)
+            return result is not False
         return False
 
     def view_comment(self, path):
@@ -126,6 +162,9 @@ class CLI:
         print("  交互模式: python remark.py")
         print("  命令行模式: python remark.py [选项] [参数]")
         print("选项:")
+        print("  --install          安装右键菜单")
+        print("  --uninstall        卸载右键菜单")
+        print("  --gui <路径>       GUI 模式（右键菜单调用）")
         print("  --delete <路径>    删除备注")
         print("  --view <路径>      查看备注")
         print("  --help, -h         显示帮助信息")
@@ -133,6 +172,7 @@ class CLI:
         print(' [添加备注] python remark.py "C:\\\\MyFolder" "这是我的文件夹"')
         print(' [删除备注] python remark.py --delete "C:\\\\MyFolder"')
         print(' [查看当前备注] python remark.py --view "C:\\\\MyFolder"')
+        print(" [安装右键菜单] python remark.py --install")
 
     def _handle_ambiguous_path(self, args_list: list[str]) -> tuple[str | None, str | None]:
         """
@@ -202,6 +242,9 @@ class CLI:
 
         parser = argparse.ArgumentParser(description="Windows 文件夹备注工具", add_help=False)
         parser.add_argument("args", nargs="*", help="位置参数（路径和备注）")
+        parser.add_argument("--install", action="store_true", help="安装右键菜单")
+        parser.add_argument("--uninstall", action="store_true", help="卸载右键菜单")
+        parser.add_argument("--gui", metavar="PATH", help="GUI 模式（右键菜单调用）")
         parser.add_argument("--delete", metavar="PATH", help="删除备注")
         parser.add_argument("--view", metavar="PATH", help="查看备注")
         parser.add_argument("--help", "-h", action="store_true", help="显示帮助信息")
@@ -210,6 +253,12 @@ class CLI:
 
         if args.help:
             self.show_help()
+        elif args.install:
+            self.install_menu()
+        elif args.uninstall:
+            self.uninstall_menu()
+        elif args.gui:
+            self.gui_mode(args.gui)
         elif args.delete:
             self.delete_comment(args.delete)
         elif args.view:

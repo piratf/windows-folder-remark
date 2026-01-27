@@ -5,12 +5,23 @@
 import argparse
 import os
 import sys
+import tempfile
+import threading
+
+import requests
 
 from remark.core.folder_handler import FolderCommentHandler
 from remark.gui import remark_dialog
 from remark.utils import registry
 from remark.utils.path_resolver import find_candidates
 from remark.utils.platform import check_platform
+from remark.utils.updater import (
+    check_for_updates,
+    create_update_script,
+    download_update,
+    get_executable_path,
+    trigger_update,
+)
 
 
 def get_version():
@@ -28,6 +39,9 @@ class CLI:
 
     def __init__(self):
         self.handler = FolderCommentHandler()
+        self.pending_update = None
+        self._update_check_done = threading.Event()
+        self._check_update_in_background()
 
     def _validate_folder(self, path):
         """验证路径是否为文件夹"""
@@ -38,6 +52,61 @@ class CLI:
             print("路径不是文件夹:", path)
             return False
         return True
+
+    def _check_update_in_background(self):
+        """后台线程检查更新，不阻塞主流程"""
+        thread = threading.Thread(target=self._do_check_update, daemon=True)
+        thread.start()
+
+    def _do_check_update(self):
+        """实际执行更新检查"""
+        try:
+            self.pending_update = check_for_updates(get_version())
+        finally:
+            self._update_check_done.set()
+
+    def _wait_for_update_check(self, timeout: float = 2.0) -> None:
+        """等待后台检测完成
+
+        Args:
+            timeout: 超时时间（秒）
+        """
+        self._update_check_done.wait(timeout=timeout)
+
+    def _prompt_update(self) -> None:
+        """提示用户有新版本可用"""
+        update = self.pending_update
+        if update is None:
+            return
+        print(f"\n发现新版本: {update['tag_name']} (当前版本: {get_version()})")
+        print(f"更新说明: {update['body'][:200]}...")
+        print(f"完整更新日志: {update['html_url']}")
+        response = input("是否立即更新? [Y/n]: ").lower()
+        if response in ("", "y", "yes"):
+            self._perform_update(update)
+
+    def _perform_update(self, update: dict) -> None:
+        """执行更新流程"""
+        try:
+            print("正在下载新版本...")
+            # 下载到临时目录
+            new_exe = os.path.join(
+                tempfile.gettempdir(), f"windows-folder-remark-{update['tag_name']}.exe"
+            )
+            download_update(update["download_url"], new_exe)
+
+            print("下载完成，准备更新...")
+            old_exe = get_executable_path()
+            script_path = create_update_script(old_exe, new_exe)
+
+            print("更新程序已启动，程序即将退出...")
+            print("请等待几秒钟，更新将自动完成。")
+            trigger_update(script_path)
+            sys.exit(0)
+        except requests.RequestException:
+            print("下载失败，请检查网络连接或手动下载更新")
+        except Exception as e:
+            print(f"更新失败: {e}")
 
     def add_comment(self, path, comment):
         """添加备注"""
@@ -281,8 +350,8 @@ class CLI:
 
 def main():
     """主入口"""
+    cli = CLI()
     try:
-        cli = CLI()
         cli.run()
     except KeyboardInterrupt:
         print("\n操作已取消")
@@ -290,6 +359,12 @@ def main():
     except Exception as e:
         print("发生错误:", str(e))
         sys.exit(1)
+    finally:
+        # 等待后台检测完成（最多等待 2 秒）
+        cli._wait_for_update_check(timeout=2.0)
+        # 退出前检查更新
+        if cli.pending_update:
+            cli._prompt_update()
 
 
 if __name__ == "__main__":

@@ -42,6 +42,8 @@ repos:
         types: [python]
         additional_dependencies:
           - types-setuptools
+          - types-requests>=2.31.0
+          - types-tqdm>=4.66.0
         exclude: ^remark\.py$
 
   # Local hooks - pre-commit 和 pre-push 阶段

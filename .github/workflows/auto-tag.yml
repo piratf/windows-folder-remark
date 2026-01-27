@@ -43,7 +43,7 @@ jobs:
           latest_ver = "${{ steps.get_latest_tag.outputs.latest }}"
           should_release = version.parse(pyproject_ver) > version.parse(latest_ver)
           with open("$GITHUB_OUTPUT", "a") as f:
-              f.write(f"should_release={should_release.lower()}\n")
+              f.write(f"should_release={str(should_release).lower()}\n")
           print(f"PyProject version: {pyproject_ver}")
           print(f"Latest tag: {latest_ver}")
           print(f"Should release: {should_release}")

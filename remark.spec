@@ -7,6 +7,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 
 from PyInstaller.utils.hooks import collect_submodules
@@ -17,7 +18,30 @@ from PyInstaller.utils.hooks import collect_submodules
 
 block_cipher = None
 app_name = "windows-folder-remark"
-app_version = "2.0.0"
+
+
+def get_app_version():
+    """从 pyproject.toml 的 [project] 部分读取版本号，确保版本同步"""
+    # SPECPATH 是 PyInstaller 提供的内置全局变量，指向 spec 文件所在目录
+    toml_file = os.path.join(SPECPATH, "pyproject.toml")
+    with open(toml_file, encoding="utf-8") as f:
+        lines = f.readlines()
+
+    # 只查找 [project] 部分的 version 字段
+    in_project_section = False
+    for line in lines:
+        if line.strip() == "[project]":
+            in_project_section = True
+        elif line.startswith("[") and not line.startswith("[["):
+            in_project_section = False
+        elif in_project_section and line.strip().startswith("version"):
+            match = re.search(r'=\s*["\']([^"\']+)["\']', line)
+            if match:
+                return match.group(1)
+    return "unknown"
+
+
+app_version = get_app_version()
 app_description = "Windows 文件夹备注工具"
 
 # =============================================================================

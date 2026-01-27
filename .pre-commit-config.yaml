@@ -57,7 +57,7 @@ repos:
 
       - id: build-exe
         name: Build exe (Windows only)
-        entry: bash -c 'if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then pyinstaller remark.spec --clean; else echo "Skip build on non-Windows"; fi'
+        entry: bash -c 'set -e; if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then pyinstaller remark.spec --clean && ./dist/windows-folder-remark.exe --help; else echo "Skip build on non-Windows"; fi'
         language: system
         files: '^(.*\.py|.*\.spec)$'
         stages: [pre-push]

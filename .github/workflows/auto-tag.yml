@@ -13,7 +13,9 @@ jobs:
   auto-tag:
     runs-on: ubuntu-latest
     outputs:
-      created_tag: ${{ steps.create_tag.outputs.tag_name }}
+      should_release: ${{ steps.version_check.outputs.should_release }}
+      version: ${{ steps.get_version.outputs.version }}
+      tag_name: ${{ steps.create_tag.outputs.tag_name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,3 +62,86 @@ jobs:
           git push origin "$TAG_NAME"
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "✓ Created tag: $TAG_NAME"
+
+  build:
+    needs: auto-tag
+    if: needs.auto-tag.outputs.should_release == 'true'
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        architecture: [x64]
+        python-version: ['3.11']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        run: |
+          pytest -v --cov=remark --cov-report=term-missing
+
+      - name: Install PyInstaller
+        run: |
+          pip install pyinstaller
+
+      - name: Build executable
+        run: |
+          pyinstaller remark.spec --clean
+
+      - name: Rename executable with version
+        run: |
+          $version = "${{ needs.auto-tag.outputs.version }}"
+          Copy-Item "dist\windows-folder-remark.exe" "dist\windows-folder-remark-$version.exe"
+
+      - name: Generate checksum
+        run: |
+          $version = "${{ needs.auto-tag.outputs.version }}"
+          $file = "dist\windows-folder-remark-$version.exe"
+          certutil -hashfile $file SHA256 > "$file.sha256"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-folder-remark-${{ matrix.architecture }}
+          path: |
+            dist/*.exe
+            dist/*.sha256
+
+  release:
+    needs: [auto-tag, build]
+    if: needs.auto-tag.outputs.should_release == 'true'
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.auto-tag.outputs.tag_name }}
+          draft: true  # 临时设为 true，测试结束后改回 false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

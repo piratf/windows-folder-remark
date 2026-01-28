@@ -62,6 +62,7 @@ def get_executable_path() -> str:
 def get_latest_release() -> dict[str, Any] | None:
     """
     从 GitHub API 获取最新 release 信息
+    使用 urllib 而不是 requests 是为了减少打包体积，减轻用户下载负担
 
     Returns:
         包含 tag_name, html_url, body, download_url 的字典，如果获取失败则返回 None

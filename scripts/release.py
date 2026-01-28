@@ -61,7 +61,8 @@ def update_version(new_version):
             )
             break
 
-    with open(toml_file, "w", encoding="utf-8") as f:
+    # 写入时使用 LF 换行符，避免 mixed-line-ending hook 修改文件
+    with open(toml_file, "w", encoding="utf-8", newline="\n") as f:
         f.writelines(lines)
     return new_version
 

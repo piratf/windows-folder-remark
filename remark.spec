@@ -9,8 +9,23 @@ Usage:
 import os
 import re
 import sys
+import subprocess
 
 from PyInstaller.utils.hooks import collect_submodules
+
+
+def get_upx_dir():
+    """获取项目本地的 UPX 目录"""
+    local_upx_dir = os.path.join(SPECPATH, "tools", "upx")
+    upx_exe = os.path.join(local_upx_dir, "upx.exe")
+
+    if os.path.exists(upx_exe):
+        return local_upx_dir
+
+    # UPX 不可用，返回 None 禁用压缩
+    print("警告: UPX 不可用，将禁用压缩（exe 体积会更大）")
+    print("提示: 运行 'python scripts/ensure_upx.py' 自动安装 UPX")
+    return None
 
 # =============================================================================
 # Configuration
@@ -61,8 +76,6 @@ options = [
 # Collect all submodules from remark package
 hiddenimports = collect_submodules('remark') + [
     'tkinter',
-    'requests',
-    'tqdm',
     'packaging',
     'packaging.version',
 ]
@@ -101,6 +114,8 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 # EXE
 # =============================================================================
 
+upx_dir = get_upx_dir()
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -113,7 +128,8 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=upx_dir is not None,
+    upx_dir=upx_dir if upx_dir is not None else "",
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,  # Console application for interactive mode

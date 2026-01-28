@@ -22,10 +22,8 @@ classifiers = [
 ]
 
 # 运行时依赖
-dependencies = [
-    "requests>=2.31.0",
-    "tqdm>=4.66.0",
-]
+# 注意：仅使用 Python 标准库，无外部依赖
+dependencies = []
 
 # 开发依赖
 [project.optional-dependencies]
@@ -39,8 +37,6 @@ dev = [
     "pyfakefs>=5.0.0",
     "pre-commit>=3.0.0",
     "pyinstaller>=6.0.0",
-    "types-requests>=2.31.0",
-    "types-tqdm>=4.66.0",
 ]
 
 # 命令行入口

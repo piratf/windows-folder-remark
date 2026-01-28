@@ -7,8 +7,7 @@ import os
 import sys
 import tempfile
 import threading
-
-import requests
+import urllib.error
 
 from remark.core.folder_handler import FolderCommentHandler
 from remark.gui import remark_dialog
@@ -19,6 +18,7 @@ from remark.utils.updater import (
     check_for_updates,
     create_update_script,
     download_update,
+    force_check_updates,
     get_executable_path,
     trigger_update,
 )
@@ -65,6 +65,29 @@ class CLI:
         finally:
             self._update_check_done.set()
 
+    def check_update_now(self) -> bool:
+        """强制检查更新（用于 --update 命令，绕过缓存）
+
+        Returns:
+            True 如果有新版本，False 否则
+        """
+        print(f"当前版本: {get_version()}")
+        print("正在检查更新...")
+
+        update = force_check_updates(get_version())
+
+        if update:
+            print(f"\n发现新版本: {update['tag_name']}")
+            print(f"更新说明: {update['body'][:300]}...")
+            print(f"完整更新日志: {update['html_url']}")
+            response = input("\n是否立即更新? [Y/n]: ").lower()
+            if response in ("", "y", "yes"):
+                self._perform_update(update)
+            return True
+        else:
+            print("已是最新版本")
+            return False
+
     def _wait_for_update_check(self, timeout: float = 2.0) -> None:
         """等待后台检测完成
 
@@ -103,10 +126,26 @@ class CLI:
             print("请等待几秒钟，更新将自动完成。")
             trigger_update(script_path)
             sys.exit(0)
-        except requests.RequestException:
-            print("下载失败，请检查网络连接或手动下载更新")
+        except urllib.error.URLError as e:
+            err_msg = str(e)
+            if "closed connection" in err_msg.lower() or "connection reset" in err_msg.lower():
+                print("下载失败：连接被服务器断开")
+                print("请稍后重试，或访问以下链接手动下载：")
+                print(f"  {update['html_url']}")
+            elif "timeout" in err_msg.lower():
+                print("下载失败：请求超时")
+                print("请检查网络连接，或访问以下链接手动下载：")
+                print(f"  {update['html_url']}")
+            elif "no route to host" in err_msg.lower() or "hostname" in err_msg.lower():
+                print("下载失败：无法连接到服务器")
+                print("请检查网络连接，或访问以下链接手动下载：")
+                print(f"  {update['html_url']}")
+            else:
+                print("下载失败，请检查网络连接或手动下载更新")
+                print(f"  {update['html_url']}")
         except Exception as e:
             print(f"更新失败: {e}")
+            print(f"手动下载: {update['html_url']}")
 
     def add_comment(self, path, comment):
         """添加备注"""
@@ -233,6 +272,7 @@ class CLI:
         print("选项:")
         print("  --install          安装右键菜单")
         print("  --uninstall        卸载右键菜单")
+        print("  --update           检查更新")
         print("  --gui <路径>       GUI 模式（右键菜单调用）")
         print("  --delete <路径>    删除备注")
         print("  --view <路径>      查看备注")
@@ -242,6 +282,7 @@ class CLI:
         print(' [删除备注] python remark.py --delete "C:\\\\MyFolder"')
         print(' [查看当前备注] python remark.py --view "C:\\\\MyFolder"')
         print(" [安装右键菜单] python remark.py --install")
+        print(" [检查更新] python remark.py --update")
 
     def _handle_ambiguous_path(self, args_list: list[str]) -> tuple[str | None, str | None]:
         """
@@ -313,6 +354,7 @@ class CLI:
         parser.add_argument("args", nargs="*", help="位置参数（路径和备注）")
         parser.add_argument("--install", action="store_true", help="安装右键菜单")
         parser.add_argument("--uninstall", action="store_true", help="卸载右键菜单")
+        parser.add_argument("--update", action="store_true", help="检查更新")
         parser.add_argument("--gui", metavar="PATH", help="GUI 模式（右键菜单调用）")
         parser.add_argument("--delete", metavar="PATH", help="删除备注")
         parser.add_argument("--view", metavar="PATH", help="查看备注")
@@ -326,6 +368,9 @@ class CLI:
             self.install_menu()
         elif args.uninstall:
             self.uninstall_menu()
+        elif args.update:
+            self.check_update_now()
+            sys.exit(0)
         elif args.gui:
             self.gui_mode(args.gui)
         elif args.delete:

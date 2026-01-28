@@ -4,20 +4,44 @@
 提供版本检测、下载更新、创建更新脚本等功能。
 """
 
+import json
 import os
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 from typing import Any
 
-import requests
 from packaging import version
-from tqdm import tqdm
 
 from remark.utils.constants import (
     GITHUB_API_RELEASES,
     UPDATE_CACHE_FILE,
     UPDATE_CHECK_INTERVAL,
 )
+
+
+def _get_proxies() -> dict[str, str] | None:
+    """从环境变量获取代理配置"""
+    proxies = []
+    http_proxy = os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy")
+    https_proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+
+    if http_proxy:
+        proxies.append(("http", http_proxy))
+    if https_proxy:
+        proxies.append(("https", https_proxy))
+
+    return dict(proxies) if proxies else None
+
+
+def _create_opener():
+    """创建带代理的 URL opener"""
+    proxies = _get_proxies()
+    if proxies:
+        proxy_handler = urllib.request.ProxyHandler(proxies)
+        return urllib.request.build_opener(proxy_handler)
+    return urllib.request.build_opener()
 
 
 def _get_cache_file_path() -> str:
@@ -43,9 +67,18 @@ def get_latest_release() -> dict[str, Any] | None:
         包含 tag_name, html_url, body, download_url 的字典，如果获取失败则返回 None
     """
     try:
-        response = requests.get(GITHUB_API_RELEASES, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+        request = urllib.request.Request(
+            GITHUB_API_RELEASES,
+            headers={
+                "Accept": "application/vnd.github.v3+json",
+                "User-Agent": "windows-folder-remark",
+            },
+        )
+        opener = _create_opener()
+        with opener.open(request, timeout=10) as response:
+            if response.status != 200:
+                return None
+            data = json.load(response)
 
         # 过滤掉 prerelease 和 draft
         if data.get("prerelease") or data.get("draft"):
@@ -68,46 +101,47 @@ def get_latest_release() -> dict[str, Any] | None:
             "body": data.get("body", ""),
             "download_url": download_url,
         }
-    except requests.RequestException:
+    except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError, OSError):
         return None
 
 
-def check_update_cache() -> bool:
+def should_check_update() -> bool:
     """
-    检查是否在更新缓存时间内
+    检查是否应该进行更新检查
 
     Returns:
-        True 表示需要检查更新，False 表示在缓存期内
+        True 表示应该检查，False 表示还没到检查时间
     """
     cache_file = _get_cache_file_path()
     if not os.path.exists(cache_file):
-        return True
+        return True  # 没有记录，进行第一次检查
 
     try:
-        with open(cache_file, encoding="utf-8") as f:
-            last_check = float(f.read().strip())
         import time
 
-        return time.time() - last_check > UPDATE_CHECK_INTERVAL
+        with open(cache_file, encoding="utf-8") as f:
+            next_check_time = float(f.read().strip())
+        return time.time() >= next_check_time
     except (ValueError, OSError):
         return True
 
 
-def update_check_cache() -> None:
-    """更新检查时间缓存"""
+def update_next_check_time() -> None:
+    """更新下次检查时间为当前时间 + 24小时"""
     cache_file = _get_cache_file_path()
     try:
         import time
 
+        next_check = time.time() + UPDATE_CHECK_INTERVAL
         with open(cache_file, "w", encoding="utf-8") as f:
-            f.write(str(time.time()))
+            f.write(str(next_check))
     except OSError:
         pass
 
 
 def check_for_updates(current_version: str) -> dict[str, Any] | None:
     """
-    检查是否有新版本可用
+    检查是否有新版本可用（仅在需要时检查）
 
     Args:
         current_version: 当前版本号
@@ -115,24 +149,45 @@ def check_for_updates(current_version: str) -> dict[str, Any] | None:
     Returns:
         最新 release 信息字典，如果没有新版本则返回 None
     """
-    # 检查缓存
-    if not check_update_cache():
+    if not should_check_update():
         return None
 
-    # 获取最新 release
+    # 决定检查，立即更新下次检查时间
+    update_next_check_time()
+
     latest = get_latest_release()
     if not latest:
         return None
 
-    # 比较版本号
     try:
         if version.parse(latest["tag_name"]) > version.parse(current_version):
-            update_check_cache()
             return latest
     except version.InvalidVersion:
         return None
 
-    update_check_cache()
+    return None
+
+
+def force_check_updates(current_version: str) -> dict[str, Any] | None:
+    """
+    强制检查更新，不受缓存影响
+
+    Args:
+        current_version: 当前版本号
+
+    Returns:
+        最新 release 信息字典，如果没有新版本则返回 None
+    """
+    latest = get_latest_release()
+    if not latest:
+        return None
+
+    try:
+        if version.parse(latest["tag_name"]) > version.parse(current_version):
+            return latest
+    except version.InvalidVersion:
+        return None
+
     return None
 
 
@@ -147,23 +202,35 @@ def download_update(url: str, dest: str) -> str:
     Returns:
         下载的文件路径
     """
-    response = requests.get(url, stream=True, timeout=30)
-    response.raise_for_status()
-    total_size = int(response.headers.get("content-length", 0))
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "windows-folder-remark"},
+    )
+    opener = _create_opener()
 
-    with (
-        open(dest, "wb") as f,
-        tqdm(
-            total=total_size,
-            unit="B",
-            unit_scale=True,
-            desc="下载中",
-        ) as progress_bar,
-    ):
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
+    with opener.open(request, timeout=30) as response:
+        total_size = int(response.headers.get("content-length", 0))
+        downloaded = 0
+        chunk_size = 8192
+
+        with open(dest, "wb") as f:
+            while True:
+                chunk = response.read(chunk_size)
+                if not chunk:
+                    break
                 f.write(chunk)
-                progress_bar.update(len(chunk))
+                downloaded += len(chunk)
+
+                # 显示进度
+                if total_size > 0:
+                    percent = min(downloaded * 100 / total_size, 100)
+                    downloaded_mb = downloaded / 1024 / 1024
+                    total_mb = total_size / 1024 / 1024
+                    print(
+                        f"\r下载进度: {percent:.1f}% ({downloaded_mb:.1f}MB / {total_mb:.1f}MB)",
+                        end="",
+                    )
+        print()  # 换行
 
     return dest
 

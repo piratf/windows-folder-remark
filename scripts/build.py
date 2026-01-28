@@ -3,26 +3,38 @@
 
 使用方法:
     # 打包为单文件 exe
-    python scripts/build.py
+    python -m scripts.build
 
     # 清理构建文件
-    python scripts/build.py --clean
+    python -m scripts.build --clean
 """
 
 import argparse
-import io
 import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable
 
 # 设置 UTF-8 输出编码（Windows 兼容）
 if sys.platform == "win32":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 # 项目根目录
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# 导入 ensure_upx 模块
+do_ensure_upx: Callable[[], str | None] | None = None
+HAS_UPX_SCRIPT = False
+try:
+    from scripts.ensure_upx import ensure_upx as do_ensure_upx
+
+    HAS_UPX_SCRIPT = True
+except ImportError:
+    pass
 
 
 def get_project_version():
@@ -53,6 +65,23 @@ def clean_build_files():
     print("✓ 清理完成")
 
 
+def ensure_upx():
+    """确保 UPX 压缩工具可用"""
+    print("检查 UPX 压缩工具...")
+
+    if not HAS_UPX_SCRIPT or do_ensure_upx is None:
+        print("警告: UPX 安装脚本不存在，跳过")
+        return True
+
+    try:
+        upx_path = do_ensure_upx()
+        return upx_path is not None
+    except Exception as e:
+        print(f"警告: UPX 检查失败: {e}")
+        print("将继续打包，但压缩可能被禁用")
+        return True
+
+
 def build_exe():
     """使用 PyInstaller 打包为单文件 exe"""
     print("开始打包...")
@@ -71,6 +100,10 @@ def build_exe():
         print("错误: 未安装 PyInstaller")
         print("请运行: pip install pyinstaller")
         return False
+
+    # 确保 UPX 可用
+    if not ensure_upx():
+        print("警告: UPX 不可用，exe 体积会更大")
 
     # 运行 PyInstaller
     try:

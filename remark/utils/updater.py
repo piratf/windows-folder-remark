@@ -140,9 +140,12 @@ def update_next_check_time() -> None:
         pass
 
 
-def check_for_updates(current_version: str) -> dict[str, Any] | None:
+def check_updates_auto(current_version: str) -> dict[str, Any] | None:
     """
-    检查是否有新版本可用（仅在需要时检查）
+    自动检查更新（CLI 启动时调用，尊重缓存）
+
+    此函数用于后台自动检查更新，会先检查缓存文件，只有在需要时才访问网络。
+    检查成功后会更新缓存文件的下次检查时间。
 
     Args:
         current_version: 当前版本号
@@ -169,9 +172,12 @@ def check_for_updates(current_version: str) -> dict[str, Any] | None:
     return None
 
 
-def force_check_updates(current_version: str) -> dict[str, Any] | None:
+def check_updates_manual(current_version: str) -> dict[str, Any] | None:
     """
-    强制检查更新，不受缓存影响
+    手动检查更新（--update 命令调用，绕过缓存）
+
+    此函数用于用户手动触发更新检查，会直接访问 GitHub API 获取最新版本信息，
+    不受缓存文件影响。
 
     Args:
         current_version: 当前版本号

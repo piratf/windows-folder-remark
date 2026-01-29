@@ -15,7 +15,7 @@ class TestCLI:
     def disable_background_update_check(self, monkeypatch):
         """禁用后台更新检查，避免 pyfakefs 隔离被后台线程破坏"""
         monkeypatch.setattr(
-            "remark.cli.commands.CLI._check_update_in_background",
+            "remark.cli.commands.CLI._start_update_checker",
             lambda self: None,
         )
 

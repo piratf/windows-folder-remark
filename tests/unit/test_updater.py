@@ -12,10 +12,10 @@ from remark.utils.updater import (
     _create_opener,
     _get_cache_file_path,
     _get_proxies,
-    check_for_updates,
+    check_updates_auto,
+    check_updates_manual,
     create_update_script,
     download_update,
-    force_check_updates,
     get_executable_path,
     get_latest_release,
     should_check_update,
@@ -353,7 +353,7 @@ class TestCacheFunctions:
         ):
             update_next_check_time()
 
-    def test_check_for_updates_skips_when_not_needed(self, fs):
+    def test_check_updates_auto_skips_when_not_needed(self, fs):
         """不需要检查时直接返回 None，不调用 API"""
         current_time = 1704067200.0
         cache_file = _get_cache_file_path()
@@ -364,12 +364,12 @@ class TestCacheFunctions:
             patch("time.time", return_value=current_time),
             patch("remark.utils.updater.get_latest_release") as mock_api,
         ):
-            result = check_for_updates("2.0.2")
+            result = check_updates_auto("2.0.2")
 
         assert result is None
         mock_api.assert_not_called()
 
-    def test_check_for_updates_updates_cache_after_check(self, fs):
+    def test_check_updates_auto_updates_cache_after_check(self, fs):
         """检查后立即更新缓存时间"""
         current_time = 1704067200.0
 
@@ -377,7 +377,7 @@ class TestCacheFunctions:
             patch("time.time", return_value=current_time),
             patch("remark.utils.updater.get_latest_release", return_value=None),
         ):
-            check_for_updates("2.0.2")
+            check_updates_auto("2.0.2")
 
         cache_file = _get_cache_file_path()
         with open(cache_file, encoding="utf-8") as f:
@@ -386,7 +386,7 @@ class TestCacheFunctions:
         expected = current_time + UPDATE_CHECK_INTERVAL
         assert cached_time == expected
 
-    def test_check_for_updates_has_new_version(self, fs):
+    def test_check_updates_auto_has_new_version(self, fs):
         """有新版本时返回 release 信息"""
         current_time = 1704067200.0
         mock_release = {
@@ -400,12 +400,12 @@ class TestCacheFunctions:
             patch("time.time", return_value=current_time),
             patch("remark.utils.updater.get_latest_release", return_value=mock_release),
         ):
-            result = check_for_updates("2.0.2")
+            result = check_updates_auto("2.0.2")
 
         assert result is not None
         assert result["tag_name"] == "2.0.3"
 
-    def test_check_for_updates_no_new_version(self, fs):
+    def test_check_updates_auto_no_new_version(self, fs):
         """无新版本时返回 None"""
         current_time = 1704067200.0
         mock_release = {
@@ -419,11 +419,11 @@ class TestCacheFunctions:
             patch("time.time", return_value=current_time),
             patch("remark.utils.updater.get_latest_release", return_value=mock_release),
         ):
-            result = check_for_updates("2.0.2")
+            result = check_updates_auto("2.0.2")
 
         assert result is None
 
-    def test_check_for_updates_api_failure(self, fs):
+    def test_check_updates_auto_api_failure(self, fs):
         """API 失败时返回 None"""
         current_time = 1704067200.0
 
@@ -431,12 +431,12 @@ class TestCacheFunctions:
             patch("time.time", return_value=current_time),
             patch("remark.utils.updater.get_latest_release", return_value=None),
         ):
-            result = check_for_updates("2.0.2")
+            result = check_updates_auto("2.0.2")
 
         assert result is None
 
-    def test_force_check_updates_ignores_cache(self, fs):
-        """force_check_updates 忽略缓存，直接调用 API"""
+    def test_check_updates_manual_ignores_cache(self, fs):
+        """check_updates_manual 忽略缓存，直接调用 API"""
         current_time = 1704067200.0
         cache_file = _get_cache_file_path()
         next_check = current_time + UPDATE_CHECK_INTERVAL
@@ -452,13 +452,13 @@ class TestCacheFunctions:
         with patch(
             "remark.utils.updater.get_latest_release", return_value=mock_release
         ) as mock_api:
-            result = force_check_updates("2.0.2")
+            result = check_updates_manual("2.0.2")
 
         mock_api.assert_called_once()
         assert result is not None
         assert result["tag_name"] == "2.0.3"
 
-    def test_force_check_updates_no_new_version(self):
+    def test_check_updates_manual_no_new_version(self):
         """无新版本时返回 None"""
         mock_release = {
             "tag_name": "2.0.2",
@@ -468,14 +468,14 @@ class TestCacheFunctions:
         }
 
         with patch("remark.utils.updater.get_latest_release", return_value=mock_release):
-            result = force_check_updates("2.0.2")
+            result = check_updates_manual("2.0.2")
 
         assert result is None
 
-    def test_force_check_updates_api_returns_none(self):
+    def test_check_updates_manual_api_returns_none(self):
         """API 返回 None 时返回 None"""
         with patch("remark.utils.updater.get_latest_release", return_value=None):
-            result = force_check_updates("2.0.2")
+            result = check_updates_manual("2.0.2")
 
         assert result is None
 
@@ -564,7 +564,7 @@ class TestUpdateScript:
 class TestInvalidVersion:
     """测试无效版本号处理"""
 
-    def test_check_for_updates_invalid_version(self, fs):
+    def test_check_updates_auto_invalid_version(self, fs):
         """当前版本号无效时返回 None"""
         current_time = 1704067200.0
         mock_release = {
@@ -578,11 +578,11 @@ class TestInvalidVersion:
             patch("time.time", return_value=current_time),
             patch("remark.utils.updater.get_latest_release", return_value=mock_release),
         ):
-            result = check_for_updates("2.0.2")
+            result = check_updates_auto("2.0.2")
 
         assert result is None
 
-    def test_force_check_updates_invalid_version(self):
+    def test_check_updates_manual_invalid_version(self):
         """强制检查时，版本号无效返回 None"""
         mock_release = {
             "tag_name": "invalid-version",
@@ -592,6 +592,6 @@ class TestInvalidVersion:
         }
 
         with patch("remark.utils.updater.get_latest_release", return_value=mock_release):
-            result = force_check_updates("2.0.2")
+            result = check_updates_manual("2.0.2")
 
         assert result is None

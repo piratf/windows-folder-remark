@@ -15,11 +15,12 @@ from remark.utils import registry
 from remark.utils.path_resolver import find_candidates
 from remark.utils.platform import check_platform
 from remark.utils.updater import (
-    check_for_updates,
+    check_updates_auto,
+    check_updates_manual,
     create_update_script,
     download_update,
-    force_check_updates,
     get_executable_path,
+    should_check_update,
     trigger_update,
 )
 
@@ -41,7 +42,11 @@ class CLI:
         self.handler = FolderCommentHandler()
         self.pending_update = None
         self._update_check_done = threading.Event()
-        self._check_update_in_background()
+        # 先检查缓存，只有在需要检查时才启动后台线程
+        if should_check_update():
+            self._start_update_checker()
+        else:
+            self._update_check_done.set()  # 不需要检查，直接标记完成
 
     def _validate_folder(self, path):
         """验证路径是否为文件夹"""
@@ -53,15 +58,15 @@ class CLI:
             return False
         return True
 
-    def _check_update_in_background(self):
+    def _start_update_checker(self):
         """后台线程检查更新，不阻塞主流程"""
-        thread = threading.Thread(target=self._do_check_update, daemon=True)
+        thread = threading.Thread(target=self._run_update_check, daemon=True)
         thread.start()
 
-    def _do_check_update(self):
+    def _run_update_check(self):
         """实际执行更新检查"""
         try:
-            self.pending_update = check_for_updates(get_version())
+            self.pending_update = check_updates_auto(get_version())
         finally:
             self._update_check_done.set()
 
@@ -74,7 +79,7 @@ class CLI:
         print(f"当前版本: {get_version()}")
         print("正在检查更新...")
 
-        update = force_check_updates(get_version())
+        update = check_updates_manual(get_version())
 
         if update:
             print(f"\n发现新版本: {update['tag_name']}")

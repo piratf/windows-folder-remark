@@ -425,7 +425,7 @@ class CLI:
         parser.add_argument("--delete", metavar="PATH", help="删除备注")
         parser.add_argument("--view", metavar="PATH", help="查看备注")
         parser.add_argument("--help", "-h", action="store_true", help="显示帮助信息")
-        parser.add_argument("--lang", "-L", metavar="LANG", help="设置语言 (en, zh_CN)", dest="lang")
+        parser.add_argument("--lang", "-L", metavar="LANG", help="设置语言 (en, zh)", dest="lang")
 
         args = parser.parse_args(argv)
 

@@ -1,7 +1,6 @@
 """CLI 命令单元测试"""
 
 import os
-from unittest.mock import patch
 
 import pytest
 
@@ -356,16 +355,14 @@ class TestResolvePathAmbiguousArgs:
         """测试拒绝文件路径"""
         fs.create_file("/file.txt")
         cli = CLI()
-        with patch("builtins.print"):
-            path = cli._resolve_path_from_ambiguous_args(["file"])
+        path = cli._resolve_path_from_ambiguous_args(["file"])
         assert path is None  # 文件应被拒绝
 
     @pytest.mark.skipif(os.name != "nt", reason="Windows only")
     def test_resolve_path_no_candidates(self, fs):
         """测试无候选路径时返回 None"""
         cli = CLI()
-        with patch("builtins.print"):
-            path = cli._resolve_path_from_ambiguous_args(["nonexistent"])
+        path = cli._resolve_path_from_ambiguous_args(["nonexistent"])
         assert path is None
 
     @pytest.mark.skipif(os.name != "nt", reason="Windows only")

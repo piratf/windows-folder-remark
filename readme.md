@@ -7,6 +7,8 @@
 - 支持中文等多语言字符（UTF-16 编码）
 - 命令行模式和交互模式
 - 自动编码检测和修复
+- 自动更新检查，保持最新版本
+- 右键菜单集成，快速访问
 - 单文件 exe 打包，无需 Python 环境
 
 ## 安装
@@ -42,6 +44,15 @@ windows-folder-remark.exe --view "C:\MyFolder"
 
 # 删除备注
 windows-folder-remark.exe --delete "C:\MyFolder"
+
+# 检查更新
+windows-folder-remark.exe --update
+
+# 安装右键菜单
+windows-folder-remark.exe --install
+
+# 卸载右键菜单
+windows-folder-remark.exe --uninstall
 ```
 
 ### 交互模式
@@ -49,6 +60,28 @@ windows-folder-remark.exe --delete "C:\MyFolder"
 ```bash
 # 运行后根据提示操作
 windows-folder-remark.exe
+```
+
+### 右键菜单（推荐）
+
+安装右键菜单后，可以直接在文件资源管理器中右键文件夹添加备注：
+
+```bash
+# 安装右键菜单
+windows-folder-remark.exe --install
+```
+
+- **Windows 10**: 右键文件夹可直接看到「添加文件夹备注」
+- **Windows 11**: 右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注
+
+### 自动更新
+
+程序会在退出时自动检查更新（每 24 小时一次），如有新版本会提示是否立即更新。
+
+也可以手动检查更新：
+
+```bash
+windows-folder-remark.exe --update
 ```
 
 ## 编码检测

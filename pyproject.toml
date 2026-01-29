@@ -3,7 +3,7 @@
 
 [project]
 name = "windows-folder-remark"
-version = "2.0.3"
+version = "2.0.4"
 description = "Windows 文件夹备注工具"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -22,6 +22,7 @@ classifiers = [
 ]
 
 # 运行时依赖
+# 注意：仅使用 Python 标准库，无外部依赖
 dependencies = []
 
 # 开发依赖
@@ -47,6 +48,9 @@ remark-build = "scripts.build:main"
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["remark*"]
 
 
 # =============================================================================

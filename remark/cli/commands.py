@@ -5,12 +5,24 @@
 import argparse
 import os
 import sys
+import tempfile
+import threading
+import urllib.error
 
 from remark.core.folder_handler import FolderCommentHandler
 from remark.gui import remark_dialog
 from remark.utils import registry
 from remark.utils.path_resolver import find_candidates
 from remark.utils.platform import check_platform
+from remark.utils.updater import (
+    check_updates_auto,
+    check_updates_manual,
+    create_update_script,
+    download_update,
+    get_executable_path,
+    should_check_update,
+    trigger_update,
+)
 
 
 def get_version():
@@ -28,6 +40,13 @@ class CLI:
 
     def __init__(self):
         self.handler = FolderCommentHandler()
+        self.pending_update = None
+        self._update_check_done = threading.Event()
+        # 先检查缓存，只有在需要检查时才启动后台线程
+        if should_check_update():
+            self._start_update_checker()
+        else:
+            self._update_check_done.set()  # 不需要检查，直接标记完成
 
     def _validate_folder(self, path):
         """验证路径是否为文件夹"""
@@ -38,6 +57,100 @@ class CLI:
             print("路径不是文件夹:", path)
             return False
         return True
+
+    def _start_update_checker(self):
+        """后台线程检查更新，不阻塞主流程"""
+        thread = threading.Thread(target=self._run_update_check, daemon=True)
+        thread.start()
+
+    def _run_update_check(self):
+        """实际执行更新检查"""
+        try:
+            self.pending_update = check_updates_auto(get_version())
+        finally:
+            self._update_check_done.set()
+
+    def check_update_now(self) -> bool:
+        """强制检查更新（用于 --update 命令，绕过缓存）
+
+        Returns:
+            True 如果有新版本，False 否则
+        """
+        print(f"当前版本: {get_version()}")
+        print("正在检查更新...")
+
+        update = check_updates_manual(get_version())
+
+        if update:
+            print(f"\n发现新版本: {update['tag_name']}")
+            print(f"更新说明: {update['body'][:300]}...")
+            print(f"完整更新日志: {update['html_url']}")
+            response = input("\n是否立即更新? [Y/n]: ").lower()
+            if response in ("", "y", "yes"):
+                self._perform_update(update)
+            return True
+        else:
+            print("已是最新版本")
+            return False
+
+    def _wait_for_update_check(self, timeout: float = 2.0) -> None:
+        """等待后台检测完成
+
+        Args:
+            timeout: 超时时间（秒）
+        """
+        self._update_check_done.wait(timeout=timeout)
+
+    def _prompt_update(self) -> None:
+        """提示用户有新版本可用"""
+        update = self.pending_update
+        if update is None:
+            return
+        print(f"\n发现新版本: {update['tag_name']} (当前版本: {get_version()})")
+        print(f"更新说明: {update['body'][:200]}...")
+        print(f"完整更新日志: {update['html_url']}")
+        response = input("是否立即更新? [Y/n]: ").lower()
+        if response in ("", "y", "yes"):
+            self._perform_update(update)
+
+    def _perform_update(self, update: dict) -> None:
+        """执行更新流程"""
+        try:
+            print("正在下载新版本...")
+            # 下载到临时目录
+            new_exe = os.path.join(
+                tempfile.gettempdir(), f"windows-folder-remark-{update['tag_name']}.exe"
+            )
+            download_update(update["download_url"], new_exe)
+
+            print("下载完成，准备更新...")
+            old_exe = get_executable_path()
+            script_path = create_update_script(old_exe, new_exe)
+
+            print("更新程序已启动，程序即将退出...")
+            print("请等待几秒钟，更新将自动完成。")
+            trigger_update(script_path)
+            sys.exit(0)
+        except urllib.error.URLError as e:
+            err_msg = str(e)
+            if "closed connection" in err_msg.lower() or "connection reset" in err_msg.lower():
+                print("下载失败：连接被服务器断开")
+                print("请稍后重试，或访问以下链接手动下载：")
+                print(f"  {update['html_url']}")
+            elif "timeout" in err_msg.lower():
+                print("下载失败：请求超时")
+                print("请检查网络连接，或访问以下链接手动下载：")
+                print(f"  {update['html_url']}")
+            elif "no route to host" in err_msg.lower() or "hostname" in err_msg.lower():
+                print("下载失败：无法连接到服务器")
+                print("请检查网络连接，或访问以下链接手动下载：")
+                print(f"  {update['html_url']}")
+            else:
+                print("下载失败，请检查网络连接或手动下载更新")
+                print(f"  {update['html_url']}")
+        except Exception as e:
+            print(f"更新失败: {e}")
+            print(f"手动下载: {update['html_url']}")
 
     def add_comment(self, path, comment):
         """添加备注"""
@@ -164,6 +277,7 @@ class CLI:
         print("选项:")
         print("  --install          安装右键菜单")
         print("  --uninstall        卸载右键菜单")
+        print("  --update           检查更新")
         print("  --gui <路径>       GUI 模式（右键菜单调用）")
         print("  --delete <路径>    删除备注")
         print("  --view <路径>      查看备注")
@@ -173,6 +287,7 @@ class CLI:
         print(' [删除备注] python remark.py --delete "C:\\\\MyFolder"')
         print(' [查看当前备注] python remark.py --view "C:\\\\MyFolder"')
         print(" [安装右键菜单] python remark.py --install")
+        print(" [检查更新] python remark.py --update")
 
     def _handle_ambiguous_path(self, args_list: list[str]) -> tuple[str | None, str | None]:
         """
@@ -244,6 +359,7 @@ class CLI:
         parser.add_argument("args", nargs="*", help="位置参数（路径和备注）")
         parser.add_argument("--install", action="store_true", help="安装右键菜单")
         parser.add_argument("--uninstall", action="store_true", help="卸载右键菜单")
+        parser.add_argument("--update", action="store_true", help="检查更新")
         parser.add_argument("--gui", metavar="PATH", help="GUI 模式（右键菜单调用）")
         parser.add_argument("--delete", metavar="PATH", help="删除备注")
         parser.add_argument("--view", metavar="PATH", help="查看备注")
@@ -257,6 +373,9 @@ class CLI:
             self.install_menu()
         elif args.uninstall:
             self.uninstall_menu()
+        elif args.update:
+            self.check_update_now()
+            sys.exit(0)
         elif args.gui:
             self.gui_mode(args.gui)
         elif args.delete:
@@ -281,8 +400,8 @@ class CLI:
 
 def main():
     """主入口"""
+    cli = CLI()
     try:
-        cli = CLI()
         cli.run()
     except KeyboardInterrupt:
         print("\n操作已取消")
@@ -290,6 +409,12 @@ def main():
     except Exception as e:
         print("发生错误:", str(e))
         sys.exit(1)
+    finally:
+        # 等待后台检测完成（最多等待 2 秒）
+        cli._wait_for_update_check(timeout=2.0)
+        # 退出前检查更新
+        if cli.pending_update:
+            cli._prompt_update()
 
 
 if __name__ == "__main__":

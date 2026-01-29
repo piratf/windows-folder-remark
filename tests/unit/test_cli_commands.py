@@ -11,6 +11,14 @@ from remark.cli.commands import CLI, get_version
 class TestCLI:
     """CLI 命令测试"""
 
+    @pytest.fixture(autouse=True)
+    def disable_background_update_check(self, monkeypatch):
+        """禁用后台更新检查，避免 pyfakefs 隔离被后台线程破坏"""
+        monkeypatch.setattr(
+            "remark.cli.commands.CLI._start_update_checker",
+            lambda self: None,
+        )
+
     def test_init(self):
         """测试 CLI 初始化"""
         cli = CLI()

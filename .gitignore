@@ -32,3 +32,4 @@ dmypy.json
 # Distribution
 *.whl
 *.tar.gz
+/tools/upx/

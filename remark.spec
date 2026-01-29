@@ -9,8 +9,25 @@ Usage:
 import os
 import re
 import sys
+import subprocess
 
 from PyInstaller.utils.hooks import collect_submodules
+
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+
+def get_upx_dir():
+    local_upx_dir = os.path.join(SPECPATH, "tools", "upx")
+    upx_exe = os.path.join(local_upx_dir, "upx.exe")
+
+    if os.path.exists(upx_exe):
+        return local_upx_dir
+
+    print("WARNING: UPX not available, compression disabled (exe will be larger)")
+    print("HINT: Run 'python scripts/ensure_upx.py' to install UPX automatically")
+    return None
 
 # =============================================================================
 # Configuration
@@ -59,7 +76,11 @@ options = [
 # =============================================================================
 
 # Collect all submodules from remark package
-hiddenimports = collect_submodules('remark') + ['tkinter']
+hiddenimports = collect_submodules('remark') + [
+    'tkinter',
+    'packaging',
+    'packaging.version',
+]
 
 a = Analysis(
     [os.path.join("remark", "cli", "commands.py")],
@@ -70,7 +91,15 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        'setuptools',
+        'setuptools.*',
+        'distutils',
+        'distutils.*',
+        'unittest',
+        'pydoc',
+        'pydoc_data',
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -87,6 +116,8 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 # EXE
 # =============================================================================
 
+upx_dir = get_upx_dir()
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -99,7 +130,8 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=upx_dir is not None,
+    upx_dir=upx_dir if upx_dir is not None else "",
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,  # Console application for interactive mode

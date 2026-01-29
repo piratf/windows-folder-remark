@@ -11,6 +11,7 @@ import urllib.error
 
 from remark.core.folder_handler import FolderCommentHandler
 from remark.gui import remark_dialog
+from remark.i18n import _ as _, set_language
 from remark.utils import registry
 from remark.utils.path_resolver import find_candidates
 from remark.utils.platform import check_platform
@@ -48,13 +49,13 @@ class CLI:
         else:
             self._update_check_done.set()  # 不需要检查，直接标记完成
 
-    def _validate_folder(self, path):
+    def _validate_folder(self, path: str) -> bool:
         """验证路径是否为文件夹"""
         if not os.path.exists(path):
-            print("路径不存在:", path)
+            print(_("Path does not exist: {path}").format(path=path))
             return False
         if not self.handler.supports(path):
-            print("路径不是文件夹:", path)
+            print(_("Path is not a folder: {path}").format(path=path))
             return False
         return True
 
@@ -76,21 +77,21 @@ class CLI:
         Returns:
             True 如果有新版本，False 否则
         """
-        print(f"当前版本: {get_version()}")
-        print("正在检查更新...")
+        print(_("Current version: {version}").format(version=get_version()))
+        print(_("Checking for updates..."))
 
         update = check_updates_manual(get_version())
 
         if update:
-            print(f"\n发现新版本: {update['tag_name']}")
-            print(f"更新说明: {update['body'][:300]}...")
-            print(f"完整更新日志: {update['html_url']}")
-            response = input("\n是否立即更新? [Y/n]: ").lower()
+            print(_("\nNew version found: {tag_name}").format(tag_name=update["tag_name"]))
+            print(_("Update notes: {notes}").format(notes=update["body"][:300]))
+            print(_("Full changelog: {url}").format(url=update["html_url"]))
+            response = input(_("\nUpdate now? [Y/n]: ")).lower()
             if response in ("", "y", "yes"):
                 self._perform_update(update)
             return True
         else:
-            print("已是最新版本")
+            print(_("Already at the latest version"))
             return False
 
     def _wait_for_update_check(self, timeout: float = 2.0) -> None:
@@ -106,51 +107,55 @@ class CLI:
         update = self.pending_update
         if update is None:
             return
-        print(f"\n发现新版本: {update['tag_name']} (当前版本: {get_version()})")
-        print(f"更新说明: {update['body'][:200]}...")
-        print(f"完整更新日志: {update['html_url']}")
-        response = input("是否立即更新? [Y/n]: ").lower()
+        print(
+            _("\nNew version available: {tag_name} (Current version: {version})").format(
+                tag_name=update["tag_name"], version=get_version()
+            )
+        )
+        print(_("Update notes: {notes}").format(notes=update["body"][:200]))
+        print(_("Full changelog: {url}").format(url=update["html_url"]))
+        response = input(_("Update now? [Y/n]: ")).lower()
         if response in ("", "y", "yes"):
             self._perform_update(update)
 
     def _perform_update(self, update: dict) -> None:
         """执行更新流程"""
         try:
-            print("正在下载新版本...")
+            print(_("Downloading new version..."))
             # 下载到临时目录
             new_exe = os.path.join(
                 tempfile.gettempdir(), f"windows-folder-remark-{update['tag_name']}.exe"
             )
             download_update(update["download_url"], new_exe)
 
-            print("下载完成，准备更新...")
+            print(_("Download complete, preparing update..."))
             old_exe = get_executable_path()
             script_path = create_update_script(old_exe, new_exe)
 
-            print("更新程序已启动，程序即将退出...")
-            print("请等待几秒钟，更新将自动完成。")
+            print(_("Update program has started, the application will exit..."))
+            print(_("Please wait a few moments, the update will complete automatically."))
             trigger_update(script_path)
             sys.exit(0)
         except urllib.error.URLError as e:
             err_msg = str(e)
             if "closed connection" in err_msg.lower() or "connection reset" in err_msg.lower():
-                print("下载失败：连接被服务器断开")
-                print("请稍后重试，或访问以下链接手动下载：")
+                print(_("Download failed: Connection reset by server"))
+                print(_("Please try again later, or visit the following link to download manually:"))
                 print(f"  {update['html_url']}")
             elif "timeout" in err_msg.lower():
-                print("下载失败：请求超时")
-                print("请检查网络连接，或访问以下链接手动下载：")
+                print(_("Download failed: Request timeout"))
+                print(_("Please check your network connection, or visit the following link to download manually:"))
                 print(f"  {update['html_url']}")
             elif "no route to host" in err_msg.lower() or "hostname" in err_msg.lower():
-                print("下载失败：无法连接到服务器")
-                print("请检查网络连接，或访问以下链接手动下载：")
+                print(_("Download failed: Unable to connect to server"))
+                print(_("Please check your network connection, or visit the following link to download manually:"))
                 print(f"  {update['html_url']}")
             else:
-                print("下载失败，请检查网络连接或手动下载更新")
+                print(_("Download failed, please check your network or download manually"))
                 print(f"  {update['html_url']}")
         except Exception as e:
-            print(f"更新失败: {e}")
-            print(f"手动下载: {update['html_url']}")
+            print(_("Update failed: {error}").format(error=e))
+            print(_("Manual download: {url}").format(url=update["html_url"]))
 
     def add_comment(self, path, comment):
         """添加备注"""
@@ -167,23 +172,23 @@ class CLI:
     def install_menu(self) -> bool:
         """安装右键菜单"""
         if registry.install_context_menu():
-            print("右键菜单安装成功")
+            print(_("Right-click menu installed successfully"))
             print("")
-            print("使用说明:")
-            print("  Windows 10: 右键文件夹可直接看到「添加文件夹备注」")
-            print("  Windows 11: 右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注")
+            print(_("Usage Instructions:"))
+            print(_("  Windows 10: Right-click folder to see 'Add Folder Remark'"))
+            print(_("  Windows 11: Right-click folder → Click 'Show more options' → Add Folder Remark"))
             return True
         else:
-            print("右键菜单安装失败")
+            print(_("Right-click menu installation failed"))
             return False
 
     def uninstall_menu(self) -> bool:
         """卸载右键菜单"""
         if registry.uninstall_context_menu():
-            print("右键菜单已卸载")
+            print(_("Right-click menu uninstalled"))
             return True
         else:
-            print("右键菜单卸载失败")
+            print(_("Right-click menu uninstallation failed"))
             return False
 
     def gui_mode(self, folder_path: str) -> bool:
@@ -198,7 +203,7 @@ class CLI:
             return result is not False
         return False
 
-    def view_comment(self, path):
+    def view_comment(self, path: str) -> None:
         """查看备注"""
         if self._validate_folder(path):
             # 检查 desktop.ini 编码
@@ -209,85 +214,87 @@ class CLI:
                 detected_encoding, is_utf16 = DesktopIniHandler.detect_encoding(desktop_ini_path)
                 if not is_utf16:
                     print(
-                        f"警告: desktop.ini 文件编码为 {detected_encoding or '未知'}，不是标准的 UTF-16。"
+                        _(
+                            "Warning: desktop.ini file encoding is {encoding}, not standard UTF-16."
+                        ).format(encoding=detected_encoding or _("unknown"))
                     )
-                    print("这可能导致中文等特殊字符显示异常。")
+                    print(_("This may cause Chinese and other special characters to display abnormally."))
 
                     # 询问是否修复
                     while True:
-                        response = input("是否修复编码为 UTF-16？[Y/n]: ").strip().lower()
+                        response = input(_("Fix encoding to UTF-16? [Y/n]: ")).strip().lower()
                         if response in ("", "y", "yes"):
                             if DesktopIniHandler.fix_encoding(desktop_ini_path, detected_encoding):
-                                print("✓ 已修复为 UTF-16 编码")
+                                print(_("Fixed to UTF-16 encoding"))
                             else:
-                                print("✗ 修复失败")
+                                print(_("Failed to fix encoding"))
                             break
                         elif response in ("n", "no"):
-                            print("跳过编码修复")
+                            print(_("Skip encoding fix"))
                             break
                         else:
-                            print("请输入 Y 或 n")
+                            print(_("Please enter Y or n"))
                     print()  # 空行分隔
 
             comment = self.handler.get_comment(path)
             if comment:
-                print("当前备注:", comment)
+                print(_("Current remark: {remark}").format(remark=comment))
             else:
-                print("该文件夹没有备注")
+                print(_("This folder has no remark"))
 
-    def interactive_mode(self):
+    def interactive_mode(self) -> None:
         """交互模式"""
         version = get_version()
-        print("Windows 文件夹备注工具 v" + version)
-        print("提示: 按 Ctrl + C 退出程序" + os.linesep)
+        print(_("Windows Folder Remark Tool v{version}").format(version=version))
+        print(_("Tip: Press Ctrl + C to exit") + os.linesep)
 
-        input_path_msg = "请输入文件夹路径(或拖动到这里): "
-        input_comment_msg = "请输入备注:"
+        input_path_msg = _("Enter folder path (or drag here): ")
+        input_comment_msg = _("Enter remark:")
 
         while True:
             try:
                 path = input(input_path_msg).replace('"', "").strip()
 
                 if not os.path.exists(path):
-                    print("路径不存在，请重新输入")
+                    print(_("Path does not exist, please re-enter"))
                     continue
 
                 if not os.path.isdir(path):
-                    print('这是一个"文件"，当前仅支持为"文件夹"添加备注')
+                    print(_("This is a 'file', currently only supports adding remarks to 'folders'"))
                     continue
 
                 comment = input(input_comment_msg)
                 while not comment:
-                    print("备注不要为空哦")
+                    print(_("Remark cannot be empty"))
                     comment = input(input_comment_msg)
 
                 self.add_comment(path, comment)
 
             except KeyboardInterrupt:
-                print(" ❤ 感谢使用")
+                print(_(" ❤ Thank you for using"))
                 break
-            print(os.linesep + "继续处理或按 Ctrl + C 退出程序" + os.linesep)
+            print(os.linesep + _("Continue processing or press Ctrl + C to exit") + os.linesep)
 
-    def show_help(self):
+    def show_help(self) -> None:
         """显示帮助信息"""
-        print("Windows 文件夹备注工具")
-        print("使用方法:")
-        print("  交互模式: python remark.py")
-        print("  命令行模式: python remark.py [选项] [参数]")
-        print("选项:")
-        print("  --install          安装右键菜单")
-        print("  --uninstall        卸载右键菜单")
-        print("  --update           检查更新")
-        print("  --gui <路径>       GUI 模式（右键菜单调用）")
-        print("  --delete <路径>    删除备注")
-        print("  --view <路径>      查看备注")
-        print("  --help, -h         显示帮助信息")
-        print("示例:")
-        print(' [添加备注] python remark.py "C:\\\\MyFolder" "这是我的文件夹"')
-        print(' [删除备注] python remark.py --delete "C:\\\\MyFolder"')
-        print(' [查看当前备注] python remark.py --view "C:\\\\MyFolder"')
-        print(" [安装右键菜单] python remark.py --install")
-        print(" [检查更新] python remark.py --update")
+        print(_("Windows Folder Remark Tool"))
+        print(_("Usage:"))
+        print(_("  Interactive mode: python remark.py"))
+        print(_("  Command line mode: python remark.py [options] [arguments]"))
+        print(_("Options:"))
+        print(_("  --install          Install right-click menu"))
+        print(_("  --uninstall        Uninstall right-click menu"))
+        print(_("  --update           Check for updates"))
+        print(_("  --gui <path>        GUI mode (called from right-click menu)"))
+        print(_("  --delete <path>     Delete remark"))
+        print(_("  --view <path>        View remark"))
+        print(_("  --help, -h         Show help information"))
+        print(_("Examples:"))
+        print(_(' [Add remark] python remark.py "C:\\\\MyFolder" "My Folder"'))
+        print(_(' [Delete remark] python remark.py --delete "C:\\\\MyFolder"'))
+        print(_(' [View current remark] python remark.py --view "C:\\\\MyFolder"'))
+        print(_(" [Install right-click menu] python remark.py --install"))
+        print(_(" [Check for updates] python remark.py --update"))
 
     def _select_from_multiple_candidates(
         self, candidates: list, show_remaining: bool = False
@@ -344,26 +351,26 @@ class CLI:
         candidates = find_candidates(args_list)
 
         if not candidates:
-            print("错误: 路径不存在或未使用引号")
-            print("提示: 路径包含空格时请使用引号")
-            print('  windows-folder-remark "C:\\\\My Documents" "备注内容"')
+            print(_("Error: Path does not exist or not quoted"))
+            print(_("Hint: Use quotes when path contains spaces"))
+            print(_('  windows-folder-remark "C:\\\\My Documents" "Remark content"'))
             return None, None
 
         if len(candidates) == 1:
             path, remaining, path_type = candidates[0]
-            print(f"检测到路径: {path}")
+            print(_("Detected path: {path}").format(path=path))
 
             if path_type == "file":
-                print("错误: 这是一个文件，工具只能为文件夹设置备注")
+                print(_("Error: This is a file, the tool can only set remarks for folders"))
                 return None, None
 
             if remaining:
                 comment = " ".join(remaining)
-                print(f"备注内容: {comment}")
+                print(_("Remark content: {remark}").format(remark=comment))
             else:
-                print("(将查看现有备注)")
+                print(_("(Will view existing remark)"))
 
-            if input("是否继续? [Y/n]: ").lower() in ("", "y", "yes"):
+            if input(_("Continue? [Y/n]: ")).lower() in ("", "y", "yes"):
                 return str(path), " ".join(remaining) if remaining else None
 
             return None, None
@@ -396,7 +403,7 @@ class CLI:
             if path_type == "folder":
                 return str(path)
             else:
-                print("错误: 这是一个文件，工具只能为文件夹设置备注")
+                print(_("Error: This is a file, the tool can only set remarks for folders"))
                 return None
 
         result = self._select_from_multiple_candidates(candidates, show_remaining=False)
@@ -404,7 +411,7 @@ class CLI:
             return result[0]
         return None
 
-    def run(self, argv=None):
+    def run(self, argv=None) -> None:
         """运行 CLI"""
         if not check_platform():
             sys.exit(1)
@@ -418,8 +425,13 @@ class CLI:
         parser.add_argument("--delete", metavar="PATH", help="删除备注")
         parser.add_argument("--view", metavar="PATH", help="查看备注")
         parser.add_argument("--help", "-h", action="store_true", help="显示帮助信息")
+        parser.add_argument("--lang", "-L", metavar="LANG", help="设置语言 (en, zh_CN)", dest="lang")
 
         args = parser.parse_args(argv)
+
+        # 设置语言
+        if args.lang:
+            set_language(args.lang)
 
         if args.help:
             self.show_help()
@@ -464,16 +476,16 @@ class CLI:
             self.interactive_mode()
 
 
-def main():
+def main() -> None:
     """主入口"""
     cli = CLI()
     try:
         cli.run()
     except KeyboardInterrupt:
-        print("\n操作已取消")
+        print(_("\nOperation cancelled"))
         sys.exit(0)
     except Exception as e:
-        print("发生错误:", str(e))
+        print(_("An error occurred: {error}").format(error=str(e)))
         sys.exit(1)
     finally:
         # 等待后台检测完成（最多等待 2 秒）

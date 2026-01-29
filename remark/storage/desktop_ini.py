@@ -14,6 +14,8 @@ This is necessary to store the localized strings that can be displayed to users.
 import codecs
 import os
 
+from remark.i18n import _ as _
+
 
 class EncodingConversionCanceled(Exception):  # noqa: N818
     """编码转换被用户取消"""
@@ -303,42 +305,46 @@ class DesktopIniHandler:
             return  # 已经是 UTF-16
 
         # 文件不是 UTF-16，需要用户确认
-        print(f"警告：desktop.ini 文件编码为 {encoding or '未知'}，不是标准的 UTF-16。")
-        print("修改此文件前需要先转换为 UTF-16 编码。")
-        print("原内容会被保留，仅改变编码格式。")
+        print(
+            _("Warning: desktop.ini file encoding is {encoding}, not standard UTF-16.").format(
+                encoding=encoding or _("unknown")
+            )
+        )
+        print(_("This file needs to be converted to UTF-16 encoding before modification."))
+        print(_("The original content will be preserved, only the encoding format will change."))
 
         try:
             # 显示文件预览
             with codecs.open(file_path, "r", encoding=encoding or "utf-8") as f:
                 content = f.read()
 
-            print("\n当前文件内容:")
+            print(_("\nCurrent file content:"))
             print("-" * 40)
             print(content)
             print("-" * 40)
 
             # 用户确认
             while True:
-                response = input("\n是否转换为 UTF-16 编码后继续？[Y/n]: ").strip().lower()
+                response = input(_("\nConvert to UTF-16 encoding and continue? [Y/n]: ")).strip().lower()
                 if response in ("", "y", "yes"):
                     break
                 elif response in ("n", "no"):
-                    print("操作已取消。")
+                    print(_("Operation cancelled."))
                     raise EncodingConversionCanceled("用户拒绝编码转换")
                 else:
-                    print("请输入 Y 或 n")
+                    print(_("Please enter Y or n"))
 
             # 执行转换
             with codecs.open(file_path, "w", encoding=DESKTOP_INI_ENCODING) as f:
                 f.write(content)
 
-            print("✓ 已转换为 UTF-16 编码。")
+            print(_("Converted to UTF-16 encoding."))
 
         except EncodingConversionCanceled:
             raise
         except Exception as e:
-            print(f"转换失败: {e}")
-            print("操作已取消。")
+            print(_("Conversion failed: {error}").format(error=e))
+            print(_("Operation cancelled."))
             raise EncodingConversionCanceled(f"编码转换失败: {e}") from e
 
     @staticmethod

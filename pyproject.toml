@@ -37,6 +37,8 @@ dev = [
     "pyfakefs>=5.0.0",
     "pre-commit>=3.0.0",
     "pyinstaller>=6.0.0",
+    "babel>=2.16.0",
+    "polint>=0.3.0",
 ]
 
 # 命令行入口
@@ -170,3 +172,15 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@abstractmethod",
 ]
+
+
+# Babel - 国际化配置
+# https://babel.pocoo.org/
+[tool.babel]
+# 目录配置
+locale_dir = "locale"
+domain = "messages"
+# 源文件编码
+input_encoding = "utf-8"
+# 输出文件编码
+output_encoding = "utf-8"

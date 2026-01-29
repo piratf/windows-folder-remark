@@ -3,7 +3,7 @@
 A command-line tool that adds remarks/comments to Windows folders by modifying the `Desktop.ini` file.
 
 [![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
-[![zh-cn](https://img.shields.io/badge/lang-zh--cn-red.svg)](README.zh-CN.md)
+[![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.zh.md)
 
 ## Features
 

@@ -34,9 +34,8 @@ dmypy.json
 *.tar.gz
 /tools/upx/
 
-# i18n - 编译后的翻译文件（只追踪源 .po 文件)
+# i18n - 只忽略编译后的翻译文件
 locale/*/LC_MESSAGES/*.mo
-messages.pot
 
 # bv (beads viewer) local config and caches
 .bv/

@@ -68,12 +68,20 @@ repos:
       # i18n 相关检查
       - id: extract-translations
         name: Extract i18n messages
-        entry: bash -c 'pybabel extract -F babel.cfg -o messages.pot remark/ && echo "Translations extracted successfully"'
+        entry: bash -c 'pybabel extract -k "_" -k "gettext" -k "ngettext" -o messages.pot remark/ && echo "Translations extracted successfully"'
         language: system
         types: [python]
         stages: [pre-commit]
         pass_filenames: false
         require_serial: true
+
+      - id: check-i18n-completeness
+        name: Check i18n completeness
+        entry: bash -c 'pybabel update -i messages.pot -d locale --check'
+        language: system
+        types: [python]
+        stages: [pre-commit]
+        pass_filenames: false
 
       - id: check-po-files
         name: Check PO files with polint

@@ -3,7 +3,7 @@
 一个通过修改 `Desktop.ini` 文件为 Windows 文件夹添加备注/注释的命令行工具。
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
-[![zh-cn](https://img.shields.io/badge/lang-zh--cn-blue.svg)](README.zh-CN.md)
+[![zh](https://img.shields.io/badge/lang-zh-blue.svg)](README.zh.md)
 
 ## 特性
 

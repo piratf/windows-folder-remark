@@ -1,0 +1,500 @@
+# Translations template for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-01-29 22:53+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: remark/cli/commands.py:55
+#, python-brace-format
+msgid "Path does not exist: {path}"
+msgstr ""
+
+#: remark/cli/commands.py:58
+#, python-brace-format
+msgid "Path is not a folder: {path}"
+msgstr ""
+
+#: remark/cli/commands.py:80
+#, python-brace-format
+msgid "Current version: {version}"
+msgstr ""
+
+#: remark/cli/commands.py:81
+msgid "Checking for updates..."
+msgstr ""
+
+#: remark/cli/commands.py:86
+#, python-brace-format
+msgid ""
+"\n"
+"New version found: {tag_name}"
+msgstr ""
+
+#: remark/cli/commands.py:87 remark/cli/commands.py:115
+#, python-brace-format
+msgid "Update notes: {notes}"
+msgstr ""
+
+#: remark/cli/commands.py:88 remark/cli/commands.py:116
+#, python-brace-format
+msgid "Full changelog: {url}"
+msgstr ""
+
+#: remark/cli/commands.py:89
+msgid ""
+"\n"
+"Update now? [Y/n]: "
+msgstr ""
+
+#: remark/cli/commands.py:94
+msgid "Already at the latest version"
+msgstr ""
+
+#: remark/cli/commands.py:111
+#, python-brace-format
+msgid ""
+"\n"
+"New version available: {tag_name} (Current version: {version})"
+msgstr ""
+
+#: remark/cli/commands.py:117
+msgid "Update now? [Y/n]: "
+msgstr ""
+
+#: remark/cli/commands.py:124
+msgid "Downloading new version..."
+msgstr ""
+
+#: remark/cli/commands.py:131
+msgid "Download complete, preparing update..."
+msgstr ""
+
+#: remark/cli/commands.py:135
+msgid "Update program has started, the application will exit..."
+msgstr ""
+
+#: remark/cli/commands.py:136
+msgid "Please wait a few moments, the update will complete automatically."
+msgstr ""
+
+#: remark/cli/commands.py:142
+msgid "Download failed: Connection reset by server"
+msgstr ""
+
+#: remark/cli/commands.py:143
+msgid "Please try again later, or visit the following link to download manually:"
+msgstr ""
+
+#: remark/cli/commands.py:146
+msgid "Download failed: Request timeout"
+msgstr ""
+
+#: remark/cli/commands.py:147 remark/cli/commands.py:151
+msgid ""
+"Please check your network connection, or visit the following link to "
+"download manually:"
+msgstr ""
+
+#: remark/cli/commands.py:150
+msgid "Download failed: Unable to connect to server"
+msgstr ""
+
+#: remark/cli/commands.py:154
+msgid "Download failed, please check your network or download manually"
+msgstr ""
+
+#: remark/cli/commands.py:157
+#, python-brace-format
+msgid "Update failed: {error}"
+msgstr ""
+
+#: remark/cli/commands.py:158
+#, python-brace-format
+msgid "Manual download: {url}"
+msgstr ""
+
+#: remark/cli/commands.py:175
+msgid "Right-click menu installed successfully"
+msgstr ""
+
+#: remark/cli/commands.py:177
+msgid "Usage Instructions:"
+msgstr ""
+
+#: remark/cli/commands.py:178
+msgid "  Windows 10: Right-click folder to see 'Add Folder Remark'"
+msgstr ""
+
+#: remark/cli/commands.py:179
+msgid ""
+"  Windows 11: Right-click folder → Click 'Show more options' → Add Folder"
+" Remark"
+msgstr ""
+
+#: remark/cli/commands.py:182
+msgid "Right-click menu installation failed"
+msgstr ""
+
+#: remark/cli/commands.py:188
+msgid "Right-click menu uninstalled"
+msgstr ""
+
+#: remark/cli/commands.py:191
+msgid "Right-click menu uninstallation failed"
+msgstr ""
+
+#: remark/cli/commands.py:218 remark/storage/desktop_ini.py:309
+#, python-brace-format
+msgid "Warning: desktop.ini file encoding is {encoding}, not standard UTF-16."
+msgstr ""
+
+#: remark/cli/commands.py:219 remark/storage/desktop_ini.py:310
+msgid "unknown"
+msgstr ""
+
+#: remark/cli/commands.py:221
+msgid "This may cause Chinese and other special characters to display abnormally."
+msgstr ""
+
+#: remark/cli/commands.py:225
+msgid "Fix encoding to UTF-16? [Y/n]: "
+msgstr ""
+
+#: remark/cli/commands.py:228
+msgid "Fixed to UTF-16 encoding"
+msgstr ""
+
+#: remark/cli/commands.py:230
+msgid "Failed to fix encoding"
+msgstr ""
+
+#: remark/cli/commands.py:233
+msgid "Skip encoding fix"
+msgstr ""
+
+#: remark/cli/commands.py:236 remark/storage/desktop_ini.py:335
+msgid "Please enter Y or n"
+msgstr ""
+
+#: remark/cli/commands.py:241
+#, python-brace-format
+msgid "Current remark: {remark}"
+msgstr ""
+
+#: remark/cli/commands.py:243 remark/core/folder_handler.py:85
+msgid "This folder has no remark"
+msgstr ""
+
+#: remark/cli/commands.py:248
+#, python-brace-format
+msgid "Windows Folder Remark Tool v{version}"
+msgstr ""
+
+#: remark/cli/commands.py:249
+msgid "Tip: Press Ctrl + C to exit"
+msgstr ""
+
+#: remark/cli/commands.py:251
+msgid "Enter folder path (or drag here): "
+msgstr ""
+
+#: remark/cli/commands.py:252
+msgid "Enter remark:"
+msgstr ""
+
+#: remark/cli/commands.py:259
+msgid "Path does not exist, please re-enter"
+msgstr ""
+
+#: remark/cli/commands.py:263
+msgid "This is a 'file', currently only supports adding remarks to 'folders'"
+msgstr ""
+
+#: remark/cli/commands.py:268
+msgid "Remark cannot be empty"
+msgstr ""
+
+#: remark/cli/commands.py:274
+msgid " ❤ Thank you for using"
+msgstr ""
+
+#: remark/cli/commands.py:276
+msgid "Continue processing or press Ctrl + C to exit"
+msgstr ""
+
+#: remark/cli/commands.py:280
+msgid "Windows Folder Remark Tool"
+msgstr ""
+
+#: remark/cli/commands.py:281
+msgid "Usage:"
+msgstr ""
+
+#: remark/cli/commands.py:282
+msgid "  Interactive mode: python remark.py"
+msgstr ""
+
+#: remark/cli/commands.py:283
+msgid "  Command line mode: python remark.py [options] [arguments]"
+msgstr ""
+
+#: remark/cli/commands.py:284
+msgid "Options:"
+msgstr ""
+
+#: remark/cli/commands.py:285
+msgid "  --install          Install right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:286
+msgid "  --uninstall        Uninstall right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:287
+msgid "  --update           Check for updates"
+msgstr ""
+
+#: remark/cli/commands.py:288
+msgid "  --gui <path>        GUI mode (called from right-click menu)"
+msgstr ""
+
+#: remark/cli/commands.py:289
+msgid "  --delete <path>     Delete remark"
+msgstr ""
+
+#: remark/cli/commands.py:290
+msgid "  --view <path>        View remark"
+msgstr ""
+
+#: remark/cli/commands.py:291
+msgid "  --help, -h         Show help information"
+msgstr ""
+
+#: remark/cli/commands.py:292
+msgid "Examples:"
+msgstr ""
+
+#: remark/cli/commands.py:293
+msgid " [Add remark] python remark.py \"C:\\\\MyFolder\" \"My Folder\""
+msgstr ""
+
+#: remark/cli/commands.py:294
+msgid " [Delete remark] python remark.py --delete \"C:\\\\MyFolder\""
+msgstr ""
+
+#: remark/cli/commands.py:295
+msgid " [View current remark] python remark.py --view \"C:\\\\MyFolder\""
+msgstr ""
+
+#: remark/cli/commands.py:296
+msgid " [Install right-click menu] python remark.py --install"
+msgstr ""
+
+#: remark/cli/commands.py:297
+msgid " [Check for updates] python remark.py --update"
+msgstr ""
+
+#: remark/cli/commands.py:313
+msgid "Error: Path does not exist or not quoted"
+msgstr ""
+
+#: remark/cli/commands.py:314
+msgid "Hint: Use quotes when path contains spaces"
+msgstr ""
+
+#: remark/cli/commands.py:315
+msgid "  windows-folder-remark \"C:\\\\My Documents\" \"Remark content\""
+msgstr ""
+
+#: remark/cli/commands.py:320
+#, python-brace-format
+msgid "Detected path: {path}"
+msgstr ""
+
+#: remark/cli/commands.py:323
+msgid "Error: This is a file, the tool can only set remarks for folders"
+msgstr ""
+
+#: remark/cli/commands.py:328
+#, python-brace-format
+msgid "Remark content: {remark}"
+msgstr ""
+
+#: remark/cli/commands.py:330
+msgid "(Will view existing remark)"
+msgstr ""
+
+#: remark/cli/commands.py:332
+msgid "Continue? [Y/n]: "
+msgstr ""
+
+#: remark/cli/commands.py:338
+msgid "Detected multiple possible paths, please select:"
+msgstr ""
+
+#: remark/cli/commands.py:340
+msgid " [file]"
+msgstr ""
+
+#: remark/cli/commands.py:341
+#, python-brace-format
+msgid ""
+"\n"
+"[{index}] Path: {path}{type_mark}"
+msgstr ""
+
+#: remark/cli/commands.py:343
+#, python-brace-format
+msgid "    Remaining remarks: {remarks}"
+msgstr ""
+
+#: remark/cli/commands.py:345
+msgid "    (Will view existing remark)"
+msgstr ""
+
+#: remark/cli/commands.py:346
+msgid ""
+"\n"
+"[0] Cancel"
+msgstr ""
+
+#: remark/cli/commands.py:349
+#, python-brace-format
+msgid ""
+"\n"
+"Please select [0-{max}]: "
+msgstr ""
+
+#: remark/cli/commands.py:355
+msgid ""
+"\n"
+"Error: This is a file, the tool can only set remarks for folders, please "
+"reselect"
+msgstr ""
+
+#: remark/cli/commands.py:358
+msgid "Invalid selection, please try again"
+msgstr ""
+
+#: remark/cli/commands.py:419
+msgid ""
+"\n"
+"Operation cancelled"
+msgstr ""
+
+#: remark/cli/commands.py:422
+#, python-brace-format
+msgid "An error occurred: {error}"
+msgstr ""
+
+#: remark/core/folder_handler.py:24
+#, python-brace-format
+msgid "Path is not a folder: {folder_path}"
+msgstr ""
+
+#: remark/core/folder_handler.py:29
+#, python-brace-format
+msgid "Remark length exceeds limit, maximum length is {length} characters"
+msgstr ""
+
+#: remark/core/folder_handler.py:47 remark/core/folder_handler.py:90
+msgid "Failed to clear file attributes"
+msgstr ""
+
+#: remark/core/folder_handler.py:52
+msgid "Failed to write desktop.ini"
+msgstr ""
+
+#: remark/core/folder_handler.py:57
+msgid "Failed to set file attributes"
+msgstr ""
+
+#: remark/core/folder_handler.py:62
+msgid "Failed to set folder attributes"
+msgstr ""
+
+#: remark/core/folder_handler.py:66
+#, python-brace-format
+msgid "Remark [{remark}] has been set for folder [{folder_path}]"
+msgstr ""
+
+#: remark/core/folder_handler.py:70
+msgid "Remark added successfully, may take a few minutes to display"
+msgstr ""
+
+#: remark/core/folder_handler.py:73
+#, python-brace-format
+msgid "Failed to set remark: {error}"
+msgstr ""
+
+#: remark/core/folder_handler.py:95
+msgid "Failed to remove remark"
+msgstr ""
+
+#: remark/core/folder_handler.py:102
+msgid "Failed to restore file attributes"
+msgstr ""
+
+#: remark/core/folder_handler.py:105
+msgid "Remark deleted successfully"
+msgstr ""
+
+#: remark/storage/desktop_ini.py:313
+msgid "This file needs to be converted to UTF-16 encoding before modification."
+msgstr ""
+
+#: remark/storage/desktop_ini.py:314
+msgid ""
+"The original content will be preserved, only the encoding format will "
+"change."
+msgstr ""
+
+#: remark/storage/desktop_ini.py:321
+msgid ""
+"\n"
+"Current file content:"
+msgstr ""
+
+#: remark/storage/desktop_ini.py:328
+msgid ""
+"\n"
+"Convert to UTF-16 encoding and continue? [Y/n]: "
+msgstr ""
+
+#: remark/storage/desktop_ini.py:332 remark/storage/desktop_ini.py:347
+msgid "Operation cancelled."
+msgstr ""
+
+#: remark/storage/desktop_ini.py:341
+msgid "Converted to UTF-16 encoding."
+msgstr ""
+
+#: remark/storage/desktop_ini.py:346
+#, python-brace-format
+msgid "Conversion failed: {error}"
+msgstr ""
+
+#: remark/utils/platform.py:13
+msgid ""
+"Error: This tool adds remarks to files/folders on Windows, other systems "
+"are not supported."
+msgstr ""
+
+#: remark/utils/platform.py:14
+#, python-brace-format
+msgid "Current system: {system}"
+msgstr ""
+

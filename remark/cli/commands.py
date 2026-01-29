@@ -289,6 +289,47 @@ class CLI:
         print(" [安装右键菜单] python remark.py --install")
         print(" [检查更新] python remark.py --update")
 
+    def _select_from_multiple_candidates(
+        self, candidates: list, show_remaining: bool = False
+    ) -> tuple[str, list[str]] | None:
+        """
+        从多个候选路径中选择
+
+        Args:
+            candidates: 候选路径列表，每个元素为 (path, remaining, type)
+            show_remaining: 是否显示剩余参数（备注内容）
+
+        Returns:
+            (path_str, remaining) 或 None 如果用户取消
+        """
+
+        # 转换 candidates 中的 Path 对象为字符串
+        str_candidates: list[tuple[str, list[str], str]] = []
+        for path, remaining, path_type in candidates:
+            str_candidates.append((str(path), remaining, path_type))
+
+        print("检测到多个可能的路径，请选择:")
+        for i, (p, r, t) in enumerate(str_candidates, 1):
+            type_mark = " [文件]" if t == "file" else ""
+            print(f"\n[{i}] {p}{type_mark}")
+            if show_remaining and r:
+                print(f"    剩余备注: {' '.join(r)}")
+            elif not show_remaining:
+                print("    (将查看现有备注)")
+        print("\n[0] 取消")
+
+        while True:
+            choice = input(f"\n请选择 [0-{len(str_candidates)}]: ").strip()
+            if choice == "0":
+                return None
+            if choice.isdigit() and 1 <= int(choice) <= len(str_candidates):
+                path, remaining, path_type = str_candidates[int(choice) - 1]
+                if path_type == "file":
+                    print("\n错误: 这是一个文件，工具只能为文件夹设置备注，请重新选择")
+                    continue
+                return path, remaining
+            print("无效选择，请重试")
+
     def _handle_ambiguous_path(self, args_list: list[str]) -> tuple[str | None, str | None]:
         """
         处理模糊路径，返回 (最终路径, 备注内容)
@@ -327,28 +368,41 @@ class CLI:
 
             return None, None
 
-        # 多个候选，让用户选择
-        print("检测到多个可能的路径，请选择:")
-        for i, (p, r, t) in enumerate(candidates, 1):
-            type_mark = " [文件]" if t == "file" else ""
-            print(f"\n[{i}] 路径: {p}{type_mark}")
-            if r:
-                print(f"    剩余备注: {' '.join(r)}")
-            else:
-                print("    (将查看现有备注)")
-        print("\n[0] 取消")
+        result = self._select_from_multiple_candidates(candidates, show_remaining=True)
+        if result:
+            path_str, remaining = result
+            return path_str, " ".join(remaining) if remaining else None
+        return None, None
 
-        while True:
-            choice = input(f"\n请选择 [0-{len(candidates)}]: ").strip()
-            if choice == "0":
-                return None, None
-            if choice.isdigit() and 1 <= int(choice) <= len(candidates):
-                path, remaining, path_type = candidates[int(choice) - 1]
-                if path_type == "file":
-                    print("\n错误: 这是一个文件，工具只能为文件夹设置备注，请重新选择")
-                    continue
-                return str(path), " ".join(remaining) if remaining else None
-            print("无效选择，请重试")
+    def _resolve_path_from_ambiguous_args(self, args_list: list[str]) -> str | None:
+        """
+        从可能被空格分割的参数列表中解析出有效路径
+
+        适用于 --view, --delete, --gui 等只接收路径的命令。
+
+        Args:
+            args_list: 可能包含路径片段的参数列表
+
+        Returns:
+            解析出的路径字符串，如果无法解析则返回 None
+        """
+        candidates = find_candidates(args_list)
+
+        if not candidates:
+            return None
+
+        if len(candidates) == 1:
+            path, remaining, path_type = candidates[0]
+            if path_type == "folder":
+                return str(path)
+            else:
+                print("错误: 这是一个文件，工具只能为文件夹设置备注")
+                return None
+
+        result = self._select_from_multiple_candidates(candidates, show_remaining=False)
+        if result:
+            return result[0]
+        return None
 
     def run(self, argv=None):
         """运行 CLI"""
@@ -377,11 +431,23 @@ class CLI:
             self.check_update_now()
             sys.exit(0)
         elif args.gui:
-            self.gui_mode(args.gui)
+            path = self._resolve_path_from_ambiguous_args([args.gui, *args.args])
+            if path:
+                self.gui_mode(path)
+            else:
+                print("错误: 路径不存在或未使用引号")
         elif args.delete:
-            self.delete_comment(args.delete)
+            path = self._resolve_path_from_ambiguous_args([args.delete, *args.args])
+            if path:
+                self.delete_comment(path)
+            else:
+                print("错误: 路径不存在或未使用引号")
         elif args.view:
-            self.view_comment(args.view)
+            path = self._resolve_path_from_ambiguous_args([args.view, *args.args])
+            if path:
+                self.view_comment(path)
+            else:
+                print("错误: 路径不存在或未使用引号")
         elif args.args:
             # 处理位置参数
             path, comment = self._handle_ambiguous_path(args.args)

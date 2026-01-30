@@ -10,20 +10,38 @@ import gettext
 import locale
 import os
 import platform
+import sys
 from pathlib import Path
 from typing import Final
-
-# 项目根目录
-PROJECT_ROOT: Final = Path(__file__).parent.parent
-
-# 翻译文件目录
-LOCALE_DIR: Final = PROJECT_ROOT / "locale"
 
 # 翻译域
 DOMAIN: Final = "messages"
 
 # 支持的语言列表
 SUPPORTED_LANGUAGES: Final = ("en", "zh")
+
+
+def _get_locale_dir() -> Path:
+    """
+    获取翻译文件目录路径.
+
+    支持 PyInstaller 打包环境：
+    - 打包后：sys._MEIPASS/locale（文件解压到临时目录的 locale 子目录）
+    - 开发环境：使用项目根目录下的 locale 目录
+
+    Returns:
+        locale 目录的路径
+    """
+    # PyInstaller 打包后的临时目录，文件被解压到 _MEIPASS/locale/
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / "locale"
+
+    # 开发环境：使用项目根目录
+    return Path(__file__).parent.parent / "locale"
+
+
+# 翻译文件目录（运行时计算）
+LOCALE_DIR: Final = _get_locale_dir()
 
 
 def _get_windows_locale() -> str | None:

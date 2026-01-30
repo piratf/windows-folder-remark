@@ -478,6 +478,13 @@ class CLI:
 
 def main() -> None:
     """主入口"""
+    # 强制设置控制台编码为 UTF-8，支持中文等特殊字符输出
+    # 这对于 Windows 系统特别重要，因为默认控制台编码可能是 GBK
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     cli = CLI()
     try:
         cli.run()

@@ -24,6 +24,18 @@ def pytest_configure(config):
     if sys.stderr.encoding.lower() not in ("utf-8", "utf-16", "utf-16-le", "utf-16-be"):
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
+    # 设置默认语言为中文，确保测试输出匹配
+    from remark.i18n import set_language
+    set_language("zh")
+
+
+@pytest.fixture(autouse=True)
+def reset_language_to_zh():
+    """每个测试前重置语言为中文"""
+    from remark.i18n import set_language
+    set_language("zh")
+    yield
+
 
 def pytest_collection_modifyitems(config, items):
     """自动跳过非 Windows 平台上的 Windows 测试"""

@@ -9,7 +9,8 @@ export default defineConfig({
   locales: {
     root: {
       label: 'English',
-      lang: 'en-US'
+      lang: 'en-US',
+      link: '/'
     },
     zh: {
       label: '简体中文',
@@ -19,9 +20,9 @@ export default defineConfig({
   },
 
   themeConfig: {
-    nav: root => [
-      { text: 'Guide', link: root === 'zh' ? '/zh/guide/' : '/en/guide/' },
-      { text: root === 'zh' ? 'English' : '中文', link: root === 'zh' ? '/en/' : '/zh/' }
+    nav: () => [
+      { text: 'Guide', link: '/en/guide/' },
+      { text: '中文', link: '/zh/' }
     ],
 
     sidebar: {

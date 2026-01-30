@@ -5,151 +5,153 @@
 [![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
 [![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.zh.md)
 
-A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No background processes, privacy-first, ~12MB portable exe. Perfect for organizing your files with custom descriptions.
+A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No background processes, privacy-first, ~12MB portable exe. / 一个轻量级的命令行工具，通过 Desktop.ini 为 Windows 文件夹添加备注/评论。无后台进程，隐私优先，约 12MB 便携版 exe。
 
-## ⭐ Star Us
+**Documentation**: [Full Documentation](https://piratf.github.io/windows-folder-remark/en/) | [完整文档](https://piratf.github.io/windows-folder-remark/zh/)
 
-If you find this tool helpful, please consider giving it a star on GitHub!
+## ⭐ 支持
 
-## Why This Tool
+如果这个工具对你有帮助，请在 GitHub 上给个 Star！
 
-- **No Background Processes**: Runs when needed, exits when done — zero background footprint
-- **Lightweight**: Only ~12 MB, minimal system resource usage
-- **Privacy-First**: Completely local operation, no data sent to any server
+## 工具优势
 
-## Features
+- **用完即走**：需要时运行，用完即退出，无后台进程占用
+- **轻量小巧**：仅约 12 MB，不占用系统资源
+- **隐私优先**：完全本地运行，数据不传输至任何服务器
 
-- Multi-language character support (UTF-16 encoding)
-- Multi-language interface support (English, Chinese)
-- Command-line and interactive modes
-- Automatic encoding detection and repair
-- Automatic update checking to stay current
-- Right-click menu integration for quick access
-- Single-file exe packaging, no Python environment required
+## 特性
 
-## Installation
+- 支持中文等多语言字符（UTF-16 编码）
+- 支持中英文界面切换
+- 命令行模式和交互模式
+- 自动编码检测和修复
+- 自动更新检查，保持最新版本
+- 右键菜单集成，快速访问
+- 单文件 exe 打包，无需 Python 环境
 
-### Method 1: Using exe file (Recommended)
+## 安装
 
-Download `windows-folder-remark.exe` from [releases](https://github.com/piratf/windows-folder-remark/releases) and use directly.
+### 方式一：使用 exe 文件（推荐）
 
-### Method 2: Install from source
+下载 [releases](https://github.com/piratf/windows-folder-remark/releases) 中的 `windows-folder-remark.exe`，直接使用。
+
+### 方式二：从源码安装
 
 ```bash
-# Clone repository
+# 克隆仓库
 git clone https://github.com/piratf/windows-folder-remark.git
 cd windows-folder-remark
 
-# Install dependencies (no external dependencies)
+# 安装依赖（无外部依赖）
 pip install -e .
 
-# Run
+# 运行
 python -m remark.cli --help
 ```
 
-## Usage
+## 使用方法
 
-### Command-line Mode
+### 命令行模式
 
 ```bash
-# Add remark
-windows-folder-remark.exe "C:\MyFolder" "This is my folder"
+# 添加备注
+windows-folder-remark.exe "C:\MyFolder" "这是我的文件夹"
 
-# View remark
+# 查看备注
 windows-folder-remark.exe --view "C:\MyFolder"
 
-# Delete remark
+# 删除备注
 windows-folder-remark.exe --delete "C:\MyFolder"
 
-# Check updates
+# 检查更新
 windows-folder-remark.exe --update
 
-# Install right-click menu
+# 安装右键菜单
 windows-folder-remark.exe --install
 
-# Uninstall right-click menu
+# 卸载右键菜单
 windows-folder-remark.exe --uninstall
 ```
 
-### Interactive Mode
+### 交互模式
 
 ```bash
-# Follow prompts after running
+# 运行后根据提示操作
 windows-folder-remark.exe
 ```
 
-### Right-click Menu (Recommended)
+### 右键菜单（推荐）
 
-After installing the right-click menu, you can add remarks directly in File Explorer by right-clicking folders:
+安装右键菜单后，可以直接在文件资源管理器中右键文件夹添加备注：
 
 ```bash
-# Install right-click menu
+# 安装右键菜单
 windows-folder-remark.exe --install
 ```
 
-- **Windows 10**: Right-click folder to see "Add Folder Remark"
-- **Windows 11**: Right-click folder → Click "Show more options" → Add Folder Remark
+- **Windows 10**：右键文件夹可直接看到「添加文件夹备注」
+- **Windows 11**：右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注
 
-### Auto Update
+### 自动更新
 
-The program automatically checks for updates on exit (once every 24 hours) and prompts if a new version is available.
+程序会在退出时自动检查更新（每 24 小时一次），如有新版本会提示是否立即更新。
 
-You can also manually check for updates:
+也可以手动检查更新：
 
 ```bash
 windows-folder-remark.exe --update
 ```
 
-## Encoding Detection
+## 编码检测
 
-When viewing remarks with `--view`, if the `desktop.ini` file is not in standard UTF-16 encoding, the tool will prompt you:
+当使用 `--view` 查看备注时，如果检测到 `desktop.ini` 文件不是标准的 UTF-16 编码，工具会提醒你：
 
 ```
-Warning: desktop.ini file encoding is utf-8, not standard UTF-16.
-This may cause Chinese and other special characters to display abnormally.
-Fix encoding to UTF-16? [Y/n]:
+警告: desktop.ini 文件编码为 utf-8，不是标准的 UTF-16。
+这可能导致中文等特殊字符显示异常。
+是否修复编码为 UTF-16？[Y/n]:
 ```
 
-Select `Y` to automatically fix the encoding.
+选择 `Y` 可自动修复编码。
 
-## Development
+## 开发
 
 ```bash
-# Install development dependencies
+# 安装开发依赖
 pip install -e ".[dev]"
 
-# Run tests
+# 运行测试
 pytest
 
-# Code check
+# 代码检查
 ruff check .
 ruff format .
 
-# Type check
+# 类型检查
 mypy remark/
 
-# Build exe locally
+# 本地打包 exe
 python -m scripts.build
 ```
 
-## How It Works
+## 原理说明
 
-This tool implements folder remarks through these steps:
+该工具通过以下步骤实现文件夹备注：
 
-1. Create/modify `Desktop.ini` file in the folder
-2. Write `[.ShellClassInfo]` section and `InfoTip` property
-3. Save file with UTF-16 encoding
-4. Set `Desktop.ini` as hidden and system attributes
-5. Set folder as read-only (makes Windows read `Desktop.ini`)
+1. 在文件夹中创建/修改 `Desktop.ini` 文件
+2. 写入 `[.ShellClassInfo]` 段落和 `InfoTip` 属性
+3. 使用 UTF-16 编码保存文件
+4. 将 `Desktop.ini` 设置为隐藏和系统属性
+5. 将文件夹设置为只读属性（使 Windows 读取 `Desktop.ini`）
 
-Reference: [Microsoft Official Documentation](https://learn.microsoft.com/en-us/windows/win32/shell/how-to-customize-folders-with-desktop-ini)
+参考：[Microsoft 官方文档](https://learn.microsoft.com/en-us/windows/win32/shell/how-to-customize-folders-with-desktop-ini)
 
-## Notes
+## 注意事项
 
-- May take a few minutes to display in File Explorer after modification
-- Some file managers may not support folder remarks
-- The tool modifies system attributes of folders
+- 修改后可能需要几分钟才能在资源管理器中显示
+- 某些文件管理器可能不支持显示文件夹备注
+- 工具会修改文件夹的系统属性
 
-## License
+## 许可证
 
 MIT License

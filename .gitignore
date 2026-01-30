@@ -39,3 +39,6 @@ locale/*/LC_MESSAGES/*.mo
 
 # bv (beads viewer) local config and caches
 .bv/
+
+# Node.js
+node_modules/

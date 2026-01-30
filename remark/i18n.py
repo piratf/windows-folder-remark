@@ -80,23 +80,16 @@ def get_system_language() -> str:
     """
     获取系统语言设置.
 
-    在 Windows 上优先使用 GetUserDefaultLocaleName API，
-    在其他平台上使用环境变量和 locale.getlocale()。
+    优先级顺序：
+    1. 环境变量 LANG（最容易被测试控制）
+    2. Windows 平台的 Windows API
+    3. locale.getlocale()
+    4. 默认返回英文
 
     Returns:
         语言代码（如 'en', 'zh'），如果不支持则返回默认的 'en'
     """
-    # Windows 平台优先使用 Windows API
-    if platform.system() == "Windows":
-        windows_locale = _get_windows_locale()
-        if windows_locale:
-            # Windows locale 格式为 'zh-CN', 'en-US' 等
-            # 提取语言部分（zh-CN -> zh）
-            lang_code = windows_locale.split("-")[0]
-            if lang_code in SUPPORTED_LANGUAGES:
-                return lang_code
-
-    # 尝试从环境变量获取
+    # 优先从环境变量获取（便于测试控制）
     lang = os.environ.get("LANG", "")
     if lang:
         # 提取语言代码（如 zh_CN.UTF-8 -> zh）
@@ -108,6 +101,16 @@ def get_system_language() -> str:
             full_lang = lang.split(".")[0]
             if full_lang in SUPPORTED_LANGUAGES:
                 return full_lang
+
+    # Windows 平台使用 Windows API
+    if platform.system() == "Windows":
+        windows_locale = _get_windows_locale()
+        if windows_locale:
+            # Windows locale 格式为 'zh-CN', 'en-US' 等
+            # 提取语言部分（zh-CN -> zh）
+            lang_code = windows_locale.split("-")[0]
+            if lang_code in SUPPORTED_LANGUAGES:
+                return lang_code
 
     # 尝试从 locale 获取
     try:

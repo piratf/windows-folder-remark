@@ -64,12 +64,13 @@ class TestGetSystemLanguage:
         ],
     )
     def test_windows_platform_priority(self, windows_locale, expected):
-        """测试 Windows 平台优先使用 Windows API"""
+        """测试 Windows 平台优先使用 Windows API（当 LANG 未设置时）"""
         with patch("remark.i18n.platform.system", return_value="Windows"):
             with patch("remark.i18n._get_windows_locale", return_value=windows_locale):
-                result = get_system_language()
-                assert result in SUPPORTED_LANGUAGES
-                assert result == expected
+                with patch.dict("os.environ", {}, clear=True):
+                    result = get_system_language()
+                    assert result in SUPPORTED_LANGUAGES
+                    assert result == expected
 
     @pytest.mark.parametrize(
         "windows_locale",

@@ -9,8 +9,7 @@ export default defineConfig({
   locales: {
     root: {
       label: 'English',
-      lang: 'en-US',
-      link: '/'
+      lang: 'en-US'
     },
     zh: {
       label: '简体中文',

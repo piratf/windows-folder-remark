@@ -16,6 +16,7 @@ os.environ["LANG"] = "zh"
 
 def pytest_configure(config):
     """pytest 配置钩子 - 定义 markers"""
+    import sys
     config.addinivalue_line("markers", "unit: 单元测试（使用 mock）")
     config.addinivalue_line("markers", "integration: 集成测试（真实文件系统）")
     config.addinivalue_line("markers", "windows: 仅在 Windows 上运行")

@@ -2,8 +2,8 @@
 
 [![PyPI](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
-[![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.zh.md)
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](README.en.md)
+[![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.md)
 
 A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No background processes, privacy-first, ~12MB portable exe. / 一个轻量级的命令行工具，通过 Desktop.ini 为 Windows 文件夹添加备注/评论。无后台进程，隐私优先，约 12MB 便携版 exe。
 

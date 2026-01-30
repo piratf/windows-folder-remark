@@ -13,6 +13,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # 在导入任何模块之前设置语言环境变量，确保翻译使用中文
 os.environ["LANG"] = "zh"
 
+# 立即设置翻译器为中文，确保在导入任何模块之前生效
+from remark.i18n import set_language
+set_language("zh")
+
 
 def pytest_configure(config):
     """pytest 配置钩子 - 定义 markers"""
@@ -44,9 +48,9 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_windows)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="session")
 def set_chinese_language():
-    """在每个测试前强制设置语言为中文"""
+    """在整个测试会话开始时设置语言为中文"""
     from remark.i18n import set_language
     set_language("zh")
     yield

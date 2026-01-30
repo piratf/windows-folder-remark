@@ -8,11 +8,18 @@ A command-line tool that adds remarks/comments to Windows folders by modifying t
 ## Features
 
 - Multi-language character support (UTF-16 encoding)
+- Multi-language interface support (English, Chinese)
 - Command-line and interactive modes
 - Automatic encoding detection and repair
 - Automatic update checking to stay current
 - Right-click menu integration for quick access
 - Single-file exe packaging, no Python environment required
+
+## Why This Tool
+
+- **No Background Processes**: Runs when needed, exits when done — zero background footprint
+- **Lightweight**: Only ~12 MB, minimal system resource usage
+- **Privacy-First**: Completely local operation, no data sent to any server
 
 ## Installation
 

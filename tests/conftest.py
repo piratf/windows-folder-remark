@@ -1,12 +1,17 @@
 """共享测试配置"""
 
+import os
 import sys
+
 from pathlib import Path
 
 import pytest
 
 # 项目根目录添加到路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# 在导入任何模块之前设置语言环境变量，确保翻译使用中文
+os.environ["LANG"] = "zh"
 
 
 def pytest_configure(config):
@@ -23,18 +28,6 @@ def pytest_configure(config):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     if sys.stderr.encoding.lower() not in ("utf-8", "utf-16", "utf-16-le", "utf-16-be"):
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-
-    # 设置默认语言为中文，确保测试输出匹配
-    from remark.i18n import set_language
-    set_language("zh")
-
-
-@pytest.fixture(autouse=True)
-def reset_language_to_zh():
-    """每个测试前重置语言为中文"""
-    from remark.i18n import set_language
-    set_language("zh")
-    yield
 
 
 def pytest_collection_modifyitems(config, items):

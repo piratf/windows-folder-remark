@@ -330,6 +330,82 @@ class TestCLI:
 
 
 @pytest.mark.unit
+class TestResolvePathAmbiguousArgs:
+    """测试 _resolve_path_from_ambiguous_args 方法"""
+
+    @pytest.fixture(autouse=True)
+    def disable_background_update_check(self, monkeypatch):
+        """禁用后台更新检查，避免 pyfakefs 隔离被后台线程破坏"""
+        monkeypatch.setattr(
+            "remark.cli.commands.CLI._start_update_checker",
+            lambda self: None,
+        )
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_resolve_path_valid_folder(self, fs):
+        """测试解析有效文件夹路径"""
+        fs.create_dir("/My Documents/folder")
+        cli = CLI()
+        path = cli._resolve_path_from_ambiguous_args(["My", "Documents", "folder"])
+        assert path is not None
+        assert "My Documents" in path
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_resolve_path_file_rejected(self, fs):
+        """测试拒绝文件路径"""
+        fs.create_file("/file.txt")
+        cli = CLI()
+        path = cli._resolve_path_from_ambiguous_args(["file"])
+        assert path is None  # 文件应被拒绝
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_resolve_path_no_candidates(self, fs):
+        """测试无候选路径时返回 None"""
+        cli = CLI()
+        path = cli._resolve_path_from_ambiguous_args(["nonexistent"])
+        assert path is None
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_resolve_path_single_candidate(self, fs, monkeypatch, capsys):
+        """测试单个候选路径直接返回"""
+        fs.create_dir("/My Folder")
+        cli = CLI()
+        # Mock input 模拟用户确认
+        monkeypatch.setattr("builtins.input", lambda *args, **kwargs: "y")
+
+        path = cli._resolve_path_from_ambiguous_args(["My", "Folder"])
+        assert path is not None
+        assert "My Folder" in path
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_resolve_path_multiple_candidates_user_cancels(self, fs, monkeypatch):
+        """测试多个候选路径用户取消"""
+        fs.create_dir("/folder1")
+        fs.create_dir("/folder2")
+        cli = CLI()
+        # Mock input 模拟用户选择取消
+        monkeypatch.setattr("builtins.input", lambda *args, **kwargs: "0")
+
+        path = cli._resolve_path_from_ambiguous_args(["folder"])
+        assert path is None
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_resolve_path_multiple_candidates_user_selects(self, fs, monkeypatch):
+        """测试多个候选路径用户选择"""
+        # 在同一目录下创建多个同名的文件夹（不同路径）
+        fs.create_dir("/parent1/folder")
+        fs.create_dir("/parent2/folder")
+        cli = CLI()
+        # Mock input 模拟用户选择第一个选项
+        inputs = iter(["1"])
+        monkeypatch.setattr("builtins.input", lambda *args, **kwargs: next(inputs))
+
+        path = cli._resolve_path_from_ambiguous_args(["parent1", "folder"])
+        assert path is not None
+        assert "parent1" in path
+
+
+@pytest.mark.unit
 class TestGetVersion:
     """get_version 函数测试"""
 

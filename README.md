@@ -1,9 +1,21 @@
-# Windows Folder Remark Tool
+# Windows Folder Remark/Comment Tool - Windows 文件夹备注工具
 
-A command-line tool that adds remarks/comments to Windows folders by modifying the `Desktop.ini` file.
-
+[![PyPI](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
 [![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.zh.md)
+
+A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No background processes, privacy-first, ~12MB portable exe. Perfect for organizing your files with custom descriptions.
+
+## ⭐ Star Us
+
+If you find this tool helpful, please consider giving it a star on GitHub!
+
+## Why This Tool
+
+- **No Background Processes**: Runs when needed, exits when done — zero background footprint
+- **Lightweight**: Only ~12 MB, minimal system resource usage
+- **Privacy-First**: Completely local operation, no data sent to any server
 
 ## Features
 
@@ -14,12 +26,6 @@ A command-line tool that adds remarks/comments to Windows folders by modifying t
 - Automatic update checking to stay current
 - Right-click menu integration for quick access
 - Single-file exe packaging, no Python environment required
-
-## Why This Tool
-
-- **No Background Processes**: Runs when needed, exits when done — zero background footprint
-- **Lightweight**: Only ~12 MB, minimal system resource usage
-- **Privacy-First**: Completely local operation, no data sent to any server
 
 ## Installation
 

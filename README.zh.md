@@ -1,9 +1,21 @@
-# Windows 文件夹备注工具
+# Windows Folder Remark/Comment Tool - Windows 文件夹备注工具
 
-一个通过修改 `Desktop.ini` 文件为 Windows 文件夹添加备注/注释的命令行工具。
-
+[![PyPI](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 [![zh](https://img.shields.io/badge/lang-zh-blue.svg)](README.zh.md)
+
+一个轻量级的命令行工具，通过 Desktop.ini 为 Windows 文件夹添加备注/评论。无后台进程，隐私优先，约 12MB 便携版 exe。适合为文件添加自定义描述来更好地组织文件。
+
+## ⭐ 支持
+
+如果这个工具对你有帮助，请在 GitHub 上给个 Star！
+
+## 工具优势
+
+- **用完即走**：需要时运行，用完即退出，无后台进程占用
+- **轻量小巧**：仅约 12 MB，不占用系统资源
+- **隐私优先**：完全本地运行，数据不传输至任何服务器
 
 ## 特性
 
@@ -14,12 +26,6 @@
 - 自动更新检查，保持最新版本
 - 右键菜单集成，快速访问
 - 单文件 exe 打包，无需 Python 环境
-
-## 工具优势
-
-- **用完即走**：需要时运行，用完即退出，无后台进程占用
-- **轻量小巧**：仅约 12 MB，不占用系统资源
-- **隐私优先**：完全本地运行，数据不传输至任何服务器
 
 ## 安装
 
@@ -81,8 +87,8 @@ windows-folder-remark.exe
 windows-folder-remark.exe --install
 ```
 
-- **Windows 10**: 右键文件夹可直接看到「添加文件夹备注」
-- **Windows 11**: 右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注
+- **Windows 10**：右键文件夹可直接看到「添加文件夹备注」
+- **Windows 11**：右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注
 
 ### 自动更新
 

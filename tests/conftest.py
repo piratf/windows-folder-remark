@@ -42,3 +42,11 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "windows" in item.keywords:
                 item.add_marker(skip_windows)
+
+
+@pytest.fixture(autouse=True)
+def set_chinese_language():
+    """在每个测试前强制设置语言为中文"""
+    from remark.i18n import set_language
+    set_language("zh")
+    yield

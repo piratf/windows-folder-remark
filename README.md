@@ -1,5 +1,7 @@
 # Windows Folder Remark/Comment Tool - Windows 文件夹备注工具
 
+**[English Documentation](README.en.md)** | [中文文档](README.md)
+
 [![PyPI](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![en](https://img.shields.io/badge/lang-en-blue.svg)](README.en.md)

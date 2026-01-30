@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Windows Folder Remark Tool',
   description: 'A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini',
+  base: '/windows-folder-remark/',
   lang: 'en-US',
 
   locales: {

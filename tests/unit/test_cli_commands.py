@@ -448,50 +448,6 @@ class TestInteractiveCommands:
         expected_commands = ["#help", "#install", "#uninstall", "#update"]
         assert cli._interactive_commands_list == expected_commands
 
-    def test_command_completer_with_hash_prefix(self):
-        """测试命令补全函数处理 # 开头的输入"""
-        cli = CLI()
-
-        # 测试补全 #h 开头
-        result = cli._command_completer("#h", 0)
-        assert result == "#help"
-
-        # 测试补全 #i 开头
-        result = cli._command_completer("#i", 0)
-        assert result == "#install"
-
-        # 测试补全 #u 开头（有多个选项）
-        result = cli._command_completer("#u", 0)
-        assert result in ["#uninstall", "#update"]
-
-        # 测试补全不存在的命令
-        result = cli._command_completer("#x", 0)
-        assert result is None
-
-    def test_command_completer_returns_multiple_options(self):
-        """测试命令补全返回多个选项"""
-        cli = CLI()
-
-        # 测试 #u 开头有多个选项
-        result = cli._command_completer("#u", 0)
-        assert result in ["#uninstall", "#update"]
-
-        # 继续获取下一个选项
-        result = cli._command_completer("#u", 1)
-        assert result in ["#uninstall", "#update"]
-
-        # 超出选项数量返回 None
-        result = cli._command_completer("#u", 2)
-        assert result is None
-
-        # #install 是唯一的 #i 开头命令
-        result = cli._command_completer("#i", 0)
-        assert result == "#install"
-
-        # #help 是唯一的 #h 开头命令
-        result = cli._command_completer("#h", 0)
-        assert result == "#help"
-
     def test_show_command_list(self, capsys):
         """测试显示命令列表"""
         cli = CLI()
@@ -539,28 +495,3 @@ class TestInteractiveCommands:
         captured = capsys.readouterr()
         # 应该显示可用命令列表（中文或英文）
         assert "Available commands" in captured.out or "可用命令" in captured.out
-
-    def test_readline_import_graceful_fallback(self, monkeypatch):
-        """测试 readline 导入失败时优雅降级"""
-        # 模拟 readline 不可用
-        import builtins
-        original_import = builtins.__import__
-
-        def mock_import(name, *args, **kwargs):
-            if name == "readline":
-                raise ImportError("readline not available")
-            return original_import(name, *args, **kwargs)
-
-        with monkeypatch.context() as m:
-            m.setattr("builtins.__import__", mock_import)
-            # 重新导入模块
-            import importlib
-            import sys
-            if "remark.cli.commands" in sys.modules:
-                del sys.modules["remark.cli.commands"]
-            if "remark.cli" in sys.modules:
-                del sys.modules["remark.cli"]
-
-            # 重新导入，应该不会因为 readline 不可用而失败
-            import remark.cli.commands as commands_module
-            assert commands_module.readline is None

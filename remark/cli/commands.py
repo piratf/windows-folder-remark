@@ -9,16 +9,6 @@ import tempfile
 import threading
 import urllib.error
 
-# 尝试导入 readline 用于 tab 补全
-# Unix/Linux 系统通常有内置 readline
-# Windows 打包版本会自动包含 pyreadline3
-try:
-    import readline
-except ImportError:
-    # 开发环境可能需要手动安装 pyreadline3
-    # 这不会影响基本功能，只是没有 tab 补全
-    readline = None
-
 from remark.core.folder_handler import FolderCommentHandler
 from remark.gui import remark_dialog
 from remark.i18n import _ as _, set_language
@@ -267,12 +257,6 @@ class CLI:
         print(_("Tip: Press Ctrl + C to exit"))
         print(_("Tip: Use #help to see available commands"))
 
-        # 设置 readline 补全（如果可用）
-        if readline:
-            readline.set_completer(self._command_completer)
-            readline.parse_and_bind("tab: complete")
-            readline.set_completer_delims("")  # 允许补全包含 # 的命令
-
         input_path_msg = "\n" + _("Enter folder path (or drag here): ")
         input_comment_msg = _("Enter remark:")
 
@@ -312,23 +296,11 @@ class CLI:
                 break
             print(os.linesep + _("Continue processing or press Ctrl + C to exit") + os.linesep)
 
-    def _command_completer(self, text: str, state: int) -> str | None:
-        """readline tab 补全函数"""
-        # 获取匹配的命令选项
-        options = [cmd for cmd in self._interactive_commands_list if cmd.startswith(text)]
-
-        # state 用于循环返回多个匹配项
-        if state < len(options):
-            return options[state]
-        return None
-
     def _show_command_list(self) -> None:
         """显示可用命令列表"""
         print(_("Available commands:"))
         for cmd in self._interactive_commands_list:
             print(f"  {cmd}")
-        # 打包版本已包含 pyreadline3，Tab 补全功能可用
-        print(_("Tip: Press Tab to complete commands"))
 
     def _interactive_help(self) -> None:
         """显示交互模式帮助信息"""
@@ -339,8 +311,6 @@ class CLI:
         print(_("  #update   Check for updates"))
         print(os.linesep)
         print(_("Or simply enter a folder path to add remarks"))
-        # 打包版本已包含 pyreadline3，Tab 补全功能可用
-        print(_("Tip: Press Tab to complete commands"))
 
     def show_help(self) -> None:
         """显示帮助信息"""

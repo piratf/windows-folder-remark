@@ -80,10 +80,6 @@ hiddenimports = collect_submodules('remark') + [
     'tkinter',
     'packaging',
     'packaging.version',
-    # pyreadline3 用于 Windows 下的 Tab 补全
-    'pyreadline3',
-    'pyreadline3.clipboard',
-    'pyreadline3.clipboard.win32_clipboard',
 ]
 
 # Collect locale translation files (.mo)

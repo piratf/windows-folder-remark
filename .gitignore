@@ -34,8 +34,8 @@ dmypy.json
 *.tar.gz
 /tools/upx/
 
-# i18n - 只忽略编译后的翻译文件
-locale/*/LC_MESSAGES/*.mo
+# i18n - 不再忽略 .mo 文件，需要提交到仓库以便 CI 使用
+# .mo 文件由 pybabel compile 生成，从 .po 文件编译而来
 
 # bv (beads viewer) local config and caches
 .bv/

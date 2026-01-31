@@ -3,7 +3,7 @@
 
 [project]
 name = "windows-folder-remark"
-version = "2.0.5"
+version = "2.0.6"
 description = "Windows 文件夹备注工具"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -11,7 +11,7 @@ license = {text = "MIT"}
 authors = [
     {name = "Piratf"}
 ]
-keywords = ["windows", "folder", "remark", "desktop.ini"]
+keywords = ["windows", "folder", "remark", "comment", "desktop.ini"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -37,6 +37,8 @@ dev = [
     "pyfakefs>=5.0.0",
     "pre-commit>=3.0.0",
     "pyinstaller>=6.0.0",
+    "babel>=2.16.0",
+    "polint>=0.3.0",
 ]
 
 # 命令行入口
@@ -170,3 +172,15 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@abstractmethod",
 ]
+
+
+# Babel - 国际化配置
+# https://babel.pocoo.org/
+[tool.babel]
+# 目录配置
+locale_dir = "locale"
+domain = "messages"
+# 源文件编码
+input_encoding = "utf-8"
+# 输出文件编码
+output_encoding = "utf-8"

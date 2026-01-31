@@ -82,11 +82,20 @@ hiddenimports = collect_submodules('remark') + [
     'packaging.version',
 ]
 
+# Collect locale translation files (.mo)
+# PyInstaller 会将这些文件复制到 exe 的临时目录
+locale_datas = []
+for lang in ['zh', 'en']:
+    lang_dir = os.path.join('locale', lang, 'LC_MESSAGES')
+    mo_file = os.path.join(lang_dir, 'messages.mo')
+    if os.path.exists(mo_file):
+        locale_datas.append((mo_file, lang_dir))
+
 a = Analysis(
     [os.path.join("remark", "cli", "commands.py")],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=locale_datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},

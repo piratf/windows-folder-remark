@@ -1,10 +1,30 @@
-# Windows 文件夹备注工具
+# Windows Folder Remark/Comment Tool - Windows 文件夹备注工具
 
-一个通过修改 `Desktop.ini` 文件为 Windows 文件夹添加备注/注释的命令行工具。
+**[English Documentation](README.en.md)** | [中文文档](README.md)
+
+[![PyPI](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](README.en.md)
+[![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.md)
+
+A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No system residency, no data upload, safe and secure, use it when you need it. / 一个轻量级的命令行工具，通过 Desktop.ini 为 Windows 文件夹添加备注/评论。无系统驻留，无数据上传，安全放心，用完即走。
+
+**Documentation**: [Full Documentation](https://piratf.github.io/windows-folder-remark/en/) | [完整文档](https://piratf.github.io/windows-folder-remark/zh/)
+
+## ⭐ 支持
+
+如果这个工具对你有帮助，请在 GitHub 上给个 Star！
+
+## 工具优势
+
+- **用完即走**：需要时运行，用完即退出，无系统驻留
+- **安全放心**：完全本地运行，无数据上传，保护隐私
+- **轻量便携**：单文件 exe 打包，无需安装，随处可用
 
 ## 特性
 
 - 支持中文等多语言字符（UTF-16 编码）
+- 支持中英文界面切换
 - 命令行模式和交互模式
 - 自动编码检测和修复
 - 自动更新检查，保持最新版本
@@ -71,8 +91,8 @@ windows-folder-remark.exe
 windows-folder-remark.exe --install
 ```
 
-- **Windows 10**: 右键文件夹可直接看到「添加文件夹备注」
-- **Windows 11**: 右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注
+- **Windows 10**：右键文件夹可直接看到「添加文件夹备注」
+- **Windows 11**：右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注
 
 ### 自动更新
 

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://piratf.github.io/windows-folder-remark/sitemap.xml

@@ -43,6 +43,14 @@ class CLI:
         self.handler = FolderCommentHandler()
         self.pending_update = None
         self._update_check_done = threading.Event()
+        # 初始化交互模式命令列表
+        self._interactive_commands_list = ["#help", "#install", "#uninstall", "#update"]
+        self._interactive_commands = {
+            "#help": self._interactive_help,
+            "#install": self.install_menu,
+            "#uninstall": self.uninstall_menu,
+            "#update": self.check_update_now,
+        }
         # 先检查缓存，只有在需要检查时才启动后台线程
         if should_check_update():
             self._start_update_checker()
@@ -246,20 +254,33 @@ class CLI:
         """交互模式"""
         version = get_version()
         print(_("Windows Folder Remark Tool v{version}").format(version=version))
-        print(_("Tip: Press Ctrl + C to exit") + os.linesep)
+        print(_("Tip: Press Ctrl + C to exit"))
+        print(_("Tip: Use #help to see available commands"))
 
-        input_path_msg = _("Enter folder path (or drag here): ")
+        input_path_msg = "\n" + _("Enter folder path (or drag here): ")
         input_comment_msg = _("Enter remark:")
 
         while True:
             try:
-                path = input(input_path_msg).replace('"', "").strip()
+                user_input = input(input_path_msg).replace('"', "").strip()
 
-                if not os.path.exists(path):
+                # 处理交互命令
+                if user_input in self._interactive_commands:
+                    self._interactive_commands[user_input]()
+                    print()
+                    continue
+
+                # 用户输入单独的 #，显示可用命令列表
+                if user_input == "#":
+                    self._show_command_list()
+                    print()
+                    continue
+
+                if not os.path.exists(user_input):
                     print(_("Path does not exist, please re-enter"))
                     continue
 
-                if not os.path.isdir(path):
+                if not os.path.isdir(user_input):
                     print(_("This is a 'file', currently only supports adding remarks to 'folders'"))
                     continue
 
@@ -268,12 +289,28 @@ class CLI:
                     print(_("Remark cannot be empty"))
                     comment = input(input_comment_msg)
 
-                self.add_comment(path, comment)
+                self.add_comment(user_input, comment)
 
             except KeyboardInterrupt:
-                print(_(" ❤ Thank you for using"))
+                print("\n" + _(" ❤ Thank you for using"))
                 break
             print(os.linesep + _("Continue processing or press Ctrl + C to exit") + os.linesep)
+
+    def _show_command_list(self) -> None:
+        """显示可用命令列表"""
+        print(_("Available commands:"))
+        for cmd in self._interactive_commands_list:
+            print(f"  {cmd}")
+
+    def _interactive_help(self) -> None:
+        """显示交互模式帮助信息"""
+        print(_("Interactive Commands:"))
+        print(_("  #help     Show this help message"))
+        print(_("  #install  Install right-click menu"))
+        print(_("  #uninstall Uninstall right-click menu"))
+        print(_("  #update   Check for updates"))
+        print(os.linesep)
+        print(_("Or simply enter a folder path to add remarks"))
 
     def show_help(self) -> None:
         """显示帮助信息"""
@@ -287,8 +324,13 @@ class CLI:
         print(_("  --update           Check for updates"))
         print(_("  --gui <path>        GUI mode (called from right-click menu)"))
         print(_("  --delete <path>     Delete remark"))
-        print(_("  --view <path>        View remark"))
+        print(_("  --view <path>       View remark"))
         print(_("  --help, -h         Show help information"))
+        print(_("Interactive Commands (available in interactive mode):"))
+        print(_("  #help              Show interactive help"))
+        print(_("  #install           Install right-click menu"))
+        print(_("  #uninstall         Uninstall right-click menu"))
+        print(_("  #update            Check for updates"))
         print(_("Examples:"))
         print(_(' [Add remark] python remark.py "C:\\\\MyFolder" "My Folder"'))
         print(_(' [Delete remark] python remark.py --delete "C:\\\\MyFolder"'))

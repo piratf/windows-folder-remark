@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-01-29 22:34+0800\n"
+"POT-Creation-Date: 2026-01-31 14:42+0800\n"
 "PO-Revision-Date: 2026-01-29 22:35+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -18,26 +18,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: remark/cli/commands.py:55
+#: remark/cli/commands.py:73
 #, python-brace-format
 msgid "Path does not exist: {path}"
 msgstr "路径不存在: {path}"
 
-#: remark/cli/commands.py:58
+#: remark/cli/commands.py:76
 #, python-brace-format
 msgid "Path is not a folder: {path}"
 msgstr "路径不是文件夹: {path}"
 
-#: remark/cli/commands.py:80
+#: remark/cli/commands.py:98
 #, python-brace-format
 msgid "Current version: {version}"
 msgstr "当前版本: {version}"
 
-#: remark/cli/commands.py:81
+#: remark/cli/commands.py:99
 msgid "Checking for updates..."
 msgstr "正在检查更新..."
 
-#: remark/cli/commands.py:86
+#: remark/cli/commands.py:104
 #, python-brace-format
 msgid ""
 "\n"
@@ -46,17 +46,17 @@ msgstr ""
 "\n"
 "发现新版本: {tag_name}"
 
-#: remark/cli/commands.py:87 remark/cli/commands.py:115
+#: remark/cli/commands.py:105 remark/cli/commands.py:133
 #, python-brace-format
 msgid "Update notes: {notes}"
 msgstr "更新说明: {notes}"
 
-#: remark/cli/commands.py:88 remark/cli/commands.py:116
+#: remark/cli/commands.py:106 remark/cli/commands.py:134
 #, python-brace-format
 msgid "Full changelog: {url}"
 msgstr "完整更新日志: {url}"
 
-#: remark/cli/commands.py:89
+#: remark/cli/commands.py:107
 msgid ""
 "\n"
 "Update now? [Y/n]: "
@@ -64,11 +64,11 @@ msgstr ""
 "\n"
 "是否立即更新? [Y/n]: "
 
-#: remark/cli/commands.py:94
+#: remark/cli/commands.py:112
 msgid "Already at the latest version"
 msgstr "已是最新版本"
 
-#: remark/cli/commands.py:111
+#: remark/cli/commands.py:129
 #, python-brace-format
 msgid ""
 "\n"
@@ -77,334 +77,339 @@ msgstr ""
 "\n"
 "发现新版本: {tag_name} (当前版本: {version})"
 
-#: remark/cli/commands.py:117
+#: remark/cli/commands.py:135
 msgid "Update now? [Y/n]: "
 msgstr "是否立即更新? [Y/n]: "
 
-#: remark/cli/commands.py:124
+#: remark/cli/commands.py:142
 msgid "Downloading new version..."
 msgstr "正在下载新版本..."
 
-#: remark/cli/commands.py:131
+#: remark/cli/commands.py:149
 msgid "Download complete, preparing update..."
 msgstr "下载完成，准备更新..."
 
-#: remark/cli/commands.py:135
+#: remark/cli/commands.py:153
 msgid "Update program has started, the application will exit..."
 msgstr "更新程序已启动，程序即将退出..."
 
-#: remark/cli/commands.py:136
+#: remark/cli/commands.py:154
 msgid "Please wait a few moments, the update will complete automatically."
 msgstr "请等待几秒钟，更新将自动完成。"
 
-#: remark/cli/commands.py:142
+#: remark/cli/commands.py:160
 msgid "Download failed: Connection reset by server"
 msgstr "下载失败：连接被服务器断开"
 
-#: remark/cli/commands.py:143
+#: remark/cli/commands.py:161
 msgid "Please try again later, or visit the following link to download manually:"
 msgstr "请稍后重试，或访问以下链接手动下载："
 
-#: remark/cli/commands.py:146
+#: remark/cli/commands.py:164
 msgid "Download failed: Request timeout"
 msgstr "下载失败：请求超时"
 
-#: remark/cli/commands.py:147 remark/cli/commands.py:151
+#: remark/cli/commands.py:165 remark/cli/commands.py:169
 msgid ""
 "Please check your network connection, or visit the following link to "
 "download manually:"
 msgstr "请检查网络连接，或访问以下链接手动下载："
 
-#: remark/cli/commands.py:150
+#: remark/cli/commands.py:168
 msgid "Download failed: Unable to connect to server"
 msgstr "下载失败：无法连接到服务器"
 
-#: remark/cli/commands.py:154
+#: remark/cli/commands.py:172
 msgid "Download failed, please check your network or download manually"
 msgstr "下载失败，请检查网络连接或手动下载更新"
 
-#: remark/cli/commands.py:157
+#: remark/cli/commands.py:175
 #, python-brace-format
 msgid "Update failed: {error}"
 msgstr "更新失败: {error}"
 
-#: remark/cli/commands.py:158
+#: remark/cli/commands.py:176
 #, python-brace-format
 msgid "Manual download: {url}"
 msgstr "手动下载: {url}"
 
-#: remark/cli/commands.py:175
+#: remark/cli/commands.py:193
 msgid "Right-click menu installed successfully"
 msgstr "右键菜单安装成功"
 
-#: remark/cli/commands.py:177
+#: remark/cli/commands.py:195
 msgid "Usage Instructions:"
 msgstr "使用说明:"
 
-#: remark/cli/commands.py:178
+#: remark/cli/commands.py:196
 msgid "  Windows 10: Right-click folder to see 'Add Folder Remark'"
 msgstr "  Windows 10: 右键文件夹可直接看到「添加文件夹备注」"
 
-#: remark/cli/commands.py:179
+#: remark/cli/commands.py:197
 msgid ""
 "  Windows 11: Right-click folder → Click 'Show more options' → Add Folder"
 " Remark"
 msgstr "  Windows 11: 右键文件夹 → 点击「显示更多选项」→ 添加文件夹备注"
 
-#: remark/cli/commands.py:182
+#: remark/cli/commands.py:200
 msgid "Right-click menu installation failed"
 msgstr "右键菜单安装失败"
 
-#: remark/cli/commands.py:188
+#: remark/cli/commands.py:206
 msgid "Right-click menu uninstalled"
 msgstr "右键菜单已卸载"
 
-#: remark/cli/commands.py:191
+#: remark/cli/commands.py:209
 msgid "Right-click menu uninstallation failed"
 msgstr "右键菜单卸载失败"
 
-#: remark/cli/commands.py:218 remark/storage/desktop_ini.py:309
+#: remark/cli/commands.py:236 remark/storage/desktop_ini.py:309
 #, python-brace-format
 msgid "Warning: desktop.ini file encoding is {encoding}, not standard UTF-16."
 msgstr "警告: desktop.ini 文件编码为 {encoding}，不是标准的 UTF-16。"
 
-#: remark/cli/commands.py:219 remark/storage/desktop_ini.py:310
+#: remark/cli/commands.py:237 remark/storage/desktop_ini.py:310
 msgid "unknown"
 msgstr "未知"
 
-#: remark/cli/commands.py:221
+#: remark/cli/commands.py:239
 msgid "This may cause Chinese and other special characters to display abnormally."
 msgstr "这可能导致中文等特殊字符显示异常。"
 
-#: remark/cli/commands.py:225
+#: remark/cli/commands.py:243
 msgid "Fix encoding to UTF-16? [Y/n]: "
 msgstr "是否修复编码为 UTF-16？[Y/n]: "
 
-#: remark/cli/commands.py:228
+#: remark/cli/commands.py:246
 msgid "Fixed to UTF-16 encoding"
 msgstr "已修复为 UTF-16 编码"
 
-#: remark/cli/commands.py:230
+#: remark/cli/commands.py:248
 msgid "Failed to fix encoding"
 msgstr "修复失败"
 
-#: remark/cli/commands.py:233
+#: remark/cli/commands.py:251
 msgid "Skip encoding fix"
 msgstr "跳过编码修复"
 
-#: remark/cli/commands.py:236 remark/storage/desktop_ini.py:335
+#: remark/cli/commands.py:254 remark/storage/desktop_ini.py:335
 msgid "Please enter Y or n"
 msgstr "请输入 Y 或 n"
 
-#: remark/cli/commands.py:241
+#: remark/cli/commands.py:259
 #, python-brace-format
 msgid "Current remark: {remark}"
 msgstr "当前备注: {remark}"
 
-#: remark/cli/commands.py:243 remark/core/folder_handler.py:85
+#: remark/cli/commands.py:261 remark/core/folder_handler.py:85
 msgid "This folder has no remark"
 msgstr "该文件夹没有备注"
 
-#: remark/cli/commands.py:248
+#: remark/cli/commands.py:266
 #, python-brace-format
 msgid "Windows Folder Remark Tool v{version}"
 msgstr "Windows 文件夹备注工具 v{version}"
 
-#: remark/cli/commands.py:249
+#: remark/cli/commands.py:267
 msgid "Tip: Press Ctrl + C to exit"
 msgstr "提示: 按 Ctrl + C 退出程序"
 
-#: remark/cli/commands.py:251
+#: remark/cli/commands.py:268
+msgid "Tip: Use #help to see available commands"
+msgstr "提示: 使用 #help 查看可用命令"
+
+#: remark/cli/commands.py:276
 msgid "Enter folder path (or drag here): "
 msgstr "请输入文件夹路径(或拖动到这里): "
 
-#: remark/cli/commands.py:252
+#: remark/cli/commands.py:277
 msgid "Enter remark:"
 msgstr "请输入备注:"
 
-#: remark/cli/commands.py:259
+#: remark/cli/commands.py:296
 msgid "Path does not exist, please re-enter"
 msgstr "路径不存在，请重新输入"
 
-#: remark/cli/commands.py:263
+#: remark/cli/commands.py:300
 msgid "This is a 'file', currently only supports adding remarks to 'folders'"
 msgstr "这是一个「文件」，当前仅支持为「文件夹」添加备注"
 
-#: remark/cli/commands.py:268
+#: remark/cli/commands.py:305
 msgid "Remark cannot be empty"
 msgstr "备注不要为空哦"
 
-#: remark/cli/commands.py:274
+#: remark/cli/commands.py:311
 msgid " ❤ Thank you for using"
 msgstr " ❤ 感谢使用"
 
-#: remark/cli/commands.py:276
+#: remark/cli/commands.py:313
 msgid "Continue processing or press Ctrl + C to exit"
 msgstr "继续处理或按 Ctrl + C 退出程序"
 
-#: remark/cli/commands.py:280
+#: remark/cli/commands.py:327
+msgid "Available commands:"
+msgstr "可用命令:"
+
+#: remark/cli/commands.py:331 remark/cli/commands.py:345
+msgid "Tip: Press Tab to complete commands"
+msgstr "提示: 按 Tab 补全命令"
+
+#: remark/cli/commands.py:333 remark/cli/commands.py:347
+msgid "Tip: Install pyreadline3 for Tab completion (pip install pyreadline3)"
+msgstr "提示: 安装 pyreadline3 以使用 Tab 补全（pip install pyreadline3）"
+
+#: remark/cli/commands.py:337
+msgid "Interactive Commands:"
+msgstr "交互命令:"
+
+#: remark/cli/commands.py:338
+msgid "  #help     Show this help message"
+msgstr "  #help     显示此帮助信息"
+
+#: remark/cli/commands.py:339
+msgid "  #install  Install right-click menu"
+msgstr "  #install  安装右键菜单"
+
+#: remark/cli/commands.py:340
+msgid "  #uninstall Uninstall right-click menu"
+msgstr "  #uninstall 卸载右键菜单"
+
+#: remark/cli/commands.py:341
+msgid "  #update   Check for updates"
+msgstr "  #update   检查更新"
+
+#: remark/cli/commands.py:343
+msgid "Or simply enter a folder path to add remarks"
+msgstr "或者直接输入文件夹路径来添加备注"
+
+#: remark/cli/commands.py:351
 msgid "Windows Folder Remark Tool"
 msgstr "Windows 文件夹备注工具"
 
-#: remark/cli/commands.py:281
+#: remark/cli/commands.py:352
 msgid "Usage:"
 msgstr "使用方法:"
 
-#: remark/cli/commands.py:282
+#: remark/cli/commands.py:353
 msgid "  Interactive mode: python remark.py"
 msgstr "  交互模式: python remark.py"
 
-#: remark/cli/commands.py:283
+#: remark/cli/commands.py:354
 msgid "  Command line mode: python remark.py [options] [arguments]"
 msgstr "  命令行模式: python remark.py [选项] [参数]"
 
-#: remark/cli/commands.py:284
+#: remark/cli/commands.py:355
 msgid "Options:"
 msgstr "选项:"
 
-#: remark/cli/commands.py:285
+#: remark/cli/commands.py:356
 msgid "  --install          Install right-click menu"
 msgstr "  --install          安装右键菜单"
 
-#: remark/cli/commands.py:286
+#: remark/cli/commands.py:357
 msgid "  --uninstall        Uninstall right-click menu"
 msgstr "  --uninstall        卸载右键菜单"
 
-#: remark/cli/commands.py:287
+#: remark/cli/commands.py:358
 msgid "  --update           Check for updates"
 msgstr "  --update           检查更新"
 
-#: remark/cli/commands.py:288
+#: remark/cli/commands.py:359
 msgid "  --gui <path>        GUI mode (called from right-click menu)"
 msgstr "  --gui <路径>       GUI 模式（右键菜单调用）"
 
-#: remark/cli/commands.py:289
+#: remark/cli/commands.py:360
 msgid "  --delete <path>     Delete remark"
 msgstr "  --delete <路径>    删除备注"
 
-#: remark/cli/commands.py:290
-msgid "  --view <path>        View remark"
+#: remark/cli/commands.py:361
+#, fuzzy
+msgid "  --view <path>       View remark"
 msgstr "  --view <路径>      查看备注"
 
-#: remark/cli/commands.py:291
+#: remark/cli/commands.py:362
 msgid "  --help, -h         Show help information"
 msgstr "  --help, -h         显示帮助信息"
 
-#: remark/cli/commands.py:292
+#: remark/cli/commands.py:363
+msgid "Interactive Commands (available in interactive mode):"
+msgstr "交互命令（在交互模式中可用）:"
+
+#: remark/cli/commands.py:364
+msgid "  #help              Show interactive help"
+msgstr "  #help              显示交互帮助"
+
+#: remark/cli/commands.py:365
+msgid "  #install           Install right-click menu"
+msgstr "  #install           安装右键菜单"
+
+#: remark/cli/commands.py:366
+msgid "  #uninstall         Uninstall right-click menu"
+msgstr "  #uninstall         卸载右键菜单"
+
+#: remark/cli/commands.py:367
+msgid "  #update            Check for updates"
+msgstr "  #update            检查更新"
+
+#: remark/cli/commands.py:368
 msgid "Examples:"
 msgstr "示例:"
 
-#: remark/cli/commands.py:293
+#: remark/cli/commands.py:369
 msgid " [Add remark] python remark.py \"C:\\\\MyFolder\" \"My Folder\""
 msgstr " [添加备注] python remark.py \"C:\\\\MyFolder\" \"这是我的文件夹\""
 
-#: remark/cli/commands.py:294
+#: remark/cli/commands.py:370
 msgid " [Delete remark] python remark.py --delete \"C:\\\\MyFolder\""
 msgstr " [删除备注] python remark.py --delete \"C:\\\\MyFolder\""
 
-#: remark/cli/commands.py:295
+#: remark/cli/commands.py:371
 msgid " [View current remark] python remark.py --view \"C:\\\\MyFolder\""
 msgstr " [查看当前备注] python remark.py --view \"C:\\\\MyFolder\""
 
-#: remark/cli/commands.py:296
+#: remark/cli/commands.py:372
 msgid " [Install right-click menu] python remark.py --install"
 msgstr " [安装右键菜单] python remark.py --install"
 
-#: remark/cli/commands.py:297
+#: remark/cli/commands.py:373
 msgid " [Check for updates] python remark.py --update"
 msgstr " [检查更新] python remark.py --update"
 
-#: remark/cli/commands.py:313
+#: remark/cli/commands.py:430
 msgid "Error: Path does not exist or not quoted"
 msgstr "错误: 路径不存在或未使用引号"
 
-#: remark/cli/commands.py:314
+#: remark/cli/commands.py:431
 msgid "Hint: Use quotes when path contains spaces"
 msgstr "提示: 路径包含空格时请使用引号"
 
-#: remark/cli/commands.py:315
+#: remark/cli/commands.py:432
 msgid "  windows-folder-remark \"C:\\\\My Documents\" \"Remark content\""
 msgstr "  windows-folder-remark \"C:\\\\My Documents\" \"备注内容\""
 
-#: remark/cli/commands.py:320
+#: remark/cli/commands.py:437
 #, python-brace-format
 msgid "Detected path: {path}"
 msgstr "检测到路径: {path}"
 
-#: remark/cli/commands.py:323
+#: remark/cli/commands.py:440 remark/cli/commands.py:482
 msgid "Error: This is a file, the tool can only set remarks for folders"
 msgstr "错误: 这是一个文件，工具只能为文件夹设置备注"
 
-#: remark/cli/commands.py:328
+#: remark/cli/commands.py:445
 #, python-brace-format
 msgid "Remark content: {remark}"
 msgstr "备注内容: {remark}"
 
-#: remark/cli/commands.py:330
+#: remark/cli/commands.py:447
 msgid "(Will view existing remark)"
 msgstr "(将查看现有备注)"
 
-#: remark/cli/commands.py:332
+#: remark/cli/commands.py:449
 msgid "Continue? [Y/n]: "
 msgstr "是否继续? [Y/n]: "
 
-#: remark/cli/commands.py:338
-msgid "Detected multiple possible paths, please select:"
-msgstr "检测到多个可能的路径，请选择:"
-
-#: remark/cli/commands.py:340
-msgid " [file]"
-msgstr " [文件]"
-
-#: remark/cli/commands.py:341
-#, python-brace-format
-msgid ""
-"\n"
-"[{index}] Path: {path}{type_mark}"
-msgstr ""
-"\n"
-"[{index}] 路径: {path}{type_mark}"
-
-#: remark/cli/commands.py:343
-#, python-brace-format
-msgid "    Remaining remarks: {remarks}"
-msgstr "    剩余备注: {remarks}"
-
-#: remark/cli/commands.py:345
-msgid "    (Will view existing remark)"
-msgstr "    (将查看现有备注)"
-
-#: remark/cli/commands.py:346
-msgid ""
-"\n"
-"[0] Cancel"
-msgstr ""
-"\n"
-"[0] 取消"
-
-#: remark/cli/commands.py:349
-#, python-brace-format
-msgid ""
-"\n"
-"Please select [0-{max}]: "
-msgstr ""
-"\n"
-"请选择 [0-{max}]: "
-
-#: remark/cli/commands.py:355
-msgid ""
-"\n"
-"Error: This is a file, the tool can only set remarks for folders, please "
-"reselect"
-msgstr ""
-"\n"
-"错误: 这是一个文件，工具只能为文件夹设置备注，请重新选择"
-
-#: remark/cli/commands.py:358
-msgid "Invalid selection, please try again"
-msgstr "无效选择，请重试"
-
-#: remark/cli/commands.py:419
+#: remark/cli/commands.py:568
 msgid ""
 "\n"
 "Operation cancelled"
@@ -412,7 +417,7 @@ msgstr ""
 "\n"
 "操作已取消"
 
-#: remark/cli/commands.py:422
+#: remark/cli/commands.py:571
 #, python-brace-format
 msgid "An error occurred: {error}"
 msgstr "发生错误: {error}"
@@ -518,3 +523,49 @@ msgstr "错误: 此工具为 Windows 系统中的文件/文件夹添加备注，
 #, python-brace-format
 msgid "Current system: {system}"
 msgstr "当前系统: {system}"
+
+#~ msgid "Detected multiple possible paths, please select:"
+#~ msgstr "检测到多个可能的路径，请选择:"
+
+#~ msgid " [file]"
+#~ msgstr " [文件]"
+
+#~ msgid ""
+#~ "\n"
+#~ "[{index}] Path: {path}{type_mark}"
+#~ msgstr ""
+#~ "\n"
+#~ "[{index}] 路径: {path}{type_mark}"
+
+#~ msgid "    Remaining remarks: {remarks}"
+#~ msgstr "    剩余备注: {remarks}"
+
+#~ msgid "    (Will view existing remark)"
+#~ msgstr "    (将查看现有备注)"
+
+#~ msgid ""
+#~ "\n"
+#~ "[0] Cancel"
+#~ msgstr ""
+#~ "\n"
+#~ "[0] 取消"
+
+#~ msgid ""
+#~ "\n"
+#~ "Please select [0-{max}]: "
+#~ msgstr ""
+#~ "\n"
+#~ "请选择 [0-{max}]: "
+
+#~ msgid ""
+#~ "\n"
+#~ "Error: This is a file, the tool"
+#~ " can only set remarks for folders,"
+#~ " please reselect"
+#~ msgstr ""
+#~ "\n"
+#~ "错误: 这是一个文件，工具只能为文件夹设置备注，请重新选择"
+
+#~ msgid "Invalid selection, please try again"
+#~ msgstr "无效选择，请重试"
+

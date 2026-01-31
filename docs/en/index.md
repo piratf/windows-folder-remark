@@ -13,7 +13,7 @@ head:
         "programmingLanguage": "Python",
         "codeRepository": "https://github.com/piratf/windows-folder-remark",
         "url": "https://piratf.github.io/windows-folder-remark/en/",
-        "version": "2.0.6",
+        "version": "2.0.7",
         "license": "MIT",
         "offers": {
           "@type": "Offer",
@@ -29,7 +29,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /guide/getting-started
+      link: /en/guide/getting-started
     - theme: alt
       text: GitHub
       link: https://github.com/piratf/windows-folder-remark

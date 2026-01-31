@@ -13,7 +13,7 @@ head:
         "programmingLanguage": "Python",
         "codeRepository": "https://github.com/piratf/windows-folder-remark",
         "url": "https://piratf.github.io/windows-folder-remark/",
-        "version": "2.0.6",
+        "version": "2.0.7",
         "license": "MIT",
         "offers": {
           "@type": "Offer",

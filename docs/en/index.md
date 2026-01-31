@@ -1,6 +1,27 @@
 ---
 layout: home
 
+head:
+  - - script
+    - type: application/ld+json
+    - |
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Windows Folder Remark Tool",
+        "description": "A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No system residency, no data upload, safe and secure, use it when you need it.",
+        "programmingLanguage": "Python",
+        "codeRepository": "https://github.com/piratf/windows-folder-remark",
+        "url": "https://piratf.github.io/windows-folder-remark/en/",
+        "version": "2.0.6",
+        "license": "MIT",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+
 hero:
   name: Windows Folder Remark Tool
   text: A Lightweight CLI Tool for Windows Folder Remarks
@@ -8,7 +29,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /en/guide/getting-started
+      link: /guide/getting-started
     - theme: alt
       text: GitHub
       link: https://github.com/piratf/windows-folder-remark

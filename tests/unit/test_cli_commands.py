@@ -425,3 +425,140 @@ class TestGetVersion:
             )
             version = get_version()
             assert version == "unknown"
+
+
+@pytest.mark.unit
+class TestInteractiveCommands:
+    """交互模式命令测试"""
+
+    @pytest.fixture(autouse=True)
+    def disable_background_update_check(self, monkeypatch):
+        """禁用后台更新检查"""
+        monkeypatch.setattr(
+            "remark.cli.commands.CLI._start_update_checker",
+            lambda self: None,
+        )
+
+    def test_interactive_commands_list_initialized(self):
+        """测试交互命令列表正确初始化"""
+        cli = CLI()
+        # 进入交互模式会初始化命令列表
+        assert hasattr(cli, "_interactive_commands_list")
+        assert hasattr(cli, "_interactive_commands")
+        expected_commands = ["#help", "#install", "#uninstall", "#update"]
+        assert cli._interactive_commands_list == expected_commands
+
+    def test_command_completer_with_hash_prefix(self):
+        """测试命令补全函数处理 # 开头的输入"""
+        cli = CLI()
+
+        # 测试补全 #h 开头
+        result = cli._command_completer("#h", 0)
+        assert result == "#help"
+
+        # 测试补全 #i 开头
+        result = cli._command_completer("#i", 0)
+        assert result == "#install"
+
+        # 测试补全 #u 开头（有多个选项）
+        result = cli._command_completer("#u", 0)
+        assert result in ["#uninstall", "#update"]
+
+        # 测试补全不存在的命令
+        result = cli._command_completer("#x", 0)
+        assert result is None
+
+    def test_command_completer_returns_multiple_options(self):
+        """测试命令补全返回多个选项"""
+        cli = CLI()
+
+        # 测试 #u 开头有多个选项
+        result = cli._command_completer("#u", 0)
+        assert result in ["#uninstall", "#update"]
+
+        # 继续获取下一个选项
+        result = cli._command_completer("#u", 1)
+        assert result in ["#uninstall", "#update"]
+
+        # 超出选项数量返回 None
+        result = cli._command_completer("#u", 2)
+        assert result is None
+
+        # #install 是唯一的 #i 开头命令
+        result = cli._command_completer("#i", 0)
+        assert result == "#install"
+
+        # #help 是唯一的 #h 开头命令
+        result = cli._command_completer("#h", 0)
+        assert result == "#help"
+
+    def test_show_command_list(self, capsys):
+        """测试显示命令列表"""
+        cli = CLI()
+        cli._show_command_list()
+        captured = capsys.readouterr()
+        assert "Available commands" in captured.out
+        assert "#help" in captured.out
+        assert "#install" in captured.out
+        assert "#uninstall" in captured.out
+        assert "#update" in captured.out
+
+    def test_interactive_help_shows_commands(self, capsys):
+        """测试 #help 命令显示所有可用命令"""
+        cli = CLI()
+        cli._interactive_help()
+        captured = capsys.readouterr()
+        assert "Interactive Commands" in captured.out
+        assert "#help" in captured.out
+        assert "#install" in captured.out
+        assert "#uninstall" in captured.out
+        assert "#update" in captured.out
+
+    @pytest.mark.skipif(os.name != "nt", reason="Windows only")
+    def test_interactive_mode_handles_hash_only(self, fs, monkeypatch, capsys):
+        """测试交互模式处理单独的 # 输入"""
+        fs.create_dir("/test/folder")
+        cli = CLI()
+
+        # Mock input: 先输入 # 然后输入 Ctrl+C 退出
+        input_count = [0]
+
+        def mock_input(prompt):
+            input_count[0] += 1
+            if input_count[0] == 1:
+                return "#"
+            else:
+                raise KeyboardInterrupt()
+
+        monkeypatch.setattr("builtins.input", mock_input)
+
+        cli.interactive_mode()
+
+        captured = capsys.readouterr()
+        # 应该显示可用命令列表
+        assert "Available commands" in captured.out
+
+    def test_readline_import_graceful_fallback(self, monkeypatch):
+        """测试 readline 导入失败时优雅降级"""
+        # 模拟 readline 不可用
+        import builtins
+        original_import = builtins.__import__
+
+        def mock_import(name, *args, **kwargs):
+            if name == "readline":
+                raise ImportError("readline not available")
+            return original_import(name, *args, **kwargs)
+
+        with monkeypatch.context() as m:
+            m.setattr("builtins.__import__", mock_import)
+            # 重新导入模块
+            import importlib
+            import sys
+            if "remark.cli.commands" in sys.modules:
+                del sys.modules["remark.cli.commands"]
+            if "remark.cli" in sys.modules:
+                del sys.modules["remark.cli"]
+
+            # 重新导入，应该不会因为 readline 不可用而失败
+            import remark.cli.commands as commands_module
+            assert commands_module.readline is None

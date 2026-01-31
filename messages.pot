@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-01-29 22:53+0800\n"
+"POT-Creation-Date: 2026-01-31 14:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,385 +17,397 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: remark/cli/commands.py:55
+#: remark/cli/commands.py:73
 #, python-brace-format
 msgid "Path does not exist: {path}"
 msgstr ""
 
-#: remark/cli/commands.py:58
+#: remark/cli/commands.py:76
 #, python-brace-format
 msgid "Path is not a folder: {path}"
 msgstr ""
 
-#: remark/cli/commands.py:80
+#: remark/cli/commands.py:98
 #, python-brace-format
 msgid "Current version: {version}"
 msgstr ""
 
-#: remark/cli/commands.py:81
+#: remark/cli/commands.py:99
 msgid "Checking for updates..."
 msgstr ""
 
-#: remark/cli/commands.py:86
+#: remark/cli/commands.py:104
 #, python-brace-format
 msgid ""
 "\n"
 "New version found: {tag_name}"
 msgstr ""
 
-#: remark/cli/commands.py:87 remark/cli/commands.py:115
+#: remark/cli/commands.py:105 remark/cli/commands.py:133
 #, python-brace-format
 msgid "Update notes: {notes}"
 msgstr ""
 
-#: remark/cli/commands.py:88 remark/cli/commands.py:116
+#: remark/cli/commands.py:106 remark/cli/commands.py:134
 #, python-brace-format
 msgid "Full changelog: {url}"
 msgstr ""
 
-#: remark/cli/commands.py:89
+#: remark/cli/commands.py:107
 msgid ""
 "\n"
 "Update now? [Y/n]: "
 msgstr ""
 
-#: remark/cli/commands.py:94
+#: remark/cli/commands.py:112
 msgid "Already at the latest version"
 msgstr ""
 
-#: remark/cli/commands.py:111
+#: remark/cli/commands.py:129
 #, python-brace-format
 msgid ""
 "\n"
 "New version available: {tag_name} (Current version: {version})"
 msgstr ""
 
-#: remark/cli/commands.py:117
+#: remark/cli/commands.py:135
 msgid "Update now? [Y/n]: "
 msgstr ""
 
-#: remark/cli/commands.py:124
+#: remark/cli/commands.py:142
 msgid "Downloading new version..."
 msgstr ""
 
-#: remark/cli/commands.py:131
+#: remark/cli/commands.py:149
 msgid "Download complete, preparing update..."
 msgstr ""
 
-#: remark/cli/commands.py:135
+#: remark/cli/commands.py:153
 msgid "Update program has started, the application will exit..."
 msgstr ""
 
-#: remark/cli/commands.py:136
+#: remark/cli/commands.py:154
 msgid "Please wait a few moments, the update will complete automatically."
 msgstr ""
 
-#: remark/cli/commands.py:142
+#: remark/cli/commands.py:160
 msgid "Download failed: Connection reset by server"
 msgstr ""
 
-#: remark/cli/commands.py:143
+#: remark/cli/commands.py:161
 msgid "Please try again later, or visit the following link to download manually:"
 msgstr ""
 
-#: remark/cli/commands.py:146
+#: remark/cli/commands.py:164
 msgid "Download failed: Request timeout"
 msgstr ""
 
-#: remark/cli/commands.py:147 remark/cli/commands.py:151
+#: remark/cli/commands.py:165 remark/cli/commands.py:169
 msgid ""
 "Please check your network connection, or visit the following link to "
 "download manually:"
 msgstr ""
 
-#: remark/cli/commands.py:150
+#: remark/cli/commands.py:168
 msgid "Download failed: Unable to connect to server"
 msgstr ""
 
-#: remark/cli/commands.py:154
+#: remark/cli/commands.py:172
 msgid "Download failed, please check your network or download manually"
 msgstr ""
 
-#: remark/cli/commands.py:157
+#: remark/cli/commands.py:175
 #, python-brace-format
 msgid "Update failed: {error}"
 msgstr ""
 
-#: remark/cli/commands.py:158
+#: remark/cli/commands.py:176
 #, python-brace-format
 msgid "Manual download: {url}"
 msgstr ""
 
-#: remark/cli/commands.py:175
+#: remark/cli/commands.py:193
 msgid "Right-click menu installed successfully"
 msgstr ""
 
-#: remark/cli/commands.py:177
+#: remark/cli/commands.py:195
 msgid "Usage Instructions:"
 msgstr ""
 
-#: remark/cli/commands.py:178
+#: remark/cli/commands.py:196
 msgid "  Windows 10: Right-click folder to see 'Add Folder Remark'"
 msgstr ""
 
-#: remark/cli/commands.py:179
+#: remark/cli/commands.py:197
 msgid ""
 "  Windows 11: Right-click folder → Click 'Show more options' → Add Folder"
 " Remark"
 msgstr ""
 
-#: remark/cli/commands.py:182
+#: remark/cli/commands.py:200
 msgid "Right-click menu installation failed"
 msgstr ""
 
-#: remark/cli/commands.py:188
+#: remark/cli/commands.py:206
 msgid "Right-click menu uninstalled"
 msgstr ""
 
-#: remark/cli/commands.py:191
+#: remark/cli/commands.py:209
 msgid "Right-click menu uninstallation failed"
 msgstr ""
 
-#: remark/cli/commands.py:218 remark/storage/desktop_ini.py:309
+#: remark/cli/commands.py:236 remark/storage/desktop_ini.py:309
 #, python-brace-format
 msgid "Warning: desktop.ini file encoding is {encoding}, not standard UTF-16."
 msgstr ""
 
-#: remark/cli/commands.py:219 remark/storage/desktop_ini.py:310
+#: remark/cli/commands.py:237 remark/storage/desktop_ini.py:310
 msgid "unknown"
 msgstr ""
 
-#: remark/cli/commands.py:221
+#: remark/cli/commands.py:239
 msgid "This may cause Chinese and other special characters to display abnormally."
 msgstr ""
 
-#: remark/cli/commands.py:225
+#: remark/cli/commands.py:243
 msgid "Fix encoding to UTF-16? [Y/n]: "
 msgstr ""
 
-#: remark/cli/commands.py:228
+#: remark/cli/commands.py:246
 msgid "Fixed to UTF-16 encoding"
 msgstr ""
 
-#: remark/cli/commands.py:230
+#: remark/cli/commands.py:248
 msgid "Failed to fix encoding"
 msgstr ""
 
-#: remark/cli/commands.py:233
+#: remark/cli/commands.py:251
 msgid "Skip encoding fix"
 msgstr ""
 
-#: remark/cli/commands.py:236 remark/storage/desktop_ini.py:335
+#: remark/cli/commands.py:254 remark/storage/desktop_ini.py:335
 msgid "Please enter Y or n"
 msgstr ""
 
-#: remark/cli/commands.py:241
+#: remark/cli/commands.py:259
 #, python-brace-format
 msgid "Current remark: {remark}"
 msgstr ""
 
-#: remark/cli/commands.py:243 remark/core/folder_handler.py:85
+#: remark/cli/commands.py:261 remark/core/folder_handler.py:85
 msgid "This folder has no remark"
 msgstr ""
 
-#: remark/cli/commands.py:248
+#: remark/cli/commands.py:266
 #, python-brace-format
 msgid "Windows Folder Remark Tool v{version}"
 msgstr ""
 
-#: remark/cli/commands.py:249
+#: remark/cli/commands.py:267
 msgid "Tip: Press Ctrl + C to exit"
 msgstr ""
 
-#: remark/cli/commands.py:251
-msgid "Enter folder path (or drag here): "
-msgstr ""
-
-#: remark/cli/commands.py:252
-msgid "Enter remark:"
-msgstr ""
-
-#: remark/cli/commands.py:259
-msgid "Path does not exist, please re-enter"
-msgstr ""
-
-#: remark/cli/commands.py:263
-msgid "This is a 'file', currently only supports adding remarks to 'folders'"
-msgstr ""
-
 #: remark/cli/commands.py:268
-msgid "Remark cannot be empty"
-msgstr ""
-
-#: remark/cli/commands.py:274
-msgid " ❤ Thank you for using"
+msgid "Tip: Use #help to see available commands"
 msgstr ""
 
 #: remark/cli/commands.py:276
-msgid "Continue processing or press Ctrl + C to exit"
+msgid "Enter folder path (or drag here): "
 msgstr ""
 
-#: remark/cli/commands.py:280
-msgid "Windows Folder Remark Tool"
-msgstr ""
-
-#: remark/cli/commands.py:281
-msgid "Usage:"
-msgstr ""
-
-#: remark/cli/commands.py:282
-msgid "  Interactive mode: python remark.py"
-msgstr ""
-
-#: remark/cli/commands.py:283
-msgid "  Command line mode: python remark.py [options] [arguments]"
-msgstr ""
-
-#: remark/cli/commands.py:284
-msgid "Options:"
-msgstr ""
-
-#: remark/cli/commands.py:285
-msgid "  --install          Install right-click menu"
-msgstr ""
-
-#: remark/cli/commands.py:286
-msgid "  --uninstall        Uninstall right-click menu"
-msgstr ""
-
-#: remark/cli/commands.py:287
-msgid "  --update           Check for updates"
-msgstr ""
-
-#: remark/cli/commands.py:288
-msgid "  --gui <path>        GUI mode (called from right-click menu)"
-msgstr ""
-
-#: remark/cli/commands.py:289
-msgid "  --delete <path>     Delete remark"
-msgstr ""
-
-#: remark/cli/commands.py:290
-msgid "  --view <path>        View remark"
-msgstr ""
-
-#: remark/cli/commands.py:291
-msgid "  --help, -h         Show help information"
-msgstr ""
-
-#: remark/cli/commands.py:292
-msgid "Examples:"
-msgstr ""
-
-#: remark/cli/commands.py:293
-msgid " [Add remark] python remark.py \"C:\\\\MyFolder\" \"My Folder\""
-msgstr ""
-
-#: remark/cli/commands.py:294
-msgid " [Delete remark] python remark.py --delete \"C:\\\\MyFolder\""
-msgstr ""
-
-#: remark/cli/commands.py:295
-msgid " [View current remark] python remark.py --view \"C:\\\\MyFolder\""
+#: remark/cli/commands.py:277
+msgid "Enter remark:"
 msgstr ""
 
 #: remark/cli/commands.py:296
-msgid " [Install right-click menu] python remark.py --install"
+msgid "Path does not exist, please re-enter"
 msgstr ""
 
-#: remark/cli/commands.py:297
-msgid " [Check for updates] python remark.py --update"
+#: remark/cli/commands.py:300
+msgid "This is a 'file', currently only supports adding remarks to 'folders'"
+msgstr ""
+
+#: remark/cli/commands.py:305
+msgid "Remark cannot be empty"
+msgstr ""
+
+#: remark/cli/commands.py:311
+msgid " ❤ Thank you for using"
 msgstr ""
 
 #: remark/cli/commands.py:313
+msgid "Continue processing or press Ctrl + C to exit"
+msgstr ""
+
+#: remark/cli/commands.py:327
+msgid "Available commands:"
+msgstr ""
+
+#: remark/cli/commands.py:331 remark/cli/commands.py:345
+msgid "Tip: Press Tab to complete commands"
+msgstr ""
+
+#: remark/cli/commands.py:333 remark/cli/commands.py:347
+msgid "Tip: Install pyreadline3 for Tab completion (pip install pyreadline3)"
+msgstr ""
+
+#: remark/cli/commands.py:337
+msgid "Interactive Commands:"
+msgstr ""
+
+#: remark/cli/commands.py:338
+msgid "  #help     Show this help message"
+msgstr ""
+
+#: remark/cli/commands.py:339
+msgid "  #install  Install right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:340
+msgid "  #uninstall Uninstall right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:341
+msgid "  #update   Check for updates"
+msgstr ""
+
+#: remark/cli/commands.py:343
+msgid "Or simply enter a folder path to add remarks"
+msgstr ""
+
+#: remark/cli/commands.py:351
+msgid "Windows Folder Remark Tool"
+msgstr ""
+
+#: remark/cli/commands.py:352
+msgid "Usage:"
+msgstr ""
+
+#: remark/cli/commands.py:353
+msgid "  Interactive mode: python remark.py"
+msgstr ""
+
+#: remark/cli/commands.py:354
+msgid "  Command line mode: python remark.py [options] [arguments]"
+msgstr ""
+
+#: remark/cli/commands.py:355
+msgid "Options:"
+msgstr ""
+
+#: remark/cli/commands.py:356
+msgid "  --install          Install right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:357
+msgid "  --uninstall        Uninstall right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:358
+msgid "  --update           Check for updates"
+msgstr ""
+
+#: remark/cli/commands.py:359
+msgid "  --gui <path>        GUI mode (called from right-click menu)"
+msgstr ""
+
+#: remark/cli/commands.py:360
+msgid "  --delete <path>     Delete remark"
+msgstr ""
+
+#: remark/cli/commands.py:361
+msgid "  --view <path>       View remark"
+msgstr ""
+
+#: remark/cli/commands.py:362
+msgid "  --help, -h         Show help information"
+msgstr ""
+
+#: remark/cli/commands.py:363
+msgid "Interactive Commands (available in interactive mode):"
+msgstr ""
+
+#: remark/cli/commands.py:364
+msgid "  #help              Show interactive help"
+msgstr ""
+
+#: remark/cli/commands.py:365
+msgid "  #install           Install right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:366
+msgid "  #uninstall         Uninstall right-click menu"
+msgstr ""
+
+#: remark/cli/commands.py:367
+msgid "  #update            Check for updates"
+msgstr ""
+
+#: remark/cli/commands.py:368
+msgid "Examples:"
+msgstr ""
+
+#: remark/cli/commands.py:369
+msgid " [Add remark] python remark.py \"C:\\\\MyFolder\" \"My Folder\""
+msgstr ""
+
+#: remark/cli/commands.py:370
+msgid " [Delete remark] python remark.py --delete \"C:\\\\MyFolder\""
+msgstr ""
+
+#: remark/cli/commands.py:371
+msgid " [View current remark] python remark.py --view \"C:\\\\MyFolder\""
+msgstr ""
+
+#: remark/cli/commands.py:372
+msgid " [Install right-click menu] python remark.py --install"
+msgstr ""
+
+#: remark/cli/commands.py:373
+msgid " [Check for updates] python remark.py --update"
+msgstr ""
+
+#: remark/cli/commands.py:430
 msgid "Error: Path does not exist or not quoted"
 msgstr ""
 
-#: remark/cli/commands.py:314
+#: remark/cli/commands.py:431
 msgid "Hint: Use quotes when path contains spaces"
 msgstr ""
 
-#: remark/cli/commands.py:315
+#: remark/cli/commands.py:432
 msgid "  windows-folder-remark \"C:\\\\My Documents\" \"Remark content\""
 msgstr ""
 
-#: remark/cli/commands.py:320
+#: remark/cli/commands.py:437
 #, python-brace-format
 msgid "Detected path: {path}"
 msgstr ""
 
-#: remark/cli/commands.py:323
+#: remark/cli/commands.py:440 remark/cli/commands.py:482
 msgid "Error: This is a file, the tool can only set remarks for folders"
 msgstr ""
 
-#: remark/cli/commands.py:328
+#: remark/cli/commands.py:445
 #, python-brace-format
 msgid "Remark content: {remark}"
 msgstr ""
 
-#: remark/cli/commands.py:330
+#: remark/cli/commands.py:447
 msgid "(Will view existing remark)"
 msgstr ""
 
-#: remark/cli/commands.py:332
+#: remark/cli/commands.py:449
 msgid "Continue? [Y/n]: "
 msgstr ""
 
-#: remark/cli/commands.py:338
-msgid "Detected multiple possible paths, please select:"
-msgstr ""
-
-#: remark/cli/commands.py:340
-msgid " [file]"
-msgstr ""
-
-#: remark/cli/commands.py:341
-#, python-brace-format
-msgid ""
-"\n"
-"[{index}] Path: {path}{type_mark}"
-msgstr ""
-
-#: remark/cli/commands.py:343
-#, python-brace-format
-msgid "    Remaining remarks: {remarks}"
-msgstr ""
-
-#: remark/cli/commands.py:345
-msgid "    (Will view existing remark)"
-msgstr ""
-
-#: remark/cli/commands.py:346
-msgid ""
-"\n"
-"[0] Cancel"
-msgstr ""
-
-#: remark/cli/commands.py:349
-#, python-brace-format
-msgid ""
-"\n"
-"Please select [0-{max}]: "
-msgstr ""
-
-#: remark/cli/commands.py:355
-msgid ""
-"\n"
-"Error: This is a file, the tool can only set remarks for folders, please "
-"reselect"
-msgstr ""
-
-#: remark/cli/commands.py:358
-msgid "Invalid selection, please try again"
-msgstr ""
-
-#: remark/cli/commands.py:419
+#: remark/cli/commands.py:568
 msgid ""
 "\n"
 "Operation cancelled"
 msgstr ""
 
-#: remark/cli/commands.py:422
+#: remark/cli/commands.py:571
 #, python-brace-format
 msgid "An error occurred: {error}"
 msgstr ""

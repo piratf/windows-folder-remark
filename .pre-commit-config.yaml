@@ -77,7 +77,7 @@ repos:
 
       - id: check-i18n-completeness
         name: Check i18n completeness
-        entry: bash -c 'pybabel update -i messages.pot -d locale --check'
+        entry: bash -c 'pybabel update -i messages.pot -d locale && python scripts/check_i18n.py locale/*/LC_MESSAGES/messages.po'
         language: system
         types: [python]
         stages: [pre-commit]

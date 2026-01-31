@@ -314,18 +314,12 @@ class CLI:
 
     def _command_completer(self, text: str, state: int) -> str | None:
         """readline tab 补全函数"""
-        # 获取当前输入的行
-        try:
-            import readline
-            line = readline.get_line_buffer()
-        except Exception:
-            line = text
+        # 获取匹配的命令选项
+        options = [cmd for cmd in self._interactive_commands_list if cmd.startswith(text)]
 
-        # 如果输入以 # 开头，补全命令
-        if line.startswith("#") or text.startswith("#"):
-            options = [cmd for cmd in self._interactive_commands_list if cmd.startswith(text)]
-            if state < len(options):
-                return options[state]
+        # state 用于循环返回多个匹配项
+        if state < len(options):
+            return options[state]
         return None
 
     def _show_command_list(self) -> None:
@@ -333,7 +327,10 @@ class CLI:
         print(_("Available commands:"))
         for cmd in self._interactive_commands_list:
             print(f"  {cmd}")
-        print(_("Tip: Press Tab to complete commands (if readline is available)"))
+        if readline:
+            print(_("Tip: Press Tab to complete commands"))
+        else:
+            print(_("Tip: Install pyreadline3 for Tab completion (pip install pyreadline3)"))
 
     def _interactive_help(self) -> None:
         """显示交互模式帮助信息"""
@@ -344,6 +341,10 @@ class CLI:
         print(_("  #update   Check for updates"))
         print(os.linesep)
         print(_("Or simply enter a folder path to add remarks"))
+        if readline:
+            print(_("Tip: Press Tab to complete commands"))
+        else:
+            print(_("Tip: Install pyreadline3 for Tab completion (pip install pyreadline3)"))
 
     def show_help(self) -> None:
         """显示帮助信息"""

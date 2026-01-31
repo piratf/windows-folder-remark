@@ -497,7 +497,8 @@ class TestInteractiveCommands:
         cli = CLI()
         cli._show_command_list()
         captured = capsys.readouterr()
-        assert "Available commands" in captured.out
+        # 检查中文或英文输出
+        assert "Available commands" in captured.out or "可用命令" in captured.out
         assert "#help" in captured.out
         assert "#install" in captured.out
         assert "#uninstall" in captured.out
@@ -508,7 +509,8 @@ class TestInteractiveCommands:
         cli = CLI()
         cli._interactive_help()
         captured = capsys.readouterr()
-        assert "Interactive Commands" in captured.out
+        # 检查中文或英文输出
+        assert "Interactive Commands" in captured.out or "交互命令" in captured.out
         assert "#help" in captured.out
         assert "#install" in captured.out
         assert "#uninstall" in captured.out
@@ -535,8 +537,8 @@ class TestInteractiveCommands:
         cli.interactive_mode()
 
         captured = capsys.readouterr()
-        # 应该显示可用命令列表
-        assert "Available commands" in captured.out
+        # 应该显示可用命令列表（中文或英文）
+        assert "Available commands" in captured.out or "可用命令" in captured.out
 
     def test_readline_import_graceful_fallback(self, monkeypatch):
         """测试 readline 导入失败时优雅降级"""

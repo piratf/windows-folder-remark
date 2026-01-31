@@ -7,7 +7,7 @@
 [![en](https://img.shields.io/badge/lang-en-blue.svg)](README.en.md)
 [![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.md)
 
-A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No background processes, privacy-first, ~12MB portable exe. / 一个轻量级的命令行工具，通过 Desktop.ini 为 Windows 文件夹添加备注/评论。无后台进程，隐私优先，约 12MB 便携版 exe。
+A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No system residency, no data upload, safe and secure, use it when you need it. / 一个轻量级的命令行工具，通过 Desktop.ini 为 Windows 文件夹添加备注/评论。无系统驻留，无数据上传，安全放心，用完即走。
 
 **Documentation**: [Full Documentation](https://piratf.github.io/windows-folder-remark/en/) | [完整文档](https://piratf.github.io/windows-folder-remark/zh/)
 
@@ -17,9 +17,9 @@ A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.in
 
 ## 工具优势
 
-- **用完即走**：需要时运行，用完即退出，无后台进程占用
-- **轻量小巧**：仅约 12 MB，不占用系统资源
-- **隐私优先**：完全本地运行，数据不传输至任何服务器
+- **用完即走**：需要时运行，用完即退出，无系统驻留
+- **安全放心**：完全本地运行，无数据上传，保护隐私
+- **轻量便携**：单文件 exe 打包，无需安装，随处可用
 
 ## 特性
 

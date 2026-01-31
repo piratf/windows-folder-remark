@@ -7,7 +7,7 @@
 [![en](https://img.shields.io/badge/lang-en-blue.svg)](README.en.md)
 [![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.md)
 
-A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No background processes, privacy-first, ~12MB portable exe. Perfect for organizing your files with custom descriptions.
+A lightweight CLI tool to add remarks/comments to Windows folders via Desktop.ini. No system residency, no data upload, safe and secure, use it when you need it. Perfect for organizing your files with custom descriptions.
 
 ## ⭐ Star Us
 
@@ -15,9 +15,9 @@ If you find this tool helpful, please consider giving it a star on GitHub!
 
 ## Why This Tool
 
-- **No Background Processes**: Runs when needed, exits when done — zero background footprint
-- **Lightweight**: Only ~12 MB, minimal system resource usage
-- **Privacy-First**: Completely local operation, no data sent to any server
+- **Use and Go**: Runs when needed, exits when done — no system residency
+- **Safe & Secure**: Completely local operation, no data upload, privacy protected
+- **Portable**: Single-file exe packaging, no installation required
 
 ## Features
 

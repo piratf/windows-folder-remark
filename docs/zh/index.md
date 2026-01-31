@@ -15,17 +15,17 @@ hero:
 
 features:
   - title: 用完即走
-    details: 需要时运行，用完即退出，无后台进程占用
-  - title: 轻量小巧
-    details: 仅约 12 MB，不占用系统资源
-  - title: 隐私优先
-    details: 完全本地运行，数据不传输至任何服务器
+    details: 需要时运行，用完即退出，无系统驻留
+  - title: 安全放心
+    details: 完全本地运行，无数据上传，保护隐私
+  - title: 轻量便携
+    details: 单文件 exe 打包，无需安装，随处可用
   - title: 多语言支持
     details: 支持中英文界面，自动检测系统语言
   - title: UTF-16 编码
     details: 支持中文等多语言字符
-  - title: 便携版 exe
-    details: 单文件打包，无需 Python 环境
+  - title: 自动更新
+    details: 内置更新检查，保持最新版本
 ---
 
 ## ⭐ 支持

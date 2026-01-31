@@ -14,18 +14,18 @@ hero:
       link: https://github.com/piratf/windows-folder-remark
 
 features:
-  - title: No Background Processes
-    details: Runs when needed, exits when done — zero background footprint
-  - title: Lightweight
-    details: Only ~12 MB, minimal system resource usage
-  - title: Privacy-First
-    details: Completely local operation, no data sent to any server
+  - title: Use and Go
+    details: Runs when needed, exits when done — no system residency
+  - title: Safe & Secure
+    details: Completely local operation, no data upload, privacy protected
+  - title: Portable
+    details: Single-file exe packaging, no installation required
   - title: Multi-language Support
     details: English and Chinese interface with auto language detection
   - title: UTF-16 Encoding
     details: Full support for Chinese and other special characters
-  - title: Portable exe
-    details: Single-file packaging, no Python environment required
+  - title: Auto Update
+    details: Built-in update checking to stay current
 ---
 
 ## ⭐ Star Us

@@ -22,8 +22,10 @@ classifiers = [
 ]
 
 # 运行时依赖
-# 注意：仅使用 Python 标准库，无外部依赖
-dependencies = []
+# pyreadline3: Windows 下的 readline 实现，用于交互模式 Tab 补全
+dependencies = [
+    "pyreadline3>=3.5.0",
+]
 
 # 开发依赖
 [project.optional-dependencies]

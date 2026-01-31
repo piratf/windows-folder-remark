@@ -11,11 +11,11 @@ import urllib.error
 
 # 尝试导入 readline 用于 tab 补全
 # Unix/Linux 系统通常有内置 readline
-# Windows 用户可以安装 pyreadline3 获得相同功能
+# Windows 打包版本会自动包含 pyreadline3
 try:
     import readline
 except ImportError:
-    # Windows 系统如果没有安装 pyreadline3，readline 不可用
+    # 开发环境可能需要手动安装 pyreadline3
     # 这不会影响基本功能，只是没有 tab 补全
     readline = None
 
@@ -327,10 +327,8 @@ class CLI:
         print(_("Available commands:"))
         for cmd in self._interactive_commands_list:
             print(f"  {cmd}")
-        if readline:
-            print(_("Tip: Press Tab to complete commands"))
-        else:
-            print(_("Tip: Install pyreadline3 for Tab completion (pip install pyreadline3)"))
+        # 打包版本已包含 pyreadline3，Tab 补全功能可用
+        print(_("Tip: Press Tab to complete commands"))
 
     def _interactive_help(self) -> None:
         """显示交互模式帮助信息"""
@@ -341,10 +339,8 @@ class CLI:
         print(_("  #update   Check for updates"))
         print(os.linesep)
         print(_("Or simply enter a folder path to add remarks"))
-        if readline:
-            print(_("Tip: Press Tab to complete commands"))
-        else:
-            print(_("Tip: Install pyreadline3 for Tab completion (pip install pyreadline3)"))
+        # 打包版本已包含 pyreadline3，Tab 补全功能可用
+        print(_("Tip: Press Tab to complete commands"))
 
     def show_help(self) -> None:
         """显示帮助信息"""

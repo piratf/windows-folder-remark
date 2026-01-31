@@ -14,26 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 os.environ["LANG"] = "zh"
 
 # 立即设置翻译器为中文，确保在导入任何模块之前生效
-from remark.i18n import set_language, LOCALE_DIR, init_translation
-import pathlib
-
-locale_dir_path = pathlib.Path(LOCALE_DIR)
-zh_messages_path = locale_dir_path / "zh" / "LC_MESSAGES" / "messages.mo"
-
-print(f"[DEBUG] LOCALE_DIR: {LOCALE_DIR}", file=sys.stderr)
-print(f"[DEBUG] LOCALE_DIR exists: {locale_dir_path.exists()}", file=sys.stderr)
-print(f"[DEBUG] zh/LC_MESSAGES exists: {(locale_dir_path / 'zh' / 'LC_MESSAGES').exists()}", file=sys.stderr)
-print(f"[DEBUG] messages.mo exists: {zh_messages_path.exists()}", file=sys.stderr)
-
-# 验证翻译加载
-try:
-    translator = init_translation("zh")
-    test_result = translator.gettext("Path does not exist: {path}")
-    print(f"[DEBUG] Translation test result: {test_result!r}", file=sys.stderr)
-    print(f"[DEBUG] Contains English: {'Path does not exist' in test_result}", file=sys.stderr)
-except Exception as e:
-    print(f"[DEBUG] Translation failed: {e}", file=sys.stderr)
-
+from remark.i18n import set_language
 set_language("zh")
 
 

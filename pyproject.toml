@@ -23,7 +23,10 @@ classifiers = [
 
 # 运行时依赖
 # 注意：仅使用 Python 标准库，无外部依赖
-dependencies = []
+dependencies = [
+    "packaging>=26.2",
+    "pyinstaller>=6.20.0",
+]
 
 # 开发依赖
 [project.optional-dependencies]

@@ -8,9 +8,17 @@ from remark.i18n import _ as _
 
 
 def check_platform() -> bool:
-    """检查是否为 Windows 系统"""
     if platform.system() != "Windows":
-        print(_("Error: This tool adds remarks to files/folders on Windows, other systems are not supported."))
-        print(_("Current system: {system}").format(system=platform.system()))
+        try:
+            from tkinter import messagebox
+
+            messagebox.showerror(
+                _("Error"),
+                _("This tool adds remarks to folders on Windows. Other systems are not supported.\nCurrent system: {system}").format(
+                    system=platform.system()
+                ),
+            )
+        except Exception:
+            pass
         return False
     return True

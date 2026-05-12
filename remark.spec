@@ -83,7 +83,6 @@ hiddenimports = collect_submodules('remark') + [
 ]
 
 # Collect locale translation files (.mo)
-# PyInstaller 会将这些文件复制到 exe 的临时目录
 locale_datas = []
 for lang in ['zh', 'en']:
     lang_dir = os.path.join('locale', lang, 'LC_MESSAGES')
@@ -143,7 +142,7 @@ exe = EXE(
     upx_dir=upx_dir if upx_dir is not None else "",
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,  # Console application for interactive mode
+    console=False,  # Windowed application — no black console window
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

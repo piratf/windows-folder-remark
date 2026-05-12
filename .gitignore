@@ -42,3 +42,8 @@ dmypy.json
 
 # Node.js
 node_modules/
+release/
+uv.lock
+dist/
+dist_new/
+dist2/

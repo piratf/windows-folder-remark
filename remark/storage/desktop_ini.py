@@ -73,18 +73,6 @@ class DesktopIniHandler:
 
     @staticmethod
     def read_info_tip(folder_path):
-        """
-        读取 desktop.ini 中的 InfoTip 值
-
-        使用 UTF-16 编码读取（与写入逻辑一致），支持中文等非 ASCII 字符。
-        如果 UTF-16 读取失败，会尝试其他编码以处理外部程序创建的文件。
-
-        Args:
-            folder_path: 文件夹路径
-
-        Returns:
-            str: InfoTip 值，如果不存在或读取失败返回 None
-        """
         desktop_ini_path = DesktopIniHandler.get_path(folder_path)
 
         if not os.path.exists(desktop_ini_path):
@@ -134,24 +122,6 @@ class DesktopIniHandler:
 
     @staticmethod
     def write_info_tip(folder_path, info_tip):
-        """
-        写入 InfoTip 到 desktop.ini
-
-        使用 UTF-16 编码写入（自动添加 BOM），符合 Microsoft 官方文档要求。
-        这确保中文等非 ASCII 字符在资源管理器中正确显示。
-
-        如果 desktop.ini 已存在且包含其他设置（如 IconResource），会保留这些设置。
-
-        Args:
-            folder_path: 文件夹路径
-            info_tip: 要写入的 InfoTip 值
-
-        Returns:
-            bool: 写入是否成功
-
-        Raises:
-            EncodingConversionCanceled: 用户拒绝编码转换
-        """
         if not info_tip:
             return False
 
@@ -349,20 +319,6 @@ class DesktopIniHandler:
 
     @staticmethod
     def remove_info_tip(folder_path):
-        """
-        移除 desktop.ini 中的 InfoTip
-
-        只删除 InfoTip 行，保留其他设置（如 IconResource, Logo 等）。
-
-        Args:
-            folder_path: 文件夹路径
-
-        Returns:
-            bool: 操作是否成功
-
-        Raises:
-            EncodingConversionCanceled: 用户拒绝编码转换
-        """
         desktop_ini_path = DesktopIniHandler.get_path(folder_path)
 
         if not os.path.exists(desktop_ini_path):

@@ -61,6 +61,23 @@ class TestDesktopIniHandler:
             result = DesktopIniHandler.read_info_tip("/folder")
             assert result == expected
 
+    @pytest.mark.parametrize(
+        "content,expected",
+        [
+            ("[.ShellClassInfo]\r\nInfoTip = spaced remark\r\n", "spaced remark"),
+            ("[.ShellClassInfo]\r\nInfoTip  =  padded  \r\n", "padded"),
+        ],
+    )
+    def test_read_info_tip_with_spaces_around_equals(self, content, expected):
+        """空格分隔的 InfoTip 也应能读取（与写入/删除逻辑一致）"""
+        with patch("os.path.exists", return_value=True), patch("codecs.open") as mock_open_func:
+            mock_file = MagicMock()
+            mock_file.read.return_value = content
+            mock_open_func.return_value.__enter__.return_value = mock_file
+
+            result = DesktopIniHandler.read_info_tip("/folder")
+            assert result == expected
+
     def test_write_info_tip_empty(self):
         """测试写入空备注"""
         result = DesktopIniHandler.write_info_tip("/folder", "")

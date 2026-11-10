@@ -104,23 +104,17 @@ class DesktopIniHandler:
                 if DesktopIniHandler.SECTION_SHELL_CLASS_INFO not in content:
                     continue
 
-                # 解析 InfoTip
-                if DesktopIniHandler.PROPERTY_INFOTIP in content:
-                    # 找到 InfoTip= 的位置
-                    start = content.index(DesktopIniHandler.PROPERTY_INFOTIP + "=")
-                    start += len(DesktopIniHandler.PROPERTY_INFOTIP + "=")
-
-                    # 找到行尾
-                    end = len(content)
-                    for line_ending in ["\r\n", "\n", "\r"]:
-                        pos = content.find(line_ending, start)
-                        if pos != -1 and pos < end:
-                            end = pos
-                            break
-
-                    value = content[start:end].strip()
-                    if value:
-                        return value
+                # 解析 InfoTip（逐行匹配，容忍等号两侧空格，与写入/删除逻辑一致）
+                for line in content.splitlines():
+                    stripped = line.strip()
+                    if stripped.startswith(
+                        DesktopIniHandler.PROPERTY_INFOTIP + "="
+                    ) or stripped.startswith(DesktopIniHandler.PROPERTY_INFOTIP + " "):
+                        _, _, value = line.partition("=")
+                        value = value.strip()
+                        if value:
+                            return value
+                        break
                 # 成功读取且结构正确，但没有 InfoTip
                 return None
             except (UnicodeDecodeError, UnicodeError):
